@@ -29,7 +29,7 @@ jobs:
       # main is protected (changes must go through a PR), so instead of pushing
       # directly we open/update a single rolling PR with the refreshed data.json.
       - name: Open or update PR with refreshed data
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           add-paths: git-metrics/data.json
           branch: automated/metrics-refresh
