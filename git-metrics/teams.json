@@ -1,0 +1,47 @@
+{
+  "_comment": "Maps GitHub handles to teams for the metrics dashboard. Any contributor NOT listed here is grouped under unassignedLabel automatically. To add a team, append an object to 'teams' with a name and a members map (github-handle -> display name). Handles are matched case-insensitively.",
+  "unassignedLabel": "Other / Unassigned",
+  "teams": [
+    {
+      "name": "QA AI Agent Framework",
+      "members": {
+        "oscarlimonmw": "Oscar Limón",
+        "SaulSuarezMW": "Saúl Suárez",
+        "CarlosAcostaMW": "Carlos Acosta",
+        "kevincervantesmw": "Kevin Cervantes"
+      }
+    },
+    {
+      "name": "Media Intelligence",
+      "members": {
+        "AlinaMeltwater": "Alina Yurova",
+        "ViktoriiaKhokhlova": "Viktoriia Khokhlova",
+        "spereira-meltwater": "Shanieka Pereira",
+        "maricarmenherreramw": "Maricarmen Morales",
+        "roman-ramirez-mw": "Roman Ramirez",
+        "aldoescobedomw": "Aldo Escobedo",
+        "celestina01": "Celestina"
+      }
+    },
+    {
+      "name": "MIRA (Studio/Mobile/Core) / GenAI + Klear",
+      "members": {
+        "bethanyveilleuxmw": "Bethany Veilleux",
+        "mini2901": "Manisha Bharadwaj",
+        "paulinagalvanmw": "Paulina Galván",
+        "ybahachova": "Yana Bahachova"
+      }
+    },
+    {
+      "name": "Explore / E+/E Analytics & UDS",
+      "members": {
+        "dcaballero-meltwater": "David Caballero",
+        "burcindede": "Burcin Dede",
+        "Gdamz": "Damien Gonzalo",
+        "DavidEspinosaMelt": "David Espinosa",
+        "ElenaHernandezMW": "Elena Valdés",
+        "jorgemartinez-mw": "Jorge Lorenzo"
+      }
+    }
+  ]
+}

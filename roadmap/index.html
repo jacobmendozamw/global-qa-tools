@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Roadmap 2026 — Mira & GenAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#28bbbb;--teal-dim:#1f9898;--teal-light:#e8f8f8;
+  --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;--border2:#d1d5db;
+  --surface:#f9fafb;--surface2:#f3f4f6;
+  --q1-bg:#f0effe;--q1-text:#4338ca;--q1-border:#c7d2fe;
+  --q2-bg:#ecfdf5;--q2-text:#065f46;--q2-border:#a7f3d0;
+  --q3-bg:#fffbeb;--q3-text:#92400e;--q3-border:#fcd34d;
+  --q4-bg:#fdf2f8;--q4-text:#831843;--q4-border:#f9a8d4;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--text);padding:0 16px 40px}
+.header{padding:16px 0 4px;display:flex;align-items:center;gap:8px}
+.header-logo{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--teal);text-transform:uppercase}
+.header-divider{color:var(--border2)}
+.header-title{font-size:12px;color:var(--muted)}
+.save-indicator{font-size:10px;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:4px}
+.save-dot{width:6px;height:6px;border-radius:50%;background:#9ca3af}
+.save-dot.saved{background:#10b981}
+.save-dot.saving{background:#f59e0b}
+.view-tabs{display:flex;gap:4px;padding:8px 0 10px}
+.tab{font-size:11px;font-family:inherit;padding:5px 14px;height:30px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--muted);cursor:pointer;font-weight:500;transition:all .15s}
+.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tab:hover:not(.active){border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+.toolbar{display:flex;align-items:center;gap:8px;padding:0 0 10px;flex-wrap:wrap}
+.toolbar select,.toolbar input[type=text]{font-size:11px;font-family:inherit;padding:5px 10px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);height:30px;outline:none}
+.toolbar select:focus,.toolbar input:focus{border-color:var(--teal)}
+.toolbar button{font-size:11px;font-family:inherit;padding:5px 14px;height:30px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);cursor:pointer;font-weight:500}
+.toolbar button:hover{border-color:var(--teal);background:var(--teal-light)}
+.btn-primary{background:var(--teal)!important;color:#fff!important;border-color:var(--teal)!important;font-weight:600!important}
+.btn-primary:hover{background:var(--teal-dim)!important}
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 10px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.gantt-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table.gantt{width:100%;border-collapse:collapse;font-size:11px;min-width:600px}
+table.gantt th{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--surface);color:var(--muted);white-space:nowrap;text-align:left}
+table.gantt th.month{text-align:center;border-left:1px solid var(--border);min-width:46px}
+table.gantt th.q1{background:var(--q1-bg);color:var(--q1-text);border-bottom:2px solid var(--q1-border);opacity:.5}
+@keyframes slide{from{background-position:0 0}to{background-position:28px 0}}
+table.gantt th.q2{background-color:var(--q2-bg);background-image:repeating-linear-gradient(-45deg,transparent,transparent 5px,rgba(255,255,255,.55) 5px,rgba(255,255,255,.55) 10px);background-size:28px 28px;color:var(--q2-text);border-top:3px solid #065f46;border-bottom:3px solid #065f46;border-left:1px solid var(--border);border-right:1px solid var(--border);animation:slide 1.2s linear infinite}
+table.gantt th.q2.q-sep{border-left:3px solid #065f46}
+table.gantt th.q3.q-sep{border-left:3px solid #065f46}
+table.gantt th.q3{background:var(--q3-bg);color:var(--q3-text);border-bottom:2px dashed var(--q3-border);opacity:.45}
+table.gantt th.q4{background:var(--q4-bg);color:var(--q4-text);border-bottom:2px dashed var(--q4-border);opacity:.45}
+table.gantt td{padding:4px 10px;border-bottom:1px solid var(--border);vertical-align:middle;background:#fff}
+table.gantt tr:last-child td{border-bottom:none}
+table.gantt tr:hover td{background:var(--surface)}
+td.month-cell{border-left:1px solid var(--border);padding:0;position:relative;height:30px}
+table.gantt tr:hover td.month-cell{background:var(--surface)}
+.bar{height:14px;border-radius:3px;position:absolute;top:8px;cursor:pointer;transition:filter .12s}
+.bar:hover{filter:brightness(.85)}
+.bar-prog{background-size:28px 28px!important;animation:slide 1.2s linear infinite}
+.pill-st{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;white-space:nowrap}
+.st-done{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.st-prog{background:#e8f8f8;color:#0e6b6b;border:1px solid #99dede}
+.st-plan{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
+td.label-col{width:200px;min-width:200px;font-size:11px;white-space:normal;line-height:1.4;word-break:break-word;cursor:default}
+td.group-col{width:90px;min-width:90px;font-size:10px;padding:4px 8px;white-space:normal;line-height:1.3;word-break:break-word}
+td.owner-col{width:100px;min-width:100px;font-size:10px;padding:4px 8px;white-space:normal;line-height:1.3}
+.q-sep{border-left:2px solid var(--border2)!important}
+.epic-header td{background:var(--surface2)!important;font-weight:600;font-size:11px;cursor:pointer;user-select:none}
+.epic-header td:hover{background:#ececec!important}
+.epic-toggle{font-size:10px;margin-right:6px;display:inline-block;width:12px}
+.owner-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#f0effe;color:#4338ca;border:1px solid #c7d2fe;margin:1px 2px 1px 0;white-space:nowrap}
+.tooltip-box{position:fixed;z-index:200;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:10px 13px;max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.12);pointer-events:none;font-family:'Inter',system-ui,sans-serif}
+.tooltip-box strong{font-size:11px;font-weight:600;color:var(--text);display:block;margin-bottom:4px;line-height:1.4}
+.tooltip-box p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.tooltip-box .tip-dates{font-size:10px;color:#9ca3af;margin-top:5px;border-top:1px solid var(--border);padding-top:5px}
+.range-wrap{position:relative}
+.range-dropdown{display:none;position:absolute;top:34px;left:0;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:10px 12px;z-index:99;min-width:210px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.range-dropdown.open{display:block}
+.q-group{margin-bottom:8px}
+.q-group-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text);cursor:pointer;margin-bottom:4px}
+.q-group-label input{accent-color:var(--teal);width:13px;height:13px;cursor:pointer}
+.month-checks{display:flex;gap:8px;padding-left:20px;flex-wrap:wrap}
+.month-checks label{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);cursor:pointer}
+.month-checks input{accent-color:var(--teal);width:12px;height:12px;cursor:pointer}
+.range-footer{display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)}
+.range-footer button{font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:#fff;border:1px solid var(--border2);border-radius:10px;padding:22px;width:360px;max-width:92%;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:12px;font-weight:700;margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--teal)}
+.modal label{font-size:10px;font-weight:600;color:var(--muted);display:block;margin-bottom:3px;margin-top:10px;text-transform:uppercase;letter-spacing:.04em}
+.modal input,.modal select{width:100%;font-size:12px;font-family:inherit;padding:6px 9px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);height:32px;outline:none}
+.modal input[type=date]{height:32px}
+.modal input:focus,.modal select:focus{border-color:var(--teal)}
+.modal textarea{width:100%;font-size:11px;font-family:inherit;padding:6px 9px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);resize:vertical;min-height:52px;outline:none}
+.modal textarea:focus{border-color:var(--teal)}
+.modal-btns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap}
+.modal-btns button{font-size:11px;font-family:inherit;padding:6px 14px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);cursor:pointer;font-weight:500}
+.modal-btns button:hover{border-color:var(--teal);background:var(--teal-light)}
+.modal-btns .btn-save{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:600}
+.modal-btns .btn-save:hover{background:var(--teal-dim)}
+.modal-btns .btn-del{color:#dc2626;border-color:#fecaca}
+.modal-btns .btn-del:hover{border-color:#dc2626;background:#fef2f2}
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="app" style="padding:0 2px">
+  <div class="header">
+    <span class="header-logo">Meltwater</span>
+    <span class="header-divider">/</span>
+    <span class="header-title">Mira &amp; GenAI QA — 2026 Roadmap</span>
+    <span class="save-indicator"><span class="save-dot" id="save-dot"></span><span id="save-text">Loading...</span></span>
+  </div>
+  <div class="view-tabs">
+    <button class="tab active" onclick="setView('epic')">By epic</button>
+    <button class="tab" onclick="setView('person')">By person</button>
+    <button class="tab" onclick="setView('pillar')">By pillar</button>
+  </div>
+  <div class="toolbar">
+    <select id="filter-status" onchange="render()">
+      <option value="">All statuses</option>
+      <option value="done">Done</option>
+      <option value="prog">In progress</option>
+      <option value="plan">Planned</option>
+    </select>
+    <div class="range-wrap">
+      <button id="range-btn" onclick="togglePicker()"><span id="range-label">All months</span> ▾</button>
+      <div class="range-dropdown" id="range-picker">
+        <div id="q-groups"></div>
+        <div class="range-footer">
+          <button onclick="clearRange()" style="border:1px solid var(--border2);background:#fff;color:var(--muted)">Clear</button>
+          <button onclick="applyRange()" style="border:none;background:var(--teal);color:#fff">Apply</button>
+        </div>
+      </div>
+    </div>
+    <select id="filter-owner" onchange="render()"><option value="">All people</option></select>
+    <input type="text" id="filter-search" placeholder="Search items..." oninput="render()" style="min-width:130px">
+    <button class="btn-primary" onclick="exportJSON()">Export JSON</button>
+    <button onclick="importClick()">Import JSON</button>
+    <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importJSON(event)">
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#28bbbb"></div>Operational Excellence</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#a855f7"></div>Product Execution</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f97316"></div>Technical Excellence</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e5e7eb;border:1px dashed #9ca3af"></div>Planned</div>
+  </div>
+  <div class="gantt-wrap" id="gantt-wrap"><div class="loading">Loading roadmap data...</div></div>
+  <textarea id="json-output" style="display:none;width:100%;height:180px;font-family:monospace;font-size:10px;padding:8px;border-radius:5px;border:1px solid #d1d5db;margin-top:8px;resize:vertical;color:#1a1a1a;background:#f9fafb" readonly></textarea>
+</div>
+<div id="tooltip-box" class="tooltip-box" style="display:none"></div>
+<div id="modal-container"></div>
+
+<script>
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const Q_STARTS=[0,3,6,9];
+const QCLASS=['q1','q1','q1','q2','q2','q2','q3','q3','q3','q4','q4','q4'];
+const QUARTERS=[
+  {label:'Q1 — Jan to Mar',short:'Q1',months:[1,2,3]},
+  {label:'Q2 — Apr to Jun',short:'Q2',months:[4,5,6]},
+  {label:'Q3 — Jul to Sep',short:'Q3',months:[7,8,9]},
+  {label:'Q4 — Oct to Dec',short:'Q4',months:[10,11,12]},
+];
+const PILLAR_COLOR={ops:'#28bbbb',prod:'#a855f7',tech:'#f97316'};
+const PILLAR_FILLS={
+  ops:{bg:'#e8f8f8',color:'#0e6b6b',border:'#99dede'},
+  prod:{bg:'#f5f0fe',color:'#7e22ce',border:'#d8b4fe'},
+  tech:{bg:'#fff4ed',color:'#9a3412',border:'#fed7aa'}
+};
+const PILLAR_LABEL={ops:'Ops Excellence',prod:'Product Exec',tech:'Tech Excellence'};
+const EPIC_ORDER=['QA Process & Metrics','QA Maturity & AI Adoption','QA Way of Working','Product & Release Quality','Mobile QA','CI/CD & Workflow Automation','Accessibility','Agentic & AI Capabilities'];
+const PERSON_COLOR={Jacob:'#28bbbb',Bethany:'#a855f7',Yana:'#f97316',Manisha:'#e11d48',Paulina:'#0284c7',Kevin:'#16a34a','Full team':'#6b7280','Core team':'#854d0e'};
+
+let items=[];
+let selectedMonths=new Set();
+let currentView='epic';
+let collapsedGroups=new Set();
+let saveTimer=null;
+
+const tip=document.getElementById('tooltip-box');
+
+function showTip(e,id){
+  const item=items.find(i=>i.id===id);
+  if(!item)return;
+  tip.innerHTML=`<strong>${item.label}</strong>${item.description?`<p>${item.description}</p>`:''}<div class="tip-dates">${fmtDate(item.startDate)} → ${fmtDate(item.endDate)}</div>`;
+  tip.style.display='block';
+  posTip(e);
+}
+function posTip(e){
+  const x=e.clientX+14,y=e.clientY+14;
+  tip.style.left=(x+tip.offsetWidth>window.innerWidth?x-tip.offsetWidth-20:x)+'px';
+  tip.style.top=(y+tip.offsetHeight>window.innerHeight?y-tip.offsetHeight-20:y)+'px';
+}
+function hideTip(){tip.style.display='none'}
+document.addEventListener('mousemove',e=>{if(tip.style.display!=='none')posTip(e)});
+
+function setSaveState(s){
+  const dot=document.getElementById('save-dot');
+  const txt=document.getElementById('save-text');
+  if(s==='saving'){dot.className='save-dot saving';txt.textContent='Saving...';}
+  else if(s==='saved'){dot.className='save-dot saved';txt.textContent='Saved';}
+  else{dot.className='save-dot';txt.textContent='Loaded from file';}
+}
+
+function scheduleAutoSave(){
+  if(saveTimer)clearTimeout(saveTimer);
+  setSaveState('saving');
+  saveTimer=setTimeout(()=>{
+    localStorage.setItem('qa-roadmap-2026',JSON.stringify(items));
+    setSaveState('saved');
+  },800);
+}
+
+async function loadData(){
+  try{
+    const saved=localStorage.getItem('qa-roadmap-2026');
+    if(saved){
+      items=JSON.parse(saved);
+      setSaveState('saved');
+    } else {
+      const res=await fetch('./data.json');
+      items=await res.json();
+      setSaveState('saved');
+    }
+  }catch(e){
+    try{
+      const res=await fetch('./data.json');
+      items=await res.json();
+      setSaveState('saved');
+    }catch(e2){
+      document.getElementById('gantt-wrap').innerHTML='<div class="loading">Error loading data.json</div>';
+      return;
+    }
+  }
+  buildOwnerFilter();
+  render();
+}
+
+function buildOwnerFilter(){
+  const sel=document.getElementById('filter-owner');
+  const people=[...new Set(items.flatMap(i=>i.owners||[]))].sort();
+  sel.innerHTML='<option value="">All people</option>'+people.map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+
+function daysInMonth(y,m){return new Date(y,m,0).getDate()}
+function parseD(s){const[y,m,d]=s.split('-').map(Number);return{y,m,d}}
+function fmtDate(s){const[y,m,d]=s.split('-');return`${d}/${m}`}
+
+function barStyle(item,mi){
+  const m=mi+1;
+  const s=parseD(item.startDate),e=parseD(item.endDate);
+  if(s.m>m||e.m<m)return null;
+  const dM=daysInMonth(2026,m);
+  const sH=s.m===m,eH=e.m===m;
+  const lp=sH?((s.d-1)/dM)*100:0;
+  const rp=eH?((dM-e.d)/dM)*100:0;
+  const col=PILLAR_COLOR[item.pillar];
+  const br=`border-radius:${sH?'3px':'0'} ${eH?'3px':'0'} ${eH?'3px':'0'} ${sH?'3px':'0'}`;
+  let fill;
+  if(item.status==='plan')fill=`border:1.5px dashed ${col};background:transparent;opacity:0.55`;
+  else if(item.status==='prog')fill=`background-color:${col};background-image:repeating-linear-gradient(-45deg,transparent,transparent 5px,rgba(255,255,255,.38) 5px,rgba(255,255,255,.38) 10px);opacity:1`;
+  else fill=`background:${col};opacity:0.75`;
+  return `${fill};${br};left:calc(${lp.toFixed(1)}% + 2px);right:calc(${rp.toFixed(1)}% + 2px)`;
+}
+
+function activeMonths(){return selectedMonths.size===0?new Set([1,2,3,4,5,6,7,8,9,10,11,12]):new Set(selectedMonths)}
+function stClass(s){return s==='done'?'st-done':s==='prog'?'st-prog':'st-plan'}
+function stLabel(s){return s==='done'?'Done':s==='prog'?'In progress':'Planned'}
+function itemOverlaps(item,active){const s=parseD(item.startDate),e=parseD(item.endDate);for(let m of active){if(s.m<=m&&e.m>=m)return true;}return false;}
+function epicStatus(arr){if(arr.every(i=>i.status==='done'))return'done';if(arr.some(i=>i.status==='prog'||i.status==='done'))return'prog';return'plan';}
+function epicRange(arr){const s=arr.map(i=>i.startDate).sort();const e=arr.map(i=>i.endDate).sort();return{startDate:s[0],endDate:e[e.length-1]};}
+
+function setView(v){
+  currentView=v;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['epic','person','pillar'][i]===v));
+  render();
+}
+
+function filteredItems(){
+  const fs=document.getElementById('filter-status').value;
+  const fq=document.getElementById('filter-search').value.toLowerCase();
+  const fo=document.getElementById('filter-owner').value;
+  const active=activeMonths();
+  const mf=selectedMonths.size>0&&selectedMonths.size<12;
+  return items.filter(i=>(!fs||i.status===fs)&&(!fq||i.label.toLowerCase().includes(fq))&&(!fo||(i.owners&&i.owners.includes(fo)))&&(!mf||itemOverlaps(i,active)));
+}
+
+function ownerTags(o){return(o||[]).map(x=>`<span class="owner-tag">${x}</span>`).join('');}
+
+function monthCells(item,active){
+  let h='';
+  MONTHS.forEach((_,mi)=>{
+    if(!active.has(mi+1))return;
+    const qs=Q_STARTS.includes(mi)?'q-sep':'';
+    const st=barStyle(item,mi);
+    h+=`<td class="month-cell ${qs}" onclick="openEdit(${item.id})" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">`;
+    if(st)h+=`<div class="bar${item.status==='prog'?' bar-prog':''}" style="${st}"></div>`;
+    h+='</td>';
+  });
+  return h;
+}
+
+function summaryBar(arr,active){
+  const rng=epicRange(arr);const st=epicStatus(arr);
+  const syn={startDate:rng.startDate,endDate:rng.endDate,pillar:'ops',status:st};
+  let h='';
+  MONTHS.forEach((_,mi)=>{
+    if(!active.has(mi+1))return;
+    const qs=Q_STARTS.includes(mi)?'q-sep':'';
+    const s=barStyle(syn,mi);
+    h+=`<td class="month-cell ${qs}">`;
+    if(s){const ip=st==='prog';h+=`<div class="bar${ip?' bar-prog':''}" style="${s};background-color:#28bbbb;${ip?'background-image:repeating-linear-gradient(-45deg,transparent,transparent 5px,rgba(255,255,255,.38) 5px,rgba(255,255,255,.38) 10px)':'background-image:none'}"></div>`;}
+    h+='</td>';
+  });
+  return h;
+}
+
+function monthHeaders(active){
+  let h='';
+  MONTHS.forEach((m,i)=>{
+    if(!active.has(i+1))return;
+    const qs=Q_STARTS.includes(i)?'q-sep':'';
+    h+=`<th class="month ${qs} ${QCLASS[i]}">${m}</th>`;
+  });
+  return h;
+}
+
+function render(){
+  const data=filteredItems();
+  const active=activeMonths();
+  const wrap=document.getElementById('gantt-wrap');
+  let h='<table class="gantt"><thead><tr>';
+
+  if(currentView==='epic'){
+    h+=`<th style="min-width:100px">Owners</th><th style="min-width:130px">Epic</th><th style="min-width:200px">Item</th><th style="min-width:70px">Status</th>`;
+    h+=monthHeaders(active);h+='</tr></thead><tbody>';
+    const grouped={};EPIC_ORDER.forEach(e=>{grouped[e]=[];});
+    data.forEach(i=>{if(grouped[i.epic])grouped[i.epic].push(i);});
+    EPIC_ORDER.forEach(epic=>{
+      const ei=grouped[epic];if(!ei.length)return;
+      const col=collapsedGroups.has(epic);const st=epicStatus(ei);
+      h+=`<tr class="epic-header" onclick="toggleGroup('${epic.replace(/'/g,"\\'")}')">`;
+      h+=`<td colspan="4" style="padding:6px 10px"><span class="epic-toggle">${col?'▶':'▼'}</span><strong>${epic}</strong> <span style="font-size:10px;color:var(--muted);margin-left:4px">${ei.length} items</span> <span class="pill-st ${stClass(st)}" style="margin-left:6px;font-size:9px">${stLabel(st)}</span></td>`;
+      h+=summaryBar(ei,active);h+='</tr>';
+      if(!col)ei.forEach(item=>{
+        h+=`<tr>`;
+        h+=`<td class="owner-col" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">${ownerTags(item.owners)}</td>`;
+        h+=`<td class="group-col" style="font-size:10px;color:var(--muted)">${item.epic}</td>`;
+        h+=`<td class="label-col" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">${item.label}</td>`;
+        h+=`<td style="padding:4px 8px"><span class="pill-st ${stClass(item.status)}">${stLabel(item.status)}</span></td>`;
+        h+=monthCells(item,active);h+='</tr>';
+      });
+    });
+
+  } else if(currentView==='person'){
+    h+=`<th style="min-width:110px">Person</th><th style="min-width:200px">Item</th><th style="min-width:70px">Status</th>`;
+    h+=monthHeaders(active);h+='</tr></thead><tbody>';
+    const people=[...new Set(items.flatMap(i=>i.owners||[]))].sort();
+    people.forEach(person=>{
+      const pi=data.filter(i=>i.owners&&i.owners.includes(person));if(!pi.length)return;
+      const col=collapsedGroups.has(person);const st=epicStatus(pi);
+      const pc=PERSON_COLOR[person]||'#6b7280';
+      h+=`<tr class="epic-header" onclick="toggleGroup('${person.replace(/'/g,"\\'")}')">`;
+      h+=`<td colspan="3" style="padding:6px 10px"><span class="epic-toggle">${col?'▶':'▼'}</span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${pc};margin-right:6px;vertical-align:middle"></span><strong>${person}</strong> <span style="font-size:10px;color:var(--muted);margin-left:4px">${pi.length} items</span></td>`;
+      h+=summaryBar(pi,active);h+='</tr>';
+      if(!col)pi.forEach(item=>{
+        h+=`<tr>`;
+        h+=`<td class="group-col" style="padding-left:22px;font-size:10px;color:var(--muted)">${item.epic}</td>`;
+        h+=`<td class="label-col" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">${item.label}</td>`;
+        h+=`<td style="padding:4px 8px"><span class="pill-st ${stClass(item.status)}">${stLabel(item.status)}</span></td>`;
+        h+=monthCells(item,active);h+='</tr>';
+      });
+    });
+
+  } else {
+    h+=`<th style="min-width:90px">Pillar</th><th style="min-width:100px">Owners</th><th style="min-width:200px">Item</th><th style="min-width:70px">Status</th>`;
+    h+=monthHeaders(active);h+='</tr></thead><tbody>';
+    ['ops','prod','tech'].forEach(pillar=>{
+      const pi=data.filter(i=>i.pillar===pillar);if(!pi.length)return;
+      const col=collapsedGroups.has(pillar);const st=epicStatus(pi);const f=PILLAR_FILLS[pillar];
+      h+=`<tr class="epic-header" onclick="toggleGroup('${pillar}')">`;
+      h+=`<td colspan="4" style="padding:6px 10px"><span class="epic-toggle">${col?'▶':'▼'}</span><span style="background:${f.bg};color:${f.color};border:1px solid ${f.border};padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600">${PILLAR_LABEL[pillar]}</span> <span style="font-size:10px;color:var(--muted);margin-left:4px">${pi.length} items</span></td>`;
+      h+=summaryBar(pi,active);h+='</tr>';
+      if(!col)pi.forEach(item=>{
+        h+=`<tr>`;
+        h+=`<td class="group-col" style="padding-left:22px;font-size:10px;color:var(--muted)">${item.epic}</td>`;
+        h+=`<td class="owner-col" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">${ownerTags(item.owners)}</td>`;
+        h+=`<td class="label-col" onmouseenter="showTip(event,${item.id})" onmouseleave="hideTip()">${item.label}</td>`;
+        h+=`<td style="padding:4px 8px"><span class="pill-st ${stClass(item.status)}">${stLabel(item.status)}</span></td>`;
+        h+=monthCells(item,active);h+='</tr>';
+      });
+    });
+  }
+
+  h+='</tbody></table>';
+  wrap.innerHTML=h;
+}
+
+function toggleGroup(k){if(collapsedGroups.has(k))collapsedGroups.delete(k);else collapsedGroups.add(k);render();}
+
+function buildPicker(){
+  const c=document.getElementById('q-groups');c.innerHTML='';
+  QUARTERS.forEach(q=>{
+    const aS=q.months.every(m=>selectedMonths.has(m));
+    const div=document.createElement('div');div.className='q-group';
+    div.innerHTML=`<label class="q-group-label"><input type="checkbox" ${aS?'checked':''} data-qid="${q.short}"> ${q.label}</label><div class="month-checks">${q.months.map(m=>`<label><input type="checkbox" ${selectedMonths.has(m)?'checked':''} data-mid="${m}"> ${MONTHS[m-1]}</label>`).join('')}</div>`;
+    c.appendChild(div);
+    div.querySelector('[data-qid]').addEventListener('change',e=>{q.months.forEach(m=>e.target.checked?selectedMonths.add(m):selectedMonths.delete(m));buildPicker();});
+    q.months.forEach(m=>div.querySelector(`[data-mid="${m}"]`).addEventListener('change',e=>{e.target.checked?selectedMonths.add(m):selectedMonths.delete(m);buildPicker();}));
+  });
+}
+
+function togglePicker(){const p=document.getElementById('range-picker');const o=p.classList.contains('open');if(!o)buildPicker();p.classList.toggle('open',!o);}
+function applyRange(){
+  document.getElementById('range-picker').classList.remove('open');
+  const lbl=document.getElementById('range-label');
+  if(selectedMonths.size===0||selectedMonths.size===12){lbl.textContent='All months';}
+  else{const byQ=QUARTERS.map(q=>{const s=q.months.filter(m=>selectedMonths.has(m));if(s.length===3)return q.short;if(!s.length)return null;return s.map(m=>MONTHS[m-1]).join(', ');}).filter(Boolean);lbl.textContent=byQ.join(' · ');}
+  render();
+}
+function clearRange(){selectedMonths.clear();buildPicker();document.getElementById('range-label').textContent='All months';render();}
+document.addEventListener('click',e=>{const p=document.getElementById('range-picker');const b=document.getElementById('range-btn');if(p&&!p.contains(e.target)&&b&&!b.contains(e.target))p.classList.remove('open');});
+
+function openEdit(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  document.getElementById('modal-container').innerHTML=`
+  <div class="modal-bg" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>Edit item</h3>
+      <label>Title</label><textarea id="e-label" style="min-height:42px">${item.label}</textarea>
+      <label>Description (scope / notes)</label><textarea id="e-desc" style="min-height:70px">${item.description||''}</textarea>
+      <label>Epic</label>
+      <select id="e-epic">${EPIC_ORDER.map(e=>`<option value="${e}" ${item.epic===e?'selected':''}>${e}</option>`).join('')}</select>
+      <label>Pillar</label>
+      <select id="e-pillar">
+        <option value="ops" ${item.pillar==='ops'?'selected':''}>Operational Excellence</option>
+        <option value="prod" ${item.pillar==='prod'?'selected':''}>Product Execution</option>
+        <option value="tech" ${item.pillar==='tech'?'selected':''}>Technical Excellence</option>
+      </select>
+      <label>Status</label>
+      <select id="e-status">
+        <option value="done" ${item.status==='done'?'selected':''}>Done</option>
+        <option value="prog" ${item.status==='prog'?'selected':''}>In progress</option>
+        <option value="plan" ${item.status==='plan'?'selected':''}>Planned</option>
+      </select>
+      <label>Owners (comma separated)</label>
+      <input type="text" id="e-owners" value="${(item.owners||[]).join(', ')}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label>Start date</label><input type="date" id="e-start" value="${item.startDate}"></div>
+        <div><label>End date</label><input type="date" id="e-end" value="${item.endDate}"></div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-del" onclick="deleteItem(${id})">Delete</button>
+        <button onclick="cloneItem(${id})">Clone</button>
+        <button onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveEdit(${id})">Save</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveEdit(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  item.label=document.getElementById('e-label').value.trim()||item.label;
+  item.description=document.getElementById('e-desc').value.trim();
+  item.epic=document.getElementById('e-epic').value;
+  item.pillar=document.getElementById('e-pillar').value;
+  item.status=document.getElementById('e-status').value;
+  item.owners=document.getElementById('e-owners').value.split(',').map(s=>s.trim()).filter(Boolean);
+  item.startDate=document.getElementById('e-start').value;
+  item.endDate=document.getElementById('e-end').value;
+  if(item.endDate<item.startDate)item.endDate=item.startDate;
+  closeModal();render();buildOwnerFilter();scheduleAutoSave();
+}
+
+function cloneItem(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  const newId=Math.max(...items.map(i=>i.id))+1;
+  const clone={...item,id:newId,label:item.label+' (copy)',status:'plan',description:''};
+  items.push(clone);closeModal();render();buildOwnerFilter();scheduleAutoSave();
+  setTimeout(()=>openEdit(newId),50);
+}
+
+function deleteItem(id){
+  if(!confirm('Delete this item?'))return;
+  items=items.filter(i=>i.id!==id);closeModal();render();buildOwnerFilter();scheduleAutoSave();
+}
+
+function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modal-container').innerHTML='';}
+
+function exportJSON(){
+  const json=JSON.stringify(items,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='data.json';
+  a.click();
+  const btn=document.querySelector('.btn-primary');
+  const orig=btn.textContent;btn.textContent='Downloaded!';
+  setTimeout(()=>btn.textContent=orig,2000);
+}
+
+function importClick(){document.getElementById('imp-file').click()}
+function importJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      items=JSON.parse(ev.target.result);
+      buildOwnerFilter();render();scheduleAutoSave();
+    }catch{alert('Invalid JSON');}
+  };
+  r.readAsText(f);
+}
+
+loadData();
+</script>
+</body>
+</html>

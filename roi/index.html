@@ -1,0 +1,239 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:#1a1a1a;padding:32px 24px 48px}
+.logo{font-size:11px;font-weight:700;color:#28bbbb;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.subtitle{font-size:12px;color:#6b7280;margin-bottom:8px}
+.scope-badge{display:inline-flex;align-items:center;gap:6px;background:#f0effe;border:1px solid #c7d2fe;border-radius:5px;padding:5px 12px;font-size:11px;font-weight:600;color:#4338ca;margin-bottom:16px}
+.team-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.member{display:flex;align-items:center;gap:6px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:5px 10px;font-size:11px}
+.avatar{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.disclaimer{background:#f9fafb;border-left:3px solid #28bbbb;padding:10px 14px;font-size:11px;color:#6b7280;border-radius:0 6px 6px 0;margin-bottom:28px;line-height:1.6}
+.disclaimer strong{color:#1a1a1a}
+.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #e5e7eb}
+.ba-card{border-radius:8px;padding:20px;border:1px solid #e5e7eb;display:flex;flex-direction:column}
+.ba-card.before{background:#fef2f2;border-color:#fecaca}
+.ba-card.after{background:#ecfdf5;border-color:#a7f3d0}
+.ba-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.before .ba-label{color:#dc2626}
+.after .ba-label{color:#065f46}
+.ba-area-title{font-size:11px;font-weight:600;color:#374151;margin-bottom:4px}
+.ba-stat{font-size:22px;font-weight:700;line-height:1;margin-bottom:6px}
+.before .ba-stat{color:#dc2626}
+.after .ba-stat{color:#065f46}
+.ba-desc{font-size:10px;color:#6b7280;line-height:1.4}
+.impact-table{width:100%;border-collapse:collapse;margin-bottom:32px;font-size:12px}
+.impact-table th{background:#f9fafb;padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;border-bottom:2px solid #e5e7eb}
+.impact-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+.impact-table tr.total-row td{border-bottom:none;font-weight:600;background:#f0fdf4}
+.pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500}
+.pill-q2{background:#e8f8f8;color:#0e6b6b;border:1px solid #99dede}
+.pill-q3{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.pill-q4{background:#f5f0fe;color:#7e22ce;border:1px solid #d8b4fe}
+.val{font-size:16px;font-weight:700;color:#28bbbb}
+.note{font-size:10px;color:#9ca3af}
+.invest-return{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:32px}
+.invest-card{border-radius:8px;padding:20px;border:1px solid #e5e7eb;text-align:center}
+.invest-card.inv{background:#fff7ed;border-color:#fed7aa}
+.invest-card.ret{background:#f0fdf4;border-color:#a7f3d0}
+.invest-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.inv .invest-label{color:#9a3412}
+.ret .invest-label{color:#065f46}
+.invest-num{font-size:40px;font-weight:700;line-height:1;margin-bottom:4px}
+.inv .invest-num{color:#ea580c}
+.ret .invest-num{color:#16a34a}
+.invest-desc{font-size:11px;color:#6b7280;line-height:1.5}
+.ratio-box{text-align:center}
+.ratio-num{font-size:28px;font-weight:700;color:#28bbbb;line-height:1}
+.ratio-label{font-size:10px;color:#6b7280;margin-top:4px;line-height:1.4}
+.callout{background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:20px;margin-bottom:24px}
+.callout-headline{font-size:16px;font-weight:700;color:#065f46;margin-bottom:8px}
+.callout-body{font-size:12px;color:#374151;line-height:1.7}
+.callout-body strong{color:#065f46}
+.multiplier{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;font-size:12px;color:#374151;line-height:1.8}
+</style>
+
+<div class="logo">Meltwater · Mira & GenAI QA</div>
+<h1>QA Transformation ROI — 2026</h1>
+<p class="subtitle">Estimated impact of the Q1–Q4 2026 improvement program</p>
+
+<div class="scope-badge">⚠ Scope: Mira & GenAI QA Team only — does not include other QA teams at Meltwater</div>
+
+<div class="team-row">
+  <div class="member"><div class="avatar" style="background:#28bbbb">JM</div>Jacob Mendoza · QA Manager <span style="font-size:9px;background:#fff7ed;border:1px solid #fed7aa;border-radius:3px;padding:1px 5px;color:#9a3412;margin-left:4px">Investment</span></div>
+  <div class="member"><div class="avatar" style="background:#a855f7">BV</div>Bethany Veilleux · QA Engineer · 100%</div>
+  <div class="member"><div class="avatar" style="background:#f97316">YB</div>Yana Bahachova · QA Engineer · 100%</div>
+  <div class="member"><div class="avatar" style="background:#e11d48">MB</div>Manisha Bharadwaj · QA Engineer · 100%</div>
+  <div class="member"><div class="avatar" style="background:#0284c7">PG</div>Paulina Galván · QA Engineer · 100%</div>
+  <div class="member"><div class="avatar" style="background:#16a34a">KC</div>Kevin Cervantes · QA Engineer · 50%</div>
+</div>
+
+<div class="disclaimer">
+  <strong>Methodology & assumptions:</strong> Capacity base = 4.5 engineers (Bethany, Yana, Manisha, Paulina at 100% + Kevin at 50%) × 20 working days/month = <strong>90 person-days/month · 1,080 person-days/year.</strong> Jacob Mendoza is excluded from the savings calculation — his full capacity represents the <strong>investment</strong> required to deliver this program. Escape rate and resolution time are based on the first real baseline captured April 20, 2026. Production bug resolution uses a 2× multiplier to account for both QA and Dev involvement.
+</div>
+
+<p class="section-title">Before vs. After — by impact area</p>
+
+<div style="display:grid;grid-template-columns:1fr 32px 1fr;grid-template-rows:auto auto auto;gap:12px 8px;margin-bottom:40px;align-items:stretch">
+  <div class="ba-card before">
+    <div class="ba-label">⚠ Today (Q1 2026)</div>
+    <div class="ba-area-title">Time spent on manual work</div>
+    <div class="ba-stat">~95%</div>
+    <div class="ba-desc">Automated tests exist but are run manually. No CI/CD. No automatic dashboards. Metrics were not tracked. Only ~5% of available capacity is spent on actual QA work.</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:#28bbbb">→</div>
+  <div class="ba-card after">
+    <div class="ba-label">✓ Target Q4 2026</div>
+    <div class="ba-area-title">Time spent on manual work</div>
+    <div class="ba-stat">~40%</div>
+    <div class="ba-desc">CI/CD active, automatic dashboards, AI Workflow across all projects, standardized templates and processes. 60% of capacity redirected to real QA work.</div>
+  </div>
+
+  <div class="ba-card before">
+    <div class="ba-label">⚠ Escape rate</div>
+    <div class="ba-stat">~23%</div>
+    <div class="ba-desc">First real data point: 5 bugs escaped out of 22 classified in 30 days. No measurement existed before April 2026.<br><span style="display:inline-block;margin-top:5px;background:#fffbeb;border:1px solid #fcd34d;border-radius:3px;padding:2px 6px;font-size:9px;color:#92400e">⚠ Preliminary — metrics definition not yet finalized. This number may change over the next few weeks as tracking matures.</span></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:#28bbbb">→</div>
+  <div class="ba-card after">
+    <div class="ba-label">✓ Target Q4 2026</div>
+    <div class="ba-stat">&lt;5%</div>
+    <div class="ba-desc">Year-end target: escape rate below 5% across all 5 active projects. GenAI Lens and Mira moved from High to Medium risk.</div>
+  </div>
+
+  <div class="ba-card before">
+    <div class="ba-label">⚠ Automated coverage</div>
+    <div class="ba-stat">3 / 6</div>
+    <div class="ba-desc">Projects with AI Workflow operational. Mobile and Mira in construction. Klear pending.</div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;font-size:20px;color:#28bbbb">→</div>
+  <div class="ba-card after">
+    <div class="ba-label">✓ Target Q4 2026</div>
+    <div class="ba-stat">6 / 6</div>
+    <div class="ba-desc">All projects with AI Workflow operational. 50% of new automated tests generated with AI assistance.</div>
+  </div>
+</div>
+
+<p class="section-title">Executive impact summary</p>
+
+<table class="impact-table">
+  <thead>
+    <tr>
+      <th style="width:30%">Improvement area</th>
+      <th style="width:18%">Timeline</th>
+      <th style="width:26%">Calculation</th>
+      <th style="width:12%">Days/year</th>
+      <th style="width:14%">FTE equiv.</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Reduction of manual overhead</strong><br><span class="note">From ~95% to ~40% on non-testing tasks</span></td>
+      <td><span class="pill pill-q2">Q2</span> → <span class="pill pill-q3">Q3</span></td>
+      <td><span class="note">90 days × 55% reduction × 12 months</span></td>
+      <td><span class="val">594</span></td>
+      <td><span class="val">2.5</span></td>
+    </tr>
+    <tr>
+      <td><strong>Reduction of production bugs</strong><br><span class="note">~6 → ~2 escaped bugs/month. 4 days resolution × 2× multiplier (QA + Dev).</span></td>
+      <td><span class="pill pill-q2">Q2</span> → <span class="pill pill-q4">Q4</span></td>
+      <td><span class="note">4 bugs saved × 4 days × 2× × 12 months</span></td>
+      <td><span class="val">384</span></td>
+      <td><span class="val">1.6</span></td>
+    </tr>
+    <tr>
+      <td><strong>AI-assisted test generation</strong><br><span class="note">50% of new tests AI-assisted at 30% time reduction</span></td>
+      <td><span class="pill pill-q3">Q3</span> → <span class="pill pill-q4">Q4</span></td>
+      <td><span class="note">90 × 60% testing × 50% AI × 30% saving × 12</span></td>
+      <td><span class="val">97</span></td>
+      <td><span class="val">0.4</span></td>
+    </tr>
+    <tr class="total-row">
+      <td><strong>TOTAL recovered capacity</strong></td>
+      <td>2026</td>
+      <td></td>
+      <td><span style="font-size:20px;font-weight:700;color:#065f46">1,075</span></td>
+      <td><span style="font-size:20px;font-weight:700;color:#065f46">4.5 FTE</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<p class="section-title">Investment vs. Return</p>
+
+<div class="invest-return">
+  <div class="invest-card inv">
+    <div class="invest-label">Investment</div>
+    <div class="invest-num">1</div>
+    <div style="font-size:13px;font-weight:600;color:#9a3412;margin-bottom:6px">FTE — Jacob Mendoza</div>
+    <div class="invest-desc">QA Manager · Full capacity dedicated to designing and implementing standards, processes, metrics, and the improvement program across all 5 projects during 2026.</div>
+  </div>
+  <div class="ratio-box">
+    <div class="ratio-num">4.5×</div>
+    <div class="ratio-label">return<br>on every<br>hour invested</div>
+  </div>
+  <div class="invest-card ret">
+    <div class="invest-label">Return</div>
+    <div class="invest-num">4.5</div>
+    <div style="font-size:13px;font-weight:600;color:#065f46;margin-bottom:6px">FTE equivalent recovered</div>
+    <div class="invest-desc">Capacity freed across 4.5 engineers (Bethany, Yana, Manisha, Paulina, Kevin) — redirected from manual overhead to real QA work, coverage, and automation.</div>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="callout-headline">What this means — the right framing</div>
+  <div class="callout-body">
+    This is <strong>not a headcount reduction.</strong> Today the team has 4.5 QA engineers operating at <strong>~5% of their real QA capacity</strong> — almost all their time goes to manual, repetitive work. The recovered capacity means those same engineers can finally do the work the business needs: coverage on high-risk projects, exploratory testing, and AI-driven automation.<br><br>
+    The alternative framing: <strong>without these improvements, Meltwater would need to hire 4–5 additional QA engineers</strong> to achieve equivalent coverage. Instead, that capacity is unlocked from within the existing team through process and tooling improvements.<br><br>
+    For the two most critical projects — <strong>GenAI Lens (risk 2.4 High) and Mira (risk 2.3 High)</strong> — the program targets moving both to Medium risk by end of Q2, directly reducing the probability of critical bugs reaching end users.
+  </div>
+</div>
+
+<div class="multiplier">
+  <strong>Dollar equivalent — based on actual team compensation ranges</strong><br>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e5e7eb">🇺🇸 US range — $112K–$186K USD/year</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#9ca3af;margin-bottom:3px">Low · $444/day</div>
+          <div style="font-size:15px;font-weight:700;color:#374151">~$477K</div>
+          <div style="font-size:9px;color:#9ca3af">USD/yr</div>
+        </div>
+        <div style="background:#f0fdf4;border:2px solid #28bbbb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#0e6b6b;margin-bottom:3px">Mid · $591/day</div>
+          <div style="font-size:17px;font-weight:700;color:#065f46">~$635K</div>
+          <div style="font-size:9px;color:#0e6b6b;font-weight:600">USD/yr</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#9ca3af;margin-bottom:3px">High · $738/day</div>
+          <div style="font-size:15px;font-weight:700;color:#374151">~$793K</div>
+          <div style="font-size:9px;color:#9ca3af">USD/yr</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #e5e7eb">🇲🇽 MX range — $587K–$978K MXN/year <span style="font-weight:400;color:#9ca3af">(@ $17.33 MXN/USD)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#9ca3af;margin-bottom:3px">Low · $134/day</div>
+          <div style="font-size:15px;font-weight:700;color:#374151">~$144K</div>
+          <div style="font-size:9px;color:#9ca3af">USD/yr</div>
+        </div>
+        <div style="background:#f0fdf4;border:2px solid #28bbbb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#0e6b6b;margin-bottom:3px">Mid · $179/day</div>
+          <div style="font-size:17px;font-weight:700;color:#065f46">~$192K</div>
+          <div style="font-size:9px;color:#0e6b6b;font-weight:600">USD/yr</div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:10px;text-align:center">
+          <div style="font-size:9px;color:#9ca3af;margin-bottom:3px">High · $224/day</div>
+          <div style="font-size:15px;font-weight:700;color:#374151">~$241K</div>
+          <div style="font-size:9px;color:#9ca3af">USD/yr</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:14px;background:#f0fdf4;border-radius:6px;padding:10px 14px;font-size:11px;color:#374151;line-height:1.7">
+    <strong style="color:#065f46">Blended team estimate:</strong> With a mix of US-based and MX-based engineers, the realistic blended midpoint falls between <strong>$192K–$635K USD/year</strong> in recovered capacity. The actual figure depends on the team's cost allocation across locations. <span style="color:#9ca3af">Exchange rate: $1 USD = $17.33 MXN as of April 22, 2026.</span>
+  </div>
+</div>

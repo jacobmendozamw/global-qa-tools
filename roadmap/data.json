@@ -1,0 +1,722 @@
+[
+  {
+    "id": 1,
+    "label": "Standardize defect & test case management (Jira templates)",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-01-01",
+    "endDate": "2026-02-28",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Bethany"
+    ],
+    "description": "Establish uniform Jira templates for defect reporting and test case management across all 5 projects. Ensures consistent data quality for metrics tracking and reduces time spent on ticket formatting."
+  },
+  {
+    "id": 2,
+    "label": "Establish Risk Reduction Baseline — all projects",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-02-01",
+    "endDate": "2026-03-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Define the Q1 2026 risk baseline across all active projects using a weighted scoring model (test coverage, bug frequency, module complexity, user impact, rate of change, testability). Results: GenAI Lens 2.4 High, Mira 2.3 High, Mira Studio 2.1 Medium, Mobile 2.0 Medium, Engage Conversations 1.5 Low. Serves as the official reference point for all 2026 risk reduction efforts."
+  },
+  {
+    "id": 3,
+    "label": "Roll out QA roles & responsibilities",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-01-01",
+    "endDate": "2026-03-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Bethany"
+    ],
+    "description": "Formally define and communicate updated QA roles and responsibilities to ensure team-wide alignment. Covers engineer assignments per project, escalation paths, and ownership of key processes."
+  },
+  {
+    "id": 4,
+    "label": "known / escaped labels & Environment field rollout",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-30",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob",
+      "Bethany"
+    ],
+    "description": "Activate the known and escaped bug classification labels across all projects, and deploy the Environment field to track where bugs are found (staging, production). Enables weekly escape rate tracking and feeds the QA Dashboard metrics. Team adoption confirmed as of April 2026."
+  },
+  {
+    "id": 6,
+    "label": "Launch QA Dashboards — 10 gadgets in Jira",
+    "pillar": "ops",
+    "status": "prog",
+    "startDate": "2026-04-01",
+    "endDate": "2026-05-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Build centralized QA Dashboards in Jira with 10 configured gadgets covering key quality metrics: open blockers, escape rate, test coverage by project, AI-generated tests, and risk scores. Filters 1–7 are active. Target: all 10 gadgets live by end of May 2026."
+  },
+  {
+    "id": 7,
+    "label": "AI QA Workflow Adoption — first monthly cycle",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-30",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Jacob",
+      "Full team"
+    ],
+    "description": "First execution of the monthly AI QA Workflow ritual. Includes a 30-min team session covering adoption recap, Qodo workflow updates, open discussion, and blockers. GenAI Lens, Mira Studio, and Engage Conversations confirmed operational. Mira and Mobile in construction. Session recording available in AI QA Workflow Adoption Tracker."
+  },
+  {
+    "id": 48,
+    "label": "Weekly escape rate tracking via Jira Dashboard",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-05-04",
+    "endDate": "2026-05-29",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Establish a weekly cadence for reviewing escape rate data using the escaped label and Production environment filter in Jira. Focuses on GenAI Lens and Mira as high-risk projects. Process change requiring no tooling work — can begin immediately once labels are active."
+  },
+  {
+    "id": 49,
+    "label": "Informal mid-Q2 baseline check",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-05-31",
+    "endDate": "2026-05-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Optional internal checkpoint at end of May to assess whether Q2 risk reduction targets are on track before the official end-of-quarter review in June. Not a formal scoring session — a directional check to surface any interventions needed in June. Covers all 5 projects."
+  },
+  {
+    "id": 8,
+    "label": "AI-Assisted Test Coverage Analysis — Pilot (GenAI Lens)",
+    "pillar": "ops",
+    "status": "done",
+    "startDate": "2026-04-20",
+    "endDate": "2026-05-08",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Bethany",
+      "Kevin"
+    ],
+    "description": "Controlled experiment using Qodo + Playwright and Claude Skills to analyze active GAIL tickets and suggest test cases. Goal is to surface coverage gaps faster than manual approach. Success targets: ≥50% AI suggestion adoption rate, reduction in time-to-test-plan per ticket, GenAI Lens risk score moved from High to Medium. Findings will define the Q3 expansion strategy across all projects."
+  },
+  {
+    "id": 52,
+    "label": "AI-Assisted Coverage — Expand as standard Way of Working",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-07-01",
+    "endDate": "2026-09-30",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Based on GenAI Lens pilot outcomes, define and roll out AI-assisted test coverage analysis as a standard practice across all projects. The prompt structures, tool selection (Qodo + Playwright vs Claude Skills), and workflow decisions documented in Q2 become the team's default approach for coverage planning."
+  },
+  {
+    "id": 10,
+    "label": "Expand AI for test case creation (Amplitude data)",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-07-31",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Core team",
+      "Bethany"
+    ],
+    "description": "Leverage Amplitude usage data to identify high-traffic user flows and prioritize AI-assisted test generation in those areas. Ensures automation investment is directed toward the highest-impact scenarios rather than arbitrary coverage expansion."
+  },
+  {
+    "id": 44,
+    "label": "QA Way of Working — Measure impact & retro",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-07-01",
+    "endDate": "2026-07-31",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Measure the impact of the QA Way of Working rollout: establish escaped bug baseline in Jira Dashboard, run the first team retrospective on adoption, publish metrics in QA Dashboard, and share a progress report with management."
+  },
+  {
+    "id": 9,
+    "label": "Operationalize the AI Automation Platform",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-31",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Move the AI Automation Platform from pilot/experimental usage to a fully operationalized capability integrated into regular QA workflows. Includes documentation, onboarding materials, and defined usage patterns for all team members."
+  },
+  {
+    "id": 45,
+    "label": "QA Way of Working — Institutionalize (DoR, onboarding docs)",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-31",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Make the QA Way of Working a permanent part of the team's process: formally document it in Confluence, add Early QA criteria to the Definition of Ready across all projects, seed the automation backlog from early reviews, and include the process in new hire onboarding."
+  },
+  {
+    "id": 11,
+    "label": "All teams running monthly AI workflow updates",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-09-30",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Jacob",
+      "Full team"
+    ],
+    "description": "Ensure all 6 projects (MIRA, GenAI Lens, Mira Studio, Mobile, Engage Conversations, Klear) are participating in the monthly AI QA Workflow ritual. Every engineer implements at least one new AI workflow update per month. QA Lead tracks adoption in the Monthly Adoption Tracker."
+  },
+  {
+    "id": 12,
+    "label": "Knowledge Vectorization System integration",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-09-01",
+    "endDate": "2026-09-30",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Integrate Knowledge Vectorization into standard QA workflows to enhance AI-assisted test generation with project-specific context. Enables AI tools to reference historical test cases, past bugs, and product documentation when suggesting new test coverage."
+  },
+  {
+    "id": 13,
+    "label": "Measure AI Workflow ROI vs. Q1 baseline",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-10-01",
+    "endDate": "2026-11-30",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Compare Q4 AI workflow adoption metrics against the Q1 baseline to measure ROI. Covers time-to-test-plan reduction, AI suggestion adoption rate, coverage improvements, and escape rate trends. Results feed the 2027 QA strategy definition."
+  },
+  {
+    "id": 14,
+    "label": "Full team adoption confirmed — incl. new hires",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-11-01",
+    "endDate": "2026-12-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Confirm that every team member, including any new hires onboarded during 2026, is actively using the AI QA Workflow and following the QA Way of Working. Final validation that the team's operating standard is fully embedded."
+  },
+  {
+    "id": 15,
+    "label": "Define 2027 QA strategy with full-year data",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-12-01",
+    "endDate": "2026-12-31",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Use the full year of 2026 data — risk scores, escape rates, coverage trends, AI adoption metrics, and team feedback — to define the QA strategy and goals for 2027. Includes setting new baselines, identifying capability gaps, and proposing investments."
+  },
+  {
+    "id": 16,
+    "label": "Mobile & Mira AI Workflow — tech stack with Dev",
+    "pillar": "prod",
+    "status": "done",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-15",
+    "epic": "Mobile QA",
+    "owners": [
+      "Jacob",
+      "Yana",
+      "Core team"
+    ],
+    "description": "Align with the Dev team on the Mobile QA tech stack. Decision: Maestro as primary tool for all standard UI flows, Detox as secondary for native OS scenarios only. Build distribution via TestFlight (iOS) and Firebase App Distribution (Android). Detox configuration owned jointly by Dev and Kevin Cervantes."
+  },
+  {
+    "id": 46,
+    "label": "Define minimum regression pack — GenAI Lens",
+    "pillar": "prod",
+    "status": "done",
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Bethany"
+    ],
+    "description": "Define a minimum regression pack that runs on every deploy for GenAI Lens. Addresses the high Rate of Change risk factor (score 3, weight 10%). Target: a stable set of automated checks that provide a safety net for the rapid weekly release cadence. Does not reduce Rate of Change score directly but reduces Bug Frequency over time."
+  },
+  {
+    "id": 17,
+    "label": "Establish QA early involvement in refinement",
+    "pillar": "prod",
+    "status": "done",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-23",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Deliver the QA Standards and Practices presentation to establish the foundation for early QA involvement. Awareness phase complete as of April 2026. Stakeholder map built covering all 5 projects with assigned QA engineers, Dev/Tech contacts, and Product contacts. Alignment and implementation begins May 2026."
+  },
+  {
+    "id": 40,
+    "label": "QA Way of Working — Awareness & survey",
+    "pillar": "prod",
+    "status": "done",
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-23",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Survey sent to the team to assess current maturity per project. Responses collected from Manisha, Kevin, Paulina, and Yana. Maturity analysis completed: Yana (Mobile) High, Manisha (Mira) Medium, Paulina (Mira Studio) Medium-low, Klear has no maturity. Beth's response pending — on vacation."
+  },
+  {
+    "id": 41,
+    "label": "QA Way of Working — Alignment (buy-in PMs/Eng Leads, Early QA Checklist v1)",
+    "pillar": "prod",
+    "status": "prog",
+    "startDate": "2026-04-24",
+    "endDate": "2026-05-15",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Present the QA Standards and Practices deck to PMs and Engineering Leads across all projects to get formal buy-in. Deliver the first version of the Early QA Checklist. Publish the QA Way of Working document in Confluence."
+  },
+  {
+    "id": 18,
+    "label": "Align QA activities with 2026 product roadmap",
+    "pillar": "prod",
+    "status": "prog",
+    "startDate": "2026-05-15",
+    "endDate": "2026-06-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Map QA activities and automation priorities to the 2026 product roadmap for each project. Ensures testing investment is directed toward features and initiatives that matter most to the business. Requires alignment sessions with POs for each project."
+  },
+  {
+    "id": 42,
+    "label": "QA Way of Working — Implementation across all projects",
+    "pillar": "prod",
+    "status": "prog",
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-31",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Jacob",
+      "Yana",
+      "Manisha",
+      "Paulina",
+      "Kevin",
+      "Bethany"
+    ],
+    "description": "Simultaneous launch of the QA Way of Working across all projects. Yana (Mobile) serves as reference engineer given high maturity. Manisha activates on Mira and starts Klear stakeholder mapping. Paulina activates on Mira Studio with PM alignment. Kevin provides internal support. Beth activates on GenAI and Engagement post-vacation."
+  },
+  {
+    "id": 19,
+    "label": "Implement Feature Flag groups in testing requirements",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-06-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Integrate feature flag groups into testing requirements to reduce rework and increase testing precision. When a feature is behind a flag, test cases should explicitly cover both enabled and disabled states. Reduces the risk of flag-related regressions reaching production."
+  },
+  {
+    "id": 43,
+    "label": "QA Way of Working — Expand & consolidate",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-06-30",
+    "epic": "QA Way of Working",
+    "owners": [
+      "Full team",
+      "Manisha"
+    ],
+    "description": "Consolidate the Way of Working across all projects: ACs reviewed by QA before development starts, Klear stakeholder conversations completed, Early QA Checklist active everywhere, Beth fully integrated. Process adjustments based on team and stakeholder feedback from May."
+  },
+  {
+    "id": 20,
+    "label": "Full automated coverage — Mobile & Mira AI Agents",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-07-01",
+    "endDate": "2026-08-31",
+    "epic": "Mobile QA",
+    "owners": [
+      "Yana",
+      "Bethany",
+      "Paulina",
+      "Core team"
+    ],
+    "description": "Achieve full automated test coverage for Mobile (React Native app using Maestro + Detox) and Mira AI Agents (Teams & Slack integration). Builds on the tech stack decisions made in Q2. Coverage target: >70% of critical flows automated."
+  },
+  {
+    "id": 21,
+    "label": "Track & report coverage per release",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-09-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Implement per-release coverage tracking directly linked to product objectives. Each release report includes test coverage percentage, AI-generated vs manual test ratio, open blockers, and escape rate. Connects QA results to core business metrics."
+  },
+  {
+    "id": 22,
+    "label": "Ensure releases — no blocker or critical bugs (Q3)",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-09-01",
+    "endDate": "2026-09-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Achieve zero blocker or critical known bugs at release across all active projects during Q3. Requires early QA involvement, regression automation coverage, and consistent escape rate tracking established in Q2."
+  },
+  {
+    "id": 23,
+    "label": "All releases closed — no blocker or critical bugs",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-10-01",
+    "endDate": "2026-12-31",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Maintain zero blocker or critical known bugs at release across all projects through Q4. Year-end target: escape rate <5% across all projects."
+  },
+  {
+    "id": 24,
+    "label": "QA–PO–Dev collaboration model reviewed for 2027",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-11-01",
+    "endDate": "2026-11-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Review and update the collaboration model between QA, Product Owners, and Engineering for 2027. Based on learnings from the QA Way of Working rollout and early involvement data. Includes refinement cadence, AC review process, and escalation paths."
+  },
+  {
+    "id": 25,
+    "label": "Full coverage report — MIRA, GenAI Lens, Mobile",
+    "pillar": "prod",
+    "status": "plan",
+    "startDate": "2026-12-01",
+    "endDate": "2026-12-31",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Jacob"
+    ],
+    "description": "Deliver the year-end coverage report for the three highest-priority projects: MIRA, GenAI Lens, and Mobile. Targets: GenAI Lens & Mira risk score ≤2.0, Mira Studio & Mobile ≤1.8, AI-generated test coverage ≥50% of new automated tests."
+  },
+  {
+    "id": 26,
+    "label": "Define framework architecture (Playwright + AI)",
+    "pillar": "tech",
+    "status": "done",
+    "startDate": "2026-01-01",
+    "endDate": "2026-03-31",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Define the automation framework architecture for web projects: Playwright as the test execution layer combined with Qodo AI Workflow for intelligent test generation. Establishes the standard that all web automation must follow. Mobile stack (Maestro + Detox) defined separately in Q2."
+  },
+  {
+    "id": 27,
+    "label": "Ensure automated tests follow Playwright framework",
+    "pillar": "tech",
+    "status": "done",
+    "startDate": "2026-04-01",
+    "endDate": "2026-04-30",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Full team"
+    ],
+    "description": "Audit and align all existing automated tests to strictly adhere to the Playwright + AI Workflow framework. Tests that deviate from the standard are refactored. Confirmed operational for GenAI Lens, Mira Studio, and Engage Conversations as of April 2026."
+  },
+  {
+    "id": 47,
+    "label": "Testability audit — Mira (friction points & structural improvements)",
+    "pillar": "tech",
+    "status": "prog",
+    "startDate": "2026-04-15",
+    "endDate": "2026-05-30",
+    "epic": "Product & Release Quality",
+    "owners": [
+      "Manisha",
+      "Paulina"
+    ],
+    "description": "Document friction points in Mira's test environment setup and propose structural improvements to move Testability from score 2 to score 1. A successful improvement would reduce Mira's overall risk score from 2.3 to approximately 2.15. Directly supports the Q2 target of moving Mira from High to Medium risk."
+  },
+  {
+    "id": 50,
+    "label": "Mobile — Dev alignment on Detox build config & repo access",
+    "pillar": "tech",
+    "status": "done",
+    "startDate": "2026-04-15",
+    "endDate": "2026-04-30",
+    "epic": "Mobile QA",
+    "owners": [
+      "Core team",
+      "Yana"
+    ],
+    "description": "Align with the Dev team on Detox build configuration requirements for the React Native project. Detox requires a dedicated test build config including iOS/Android build schemes and instrumentation flag. Configuration owned jointly by Dev team and Kevin Cervantes. QA team also requesting read access to the React Native repo for Yana and Kevin."
+  },
+  {
+    "id": 28,
+    "label": "Establish cross-team Automation Code Reviews",
+    "pillar": "tech",
+    "status": "prog",
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-31",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Jacob",
+      "Full team"
+    ],
+    "description": "Formalize the cross-team PR review process for automated tests. Stage 1 in progress: resolving team blockers (Manisha pending 2-step auth, Yana pending Mobile stack alignment). Stage 2 begins when ≥3 engineers are actively contributing. Review checklist covers coverage completeness, naming conventions, test independence, stability, and no duplication. Each reviewer must leave at least one constructive comment per PR."
+  },
+  {
+    "id": 29,
+    "label": "Shared libraries & scalable test architecture",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-07-01",
+    "endDate": "2026-07-31",
+    "epic": "QA Maturity & AI Adoption",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Build and maintain shared test libraries that can be reused across projects — common utilities, page objects, fixtures, and helper functions. Reduces duplication, enforces consistency, and makes onboarding new engineers faster."
+  },
+  {
+    "id": 30,
+    "label": "Axe Deque accessibility testing (Pilot)",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-06-30",
+    "epic": "Accessibility",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Run a controlled pilot of Axe Deque accessibility testing on one project. Evaluate integration with the existing Playwright framework, assess the tooling overhead, and define the accessibility criteria that will become standard across all projects in Q3."
+  },
+  {
+    "id": 31,
+    "label": "CI/CD integration planning",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-06-30",
+    "epic": "CI/CD & Workflow Automation",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Plan the integration of QA automation into the CI/CD pipeline across all 5 projects. Define trigger points, test suite segmentation (smoke, regression, full), reporting requirements, and failure escalation paths. Execution in Q3. Year-end target: CI/CD live on all 5 projects."
+  },
+  {
+    "id": 32,
+    "label": "CI/CD integration live & validated",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-07-01",
+    "endDate": "2026-07-31",
+    "epic": "CI/CD & Workflow Automation",
+    "owners": [
+      "Core team",
+      "Full team"
+    ],
+    "description": "Deploy and validate CI/CD integration for QA automation across all active projects. QA engineers confirm pipelines are triggering correctly, test results are visible, and failure notifications are reaching the right people. Implements the AI Workflow with high accuracy for seamless CI/CD integration."
+  },
+  {
+    "id": 51,
+    "label": "Mobile — Long-term AI automation strategy (Claude Skills / QA Core)",
+    "pillar": "tech",
+    "status": "prog",
+    "startDate": "2026-05-15",
+    "endDate": "2026-06-30",
+    "epic": "Mobile QA",
+    "owners": [
+      "Jacob",
+      "Yana",
+      "Core team"
+    ],
+    "description": "Define the long-term AI automation strategy for Mobile. Claude Skills is the leading candidate to drive the automation layer, though no final decision has been made. Scope and architecture to be refined with the QA Core team who owns automation tooling organization-wide. Builds on the Maestro + Detox foundation established in Q2."
+  },
+  {
+    "id": 33,
+    "label": "Deploy E2E Workflow Automation (n8n)",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-08-31",
+    "epic": "CI/CD & Workflow Automation",
+    "owners": [
+      "Core team"
+    ],
+    "description": "Deploy end-to-end workflow automation using n8n to streamline the process from Ticket creation to Pull Request. Reduces manual handoffs between Jira ticket management, test case creation, code generation, and PR submission."
+  },
+  {
+    "id": 34,
+    "label": "Axe Deque rolled out across all projects",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-08-01",
+    "endDate": "2026-09-30",
+    "epic": "Accessibility",
+    "owners": [
+      "Core team",
+      "Full team"
+    ],
+    "description": "Roll out Axe Deque accessibility testing across all 5 active projects based on the Q2 pilot findings. Integrates into the standard Playwright test suite. Ensures accessibility is validated as part of every release cycle."
+  },
+  {
+    "id": 35,
+    "label": "Expand AI Workflow to Mobile & AI companions",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-06-01",
+    "endDate": "2026-07-31",
+    "epic": "Agentic & AI Capabilities",
+    "owners": [
+      "Jacob",
+      "Yana",
+      "Bethany",
+      "Paulina",
+      "Core team"
+    ],
+    "description": "Extend the AI QA Workflow service to Mobile (React Native) and Mira AI companion systems (Teams & Slack agents). Builds on the full automated coverage achieved in Q3 and the AI workflow adoption established across all projects."
+  },
+  {
+    "id": 36,
+    "label": "Launch Agentic Service for repetitive execution",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-10-01",
+    "endDate": "2026-10-31",
+    "epic": "Agentic & AI Capabilities",
+    "owners": [
+      "Core team",
+      "Full team"
+    ],
+    "description": "Enable an Agentic Service capable of autonomously resolving repetitive test execution tasks based on QA engineer instructions. Frees engineers from mechanical test runs and allows focus on exploratory and risk-based testing."
+  },
+  {
+    "id": 37,
+    "label": "Develop Conversational Automation Ecosystem",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-10-15",
+    "endDate": "2026-11-30",
+    "epic": "Agentic & AI Capabilities",
+    "owners": [
+      "Core team",
+      "Full team"
+    ],
+    "description": "Build a Conversational Automation Ecosystem that enables rapid feedback loops between QA engineers and automation tooling. Engineers interact with the system via natural language to create, modify, and trigger test scenarios without writing code directly."
+  },
+  {
+    "id": 38,
+    "label": "Enable self-service QA workflows (non-QA)",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-11-01",
+    "endDate": "2026-11-30",
+    "epic": "Agentic & AI Capabilities",
+    "owners": [
+      "Core team",
+      "Full team"
+    ],
+    "description": "Democratize QA by enabling non-QA team members (developers, PMs) to execute predefined test workflows through simplified interfaces. Reduces QA bottlenecks on critical paths and increases product team ownership of quality."
+  },
+  {
+    "id": 39,
+    "label": "Pilot AI-driven test generation in one project",
+    "pillar": "tech",
+    "status": "plan",
+    "startDate": "2026-12-01",
+    "endDate": "2026-12-31",
+    "epic": "Agentic & AI Capabilities",
+    "owners": [
+      "Bethany",
+      "Core team"
+    ],
+    "description": "Run a designated pilot of fully AI-driven test generation and maintenance in one project. Document key outcomes, failure modes, and lessons learned. Results feed the 2027 strategy for scaling AI-generated tests to 50% of new automated tests across all projects."
+  },
+  {
+    "id": 53,
+    "label": "Informal mid-Q3 baseline check",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-08-14",
+    "endDate": "2026-08-14",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": ""
+  },
+  {
+    "id": 54,
+    "label": "Informal mid-Q4 baseline check",
+    "pillar": "ops",
+    "status": "plan",
+    "startDate": "2026-11-16",
+    "endDate": "2026-11-16",
+    "epic": "QA Process & Metrics",
+    "owners": [
+      "Jacob"
+    ],
+    "description": ""
+  }
+]

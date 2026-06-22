@@ -1,0 +1,51 @@
+name: Refresh GitHub Metrics
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch: {} # allow manual runs
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Fetch metrics
+        env:
+          # Fine-grained, read-only PAT with access to meltwater/global-qa-test-suite.
+          # Stored as a repo secret (Settings → Secrets and variables → Actions).
+          GH_TOKEN: ${{ secrets.METRICS_READ_TOKEN }}
+        run: node scripts/fetch-github-metrics.mjs
+
+      # main is protected (changes must go through a PR), so instead of pushing
+      # directly we open/update a single rolling PR with the refreshed data.json.
+      - name: Open or update PR with refreshed data
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: git-metrics/data.json
+          branch: automated/metrics-refresh
+          base: main
+          commit-message: "chore: refresh github metrics data"
+          title: "chore: refresh GitHub metrics data"
+          assignees: |
+            jacobmendozamw
+          reviewers: |
+            oscarlimonmw
+            jacobmendozamw
+            dcaballero-meltwater
+          body: |
+            Automated refresh of `git-metrics/data.json` by the **Refresh GitHub Metrics** workflow.
+
+            Merge to publish the latest team / contributor metrics.
+          labels: |
+            automated
+            metrics

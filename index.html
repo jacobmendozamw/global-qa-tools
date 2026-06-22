@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global QA Tools — Mira &amp; GenAI QA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --teal:#28bbbb;--teal-dim:#1f9898;--teal-light:#e8f8f8;
+      --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;--border2:#d1d5db;
+      --surface:#f9fafb;--surface2:#f3f4f6;
+    }
+    body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--text);padding:0 16px 48px;max-width:920px;margin:0 auto}
+    .header{padding:24px 0 4px;display:flex;align-items:center;gap:8px}
+    .header-logo{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--teal);text-transform:uppercase}
+    .header-divider{color:var(--border2)}
+    .header-title{font-size:12px;color:var(--muted)}
+    h1{font-size:22px;font-weight:600;margin:20px 0 4px}
+    .subtitle{font-size:13px;color:var(--muted);margin-bottom:28px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    a.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;transition:all .15s}
+    a.card:hover{border-color:var(--teal);background:var(--teal-light);transform:translateY(-2px);box-shadow:0 6px 18px rgba(40,187,187,.12)}
+    .card-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;background:#fff;border:1px solid var(--border);margin-bottom:12px}
+    .card-title{font-size:14px;font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+    .card-arrow{font-size:13px;color:var(--teal);transition:transform .15s}
+    a.card:hover .card-arrow{transform:translateX(3px)}
+    .card-desc{font-size:11.5px;color:var(--muted);line-height:1.5;flex:1}
+    .card-tag{font-size:9px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px;margin-top:12px;align-self:flex-start}
+    .footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="header-logo">Meltwater</span>
+    <span class="header-divider">/</span>
+    <span class="header-title">Mira &amp; GenAI QA — Global QA Tools</span>
+  </div>
+
+  <h1>Global QA Tools</h1>
+  <p class="subtitle">Internal tooling for the Mira &amp; GenAI QA Team — operations, risk tracking, and team visibility.</p>
+
+  <div class="grid">
+    <a class="card" href="/roadmap/">
+      <div class="card-icon">🗺️</div>
+      <div class="card-title">2026 Roadmap <span class="card-arrow">→</span></div>
+      <div class="card-desc">Gantt viewer for the Mira &amp; GenAI QA 2026 roadmap. Filter by epic, person, or pillar; edit, import &amp; export.</div>
+      <span class="card-tag">Planning</span>
+    </a>
+
+    <a class="card" href="/risk-baseline/">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">QA Risk Baseline <span class="card-arrow">→</span></div>
+      <div class="card-desc">Score and track project risk over time using a two-layer model (base risk + QA mitigations), with saved history.</div>
+      <span class="card-tag">Risk</span>
+    </a>
+
+    <a class="card" href="/git-metrics/">
+      <div class="card-icon">📊</div>
+      <div class="card-title">GitHub Metrics <span class="card-arrow">→</span></div>
+      <div class="card-desc">Team activity dashboard — commits &amp; PRs over time, plus repo contributor ranking.</div>
+      <span class="card-tag">Activity</span>
+    </a>
+
+    <a class="card" href="/roi/">
+      <div class="card-icon">💡</div>
+      <div class="card-title">Transformation ROI <span class="card-arrow">→</span></div>
+      <div class="card-desc">Business-case page estimating the impact of the 2026 QA improvement program.</div>
+      <span class="card-tag">Impact</span>
+    </a>
+  </div>
+
+  <div class="footer">Maintained by the Mira &amp; GenAI QA Team (GQA) — Meltwater</div>
+</body>
+</html>

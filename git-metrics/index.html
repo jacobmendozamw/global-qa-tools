@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GQA · GitHub Metrics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --teal:#28bbbb;--teal-dim:#1f9898;--teal-light:#e8f8f8;
+      --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;--border2:#d1d5db;
+      --surface:#f9fafb;--surface2:#f3f4f6;
+    }
+    body{font-family:'Inter',system-ui,sans-serif;background:#fff;color:var(--text);padding:0 16px 40px}
+    .header{padding:16px 0 4px;display:flex;align-items:center;gap:8px}
+    .header-logo{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--teal);text-transform:uppercase}
+    .header-divider{color:var(--border2)}
+    .header-title{font-size:12px;color:var(--muted)}
+    .status-wrap{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+    .status-dot{width:6px;height:6px;border-radius:50%;background:#9ca3af}
+    .status-dot.live{background:#10b981;animation:pulse 2s infinite}
+    .status-dot.error{background:#ef4444}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    .view-tabs{display:flex;gap:4px;padding:8px 0 10px}
+    .tab{font-size:11px;font-family:inherit;padding:5px 14px;height:30px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--muted);cursor:pointer;font-weight:500;transition:all .15s}
+    .tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+    .tab:hover:not(.active){border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+
+    .toolbar{display:flex;align-items:center;gap:8px;padding:4px 0 10px;flex-wrap:wrap}
+    .toolbar select{font-size:11px;font-family:inherit;padding:5px 10px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);height:30px;outline:none}
+    .toolbar select:focus{border-color:var(--teal)}
+    .toolbar button{font-size:11px;font-family:inherit;padding:5px 10px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--text);height:30px;cursor:pointer;white-space:nowrap}
+    .toolbar button:hover{border-color:var(--teal);background:var(--teal-light)}
+
+    .range-wrap{position:relative}
+    .range-dropdown{display:none;position:absolute;top:34px;left:0;background:#fff;border:1px solid var(--border2);border-radius:8px;padding:10px 12px;z-index:99;min-width:230px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+    .range-dropdown.open{display:block}
+    .y-group{margin-bottom:10px}
+    .y-group-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text);cursor:pointer;margin-bottom:5px}
+    .y-group-label input{accent-color:var(--teal);width:13px;height:13px;cursor:pointer}
+    .month-checks{display:flex;gap:6px;padding-left:20px;flex-wrap:wrap}
+    .month-checks label{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--muted);cursor:pointer;min-width:38px}
+    .month-checks input{accent-color:var(--teal);width:12px;height:12px;cursor:pointer}
+    .range-footer{display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)}
+    .range-footer button{font-size:10px;padding:3px 10px;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:500;border:none;height:auto}
+    .range-footer .btn-clear{border:1px solid var(--border2)!important;background:#fff;color:var(--muted)}
+    .range-footer .btn-apply{background:var(--teal);color:#fff}
+
+    .legend{display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 10px}
+    .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+    .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+    .card-label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+    .card-value{font-size:24px;font-weight:600;color:var(--text);line-height:1;margin-bottom:3px}
+    .card-sub{font-size:10px;color:var(--muted)}
+
+    .chart-wrap{border:1px solid var(--border);border-radius:8px;padding:16px;background:#fff}
+    .chart-container{position:relative;width:100%;height:320px}
+
+    .rank-wrap{overflow:hidden}
+    .rank-title{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+    .rank-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)}
+    .rank-row:last-child{border-bottom:none}
+    .rank-pos{font-size:11px;color:var(--muted);width:22px;text-align:right;flex-shrink:0}
+    .rank-name{font-size:11px;width:150px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rank-team{width:96px;flex-shrink:0;overflow:hidden;display:flex;align-items:center}
+    .rank-bar-wrap{flex:1;background:var(--surface2);border-radius:3px;height:14px;position:relative}
+    .rank-bar{height:14px;border-radius:3px;transition:width .3s}
+    .rank-val{font-size:11px;color:var(--muted);width:46px;text-align:right;flex-shrink:0}
+    .rank-avg-line{position:absolute;top:0;bottom:0;width:2px;background:#f97316;opacity:.7;border-radius:1px}
+    .team-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600;vertical-align:middle;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    .loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .error-msg{color:#ef4444;font-size:12px;padding:24px;text-align:center}
+    @media print{.toolbar,.legend,.view-tabs{display:none}.chart-wrap{border:none;padding:0}}
+  </style>
+</head>
+<body>
+<div style="padding:0 2px">
+
+  <div class="header">
+    <span class="header-logo">Meltwater</span>
+    <span class="header-divider">/</span>
+    <span class="header-title">GitHub Activity — global-qa-test-suite</span>
+    <span class="status-wrap">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Loading...</span>
+    </span>
+  </div>
+
+  <div class="view-tabs">
+    <button class="tab active" onclick="setView('team')">By team</button>
+    <button class="tab" onclick="setView('compare')">Team comparison</button>
+    <button class="tab" onclick="setView('contrib')">Contributors</button>
+  </div>
+
+  <div class="toolbar">
+    <select id="metricSel">
+      <option value="commits">Commits</option>
+      <option value="prs">Pull Requests</option>
+    </select>
+    <!-- team-view only -->
+    <select id="teamSel"></select>
+    <!-- team-view only -->
+    <select id="viewSel">
+      <option value="grouped">Per member</option>
+      <option value="stacked">Stacked</option>
+    </select>
+    <!-- shared month picker -->
+    <div class="range-wrap">
+      <button id="rangeBtn" onclick="togglePicker()"><span id="rangeLabel">All months</span> ▾</button>
+      <div class="range-dropdown" id="rangePicker">
+        <div id="yGroups"></div>
+        <div class="range-footer">
+          <button class="btn-clear" onclick="clearMonths()">Clear</button>
+          <button class="btn-apply" onclick="applyMonths()">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="chart-wrap">
+    <div id="chartContainer" class="chart-container">
+      <div class="loading"><span class="spinner"></span>Loading data...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const NAMED_COLORS={Bethany:'#28bbbb',Paulina:'#a855f7',Kevin:'#f97316',Manisha:'#e11d48'};
+const PALETTE=['#28bbbb','#a855f7','#f97316','#e11d48','#0284c7','#16a34a','#854d0e','#7c3aed','#0891b2','#ca8a04','#db2777','#4f46e5'];
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let appData=null, chart=null, currentView='team', selectedTeam=null;
+let selectedMonths=new Set(), pendingMonths=new Set();
+let teamColorMap={};
+
+function metricLabel(m){return m==='prs'?'PRs':'commits'}
+function colorForName(name,i){return NAMED_COLORS[name]||PALETTE[i%PALETTE.length]}
+// Badge labels per team. Keep keys in sync with team names in teams.json;
+// unknown teams fall back to the text before the first "/" or "(".
+const TEAM_ABBR={
+  'QA AI Agent Framework':'QA Core',
+  'Media Intelligence':'MI',
+  'MIRA (Studio/Mobile/Core) / GenAI + Klear':'Mira & GenAI',
+  'Explore / E+/E Analytics & UDS':'E/E+ & UDS',
+};
+function shortTeam(name){return TEAM_ABBR[name]||name.split(/[(/]/)[0].trim();}
+function fmtMonth(m){const[y,mo]=m.split('-');return`${MONTH_NAMES[parseInt(mo,10)-1]} '${y.slice(2)}`;}
+
+function setStatus(state,text){
+  document.getElementById('statusDot').className='status-dot'+(state==='live'?' live':state==='error'?' error':'');
+  document.getElementById('statusText').textContent=text;
+}
+
+async function fetchData(){
+  // Static data file, refreshed by the "Refresh GitHub Metrics" GitHub Action.
+  try{const r=await fetch('./data.json',{cache:'no-store'});if(!r.ok)throw new Error();return await r.json();}
+  catch(e){return null;}
+}
+
+/* ---- tabs ---- */
+function setView(v){
+  currentView=v;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['team','compare','contrib'][i]===v));
+  document.getElementById('teamSel').style.display=v==='team'?'':'none';
+  document.getElementById('viewSel').style.display=v==='team'?'':'none';
+  const c=document.getElementById('chartContainer');
+  c.style.height=v==='team'?'320px':'auto';
+  c.style.minHeight=v==='team'?'':'320px';
+  render();
+}
+
+/* ---- month picker (shared) ---- */
+function togglePicker(){
+  const p=document.getElementById('rangePicker');
+  const opening=!p.classList.contains('open');
+  if(opening){pendingMonths=new Set(selectedMonths);buildPicker();}
+  p.classList.toggle('open',opening);
+}
+function buildPicker(){
+  if(!appData)return;
+  const byYear={};
+  appData.allMonths.forEach(m=>{const[y]=m.split('-');if(!byYear[y])byYear[y]=[];byYear[y].push(m);});
+  const c=document.getElementById('yGroups');c.innerHTML='';
+  Object.keys(byYear).sort().forEach(year=>{
+    const months=byYear[year];
+    const allChecked=months.every(m=>pendingMonths.has(m));
+    const div=document.createElement('div');div.className='y-group';
+    div.innerHTML=`
+      <label class="y-group-label"><input type="checkbox" ${allChecked?'checked':''} data-year="${year}"> ${year}</label>
+      <div class="month-checks">${months.map(m=>{const mo=parseInt(m.split('-')[1],10);return`<label><input type="checkbox" ${pendingMonths.has(m)?'checked':''} data-month="${m}"> ${MONTH_NAMES[mo-1]}</label>`;}).join('')}</div>`;
+    c.appendChild(div);
+    div.querySelector(`[data-year="${year}"]`).addEventListener('change',e=>{
+      months.forEach(m=>e.target.checked?pendingMonths.add(m):pendingMonths.delete(m));buildPicker();
+    });
+    months.forEach(m=>{
+      div.querySelector(`[data-month="${m}"]`).addEventListener('change',e=>{
+        e.target.checked?pendingMonths.add(m):pendingMonths.delete(m);
+        const yBox=div.querySelector(`[data-year="${year}"]`);
+        yBox.checked=months.every(mx=>pendingMonths.has(mx));
+        yBox.indeterminate=!yBox.checked&&months.some(mx=>pendingMonths.has(mx));
+      });
+    });
+  });
+}
+function applyMonths(){selectedMonths=new Set(pendingMonths);document.getElementById('rangePicker').classList.remove('open');updateRangeLabel();render();}
+function clearMonths(){pendingMonths.clear();selectedMonths.clear();buildPicker();document.getElementById('rangePicker').classList.remove('open');updateRangeLabel();render();}
+function updateRangeLabel(){
+  const lbl=document.getElementById('rangeLabel');
+  if(!appData||selectedMonths.size===0||selectedMonths.size===appData.allMonths.length){lbl.textContent='All months';return;}
+  const sorted=[...selectedMonths].sort();
+  lbl.textContent=sorted.length<=3?sorted.map(fmtMonth).join(', '):`${sorted.length} months selected`;
+}
+document.addEventListener('click',e=>{
+  const p=document.getElementById('rangePicker'),b=document.getElementById('rangeBtn');
+  if(p&&!p.contains(e.target)&&b&&!b.contains(e.target))p.classList.remove('open');
+});
+
+/* ---- active month helpers ---- */
+function activeIdx(){
+  const all=appData.allMonths;
+  const active=(selectedMonths.size===0?all:all.filter(m=>selectedMonths.has(m)));
+  return active.map(m=>all.indexOf(m));
+}
+
+/* ---- legend ---- */
+function buildLegend(items){
+  document.getElementById('legend').innerHTML=items.map(it=>
+    `<div class="leg-item"><div class="leg-dot" style="background:${it.color}${it.dashed?';height:3px;margin-top:3px;border-radius:1px':''}"></div>${it.label}</div>`
+  ).join('');
+}
+
+/* ================= TEAM VIEW ================= */
+function teamSeries(teamName,metric){
+  const td=appData.teamData[teamName];
+  if(!td)return{months:[],members:[],values:{}};
+  const idx=activeIdx();
+  return{
+    months:idx.map(i=>appData.allMonths[i]),
+    members:td.members,
+    values:Object.fromEntries(td.members.map(n=>[n,idx.map(i=>td[metric][n]?.[i]??0)])),
+  };
+}
+function buildTeamCards(data,metric){
+  const {members,values,months}=data;
+  const totals=members.map(n=>(values[n]||[]).reduce((a,b)=>a+b,0));
+  const grand=totals.reduce((a,b)=>a+b,0);
+  const topIdx=totals.length?totals.indexOf(Math.max(...totals)):-1;
+  const active=totals.filter(t=>t>0).length;
+  const label=metricLabel(metric);
+  document.getElementById('cards').innerHTML=`
+    <div class="card"><div class="card-label">Total ${label}</div><div class="card-value">${grand}</div><div class="card-sub">${months.length} month${months.length!==1?'s':''} shown</div></div>
+    <div class="card"><div class="card-label">Top contributor</div><div class="card-value" style="font-size:16px;padding-top:4px;color:${topIdx>=0?colorForName(members[topIdx],topIdx):'var(--teal)'}">${topIdx>=0?members[topIdx]:'—'}</div><div class="card-sub">${topIdx>=0?totals[topIdx]:0} ${label}</div></div>
+    <div class="card"><div class="card-label">Monthly avg</div><div class="card-value">${months.length?Math.round(grand/months.length):0}</div><div class="card-sub">whole team</div></div>
+    <div class="card"><div class="card-label">Active members</div><div class="card-value">${active}</div><div class="card-sub">of ${members.length} tracked</div></div>`;
+}
+function buildTeamChart(data,metric,viewType){
+  if(chart){chart.destroy();chart=null;}
+  const container=document.getElementById('chartContainer');
+  container.innerHTML='<canvas id="myChart" role="img" aria-label="Bar chart of GitHub activity per team member by month."></canvas>';
+  const stacked=viewType==='stacked';
+  const label=metricLabel(metric);
+  chart=new Chart(document.getElementById('myChart'),{
+    type:'bar',
+    data:{labels:data.months,datasets:data.members.map((name,i)=>({
+      label:name,data:data.values[name]||[],backgroundColor:colorForName(name,i),
+      borderRadius:3,borderSkipped:false,stack:stacked?'stack':name,
+    }))},
+    options:baseChartOptions(label,stacked)
+  });
+}
+
+/* ================= COMPARE VIEW ================= */
+function compareTotals(metric){
+  const idx=activeIdx();
+  return appData.teams.map((t,i)=>{
+    const arr=appData.teamTotals[t][metric]||[];
+    const series=idx.map(k=>arr[k]??0);
+    return{team:t,color:teamColorMap[t]||PALETTE[i%PALETTE.length],series,total:series.reduce((a,b)=>a+b,0)};
+  });
+}
+function buildCompareCards(totals,metric){
+  const label=metricLabel(metric);
+  const sorted=[...totals].sort((a,b)=>b.total-a.total);
+  const grand=totals.reduce((a,b)=>a+b.total,0);
+  const top=sorted[0];
+  const idx=activeIdx();
+  document.getElementById('cards').innerHTML=`
+    <div class="card"><div class="card-label">Teams</div><div class="card-value">${totals.length}</div><div class="card-sub">${idx.length} month${idx.length!==1?'s':''} shown</div></div>
+    <div class="card"><div class="card-label">Most active team</div><div class="card-value" style="font-size:15px;padding-top:5px;color:${top?top.color:'var(--teal)'}">${top?top.team:'—'}</div><div class="card-sub">${top?top.total:0} ${label}</div></div>
+    <div class="card"><div class="card-label">Repo total ${label}</div><div class="card-value">${grand}</div><div class="card-sub">across all teams</div></div>
+    <div class="card"><div class="card-label">Team avg</div><div class="card-value">${totals.length?Math.round(grand/totals.length):0}</div><div class="card-sub">${label} per team</div></div>`;
+}
+function buildCompareView(metric,viewType){
+  if(chart){chart.destroy();chart=null;}
+  const idx=activeIdx();
+  const months=idx.map(i=>appData.allMonths[i]);
+  const totals=compareTotals(metric);
+  const sorted=[...totals].sort((a,b)=>b.total-a.total);
+  const label=metricLabel(metric);
+  const stacked=viewType!=='grouped';
+
+  const container=document.getElementById('chartContainer');
+  container.innerHTML='<div style="height:300px;position:relative"><canvas id="myChart" role="img" aria-label="Activity per team by month."></canvas></div>'+
+    '<div class="rank-wrap" style="margin-top:20px"><div class="rank-title">Team ranking · '+label+'</div>'+rankRows(sorted.map(t=>({
+      name:t.team,color:t.color,val:t.total
+    })),sorted[0]?.total||1)+'</div>';
+
+  chart=new Chart(document.getElementById('myChart'),{
+    type:'bar',
+    data:{labels:months,datasets:totals.map(t=>({
+      label:t.team,data:t.series,backgroundColor:t.color,borderRadius:3,borderSkipped:false,stack:stacked?'stack':t.team,
+    }))},
+    options:baseChartOptions(label,stacked)
+  });
+}
+
+/* ================= CONTRIBUTORS VIEW ================= */
+function filteredContributors(metric){
+  const active=selectedMonths.size===0?new Set(appData.allMonths):selectedMonths;
+  return appData.ranking.map(r=>{
+    const byMonth=metric==='prs'?r.prsByMonth:r.commitsByMonth;
+    const total=Object.entries(byMonth).filter(([m])=>active.has(m)).reduce((s,[,v])=>s+v,0);
+    return{...r,total};
+  }).filter(r=>r.total>0).sort((a,b)=>b.total-a.total);
+}
+function buildContribCards(sorted,metric){
+  const label=metricLabel(metric);
+  const grand=sorted.reduce((a,b)=>a+b.total,0);
+  const avg=sorted.length?Math.round(grand/sorted.length):0;
+  const teamOnly=sorted.filter(r=>r.isTeam);
+  const bestRank=teamOnly.length?sorted.findIndex(x=>x.isTeam)+1:'-';
+  const topTeam=teamOnly[0];
+  const periodLabel=selectedMonths.size===0||selectedMonths.size===appData.allMonths.length?'all time':`${selectedMonths.size} month${selectedMonths.size!==1?'s':''}`;
+  document.getElementById('cards').innerHTML=`
+    <div class="card"><div class="card-label">Contributors</div><div class="card-value">${sorted.length}</div><div class="card-sub">${periodLabel}</div></div>
+    <div class="card"><div class="card-label">Repo avg ${label}</div><div class="card-value">${avg}</div><div class="card-sub">per contributor</div></div>
+    <div class="card"><div class="card-label">Best tracked rank</div><div class="card-value" style="color:var(--teal)">#${bestRank}</div><div class="card-sub">${topTeam?topTeam.displayName:''}</div></div>
+    <div class="card"><div class="card-label">Repo total ${label}</div><div class="card-value">${grand}</div><div class="card-sub">${periodLabel}</div></div>`;
+}
+function buildContribList(sorted,metric){
+  if(chart){chart.destroy();chart=null;}
+  const label=metricLabel(metric);
+  const maxVal=sorted[0]?.total||1;
+  const avg=sorted.length?sorted.reduce((a,b)=>a+b.total,0)/sorted.length:0;
+  const avgPct=(avg/maxVal*100).toFixed(1);
+  const container=document.getElementById('chartContainer');
+  let html='<div class="rank-wrap">';
+  sorted.forEach((r,i)=>{
+    const pct=(r.total/maxVal*100).toFixed(1);
+    const tc=teamColorMap[r.team];
+    const color=r.isTeam?(tc||'#28bbbb'):'#d1d5db';
+    const nameStyle=r.isTeam?`font-weight:600;color:${tc||'#28bbbb'}`:'color:var(--text)';
+    const badge=r.isTeam?`<span class="team-badge" style="background:${(tc||'#28bbbb')}22;color:${tc||'#28bbbb'};border:1px solid ${(tc||'#28bbbb')}44" title="${r.team}">${shortTeam(r.team)}</span>`:'';
+    html+=`<div class="rank-row">
+      <span class="rank-pos">${i+1}</span>
+      <span class="rank-name" style="${nameStyle}" title="${r.displayName} · ${r.team}">${r.displayName}</span>
+      <span class="rank-team">${badge}</span>
+      <div class="rank-bar-wrap">
+        <div class="rank-bar" style="width:${pct}%;background:${color}"></div>
+        <div class="rank-avg-line" style="left:${avgPct}%" title="Repo avg: ${Math.round(avg)} ${label}"></div>
+      </div>
+      <span class="rank-val">${r.total}</span>
+    </div>`;
+  });
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+/* ---- shared bits ---- */
+function rankRows(items,maxVal){
+  return items.map((it,i)=>{
+    const pct=(it.val/(maxVal||1)*100).toFixed(1);
+    return`<div class="rank-row">
+      <span class="rank-pos">${i+1}</span>
+      <span class="rank-name" style="font-weight:600;color:${it.color}" title="${it.name}">${it.name}</span>
+      <div class="rank-bar-wrap"><div class="rank-bar" style="width:${pct}%;background:${it.color}"></div></div>
+      <span class="rank-val">${it.val}</span>
+    </div>`;
+  }).join('');
+}
+function baseChartOptions(label,stacked){
+  return{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',borderColor:'#d1d5db',borderWidth:1,titleColor:'#1a1a1a',bodyColor:'#6b7280',padding:10,
+      callbacks:{label:item=>` ${item.dataset.label}: ${item.raw} ${label}`}}},
+    scales:{
+      x:{stacked,grid:{display:false},ticks:{color:'#6b7280',font:{size:11,family:'Inter'},autoSkip:false,maxRotation:45},border:{color:'#e5e7eb'}},
+      y:{stacked,grid:{color:'#f3f4f6'},ticks:{color:'#6b7280',font:{size:11,family:'Inter'}},border:{display:false}}
+    }
+  };
+}
+
+/* ---- main render ---- */
+function render(){
+  if(!appData)return;
+  const metric=document.getElementById('metricSel').value;
+  if(currentView==='team'){
+    if(!selectedTeam||!appData.teamData[selectedTeam])selectedTeam=appData.teams[0];
+    document.getElementById('teamSel').value=selectedTeam;
+    const data=teamSeries(selectedTeam,metric);
+    buildLegend(data.members.map((n,i)=>({label:n,color:colorForName(n,i)})));
+    buildTeamCards(data,metric);
+    buildTeamChart(data,metric,document.getElementById('viewSel').value);
+  } else if(currentView==='compare'){
+    const totals=compareTotals(metric);
+    buildLegend(totals.map(t=>({label:t.team,color:t.color})));
+    buildCompareCards(totals,metric);
+    buildCompareView(metric,'stacked');
+  } else {
+    const sorted=filteredContributors(metric);
+    const teams=appData.teams.filter(t=>t!=='Other / Unassigned').map(t=>({label:t,color:teamColorMap[t]}));
+    buildLegend([...teams,{label:'Other contributors',color:'#d1d5db'},{label:'Repo average',color:'#f97316',dashed:true}]);
+    buildContribCards(sorted,metric);
+    buildContribList(sorted,metric);
+  }
+}
+
+async function init(){
+  setStatus('loading','Loading...');
+  const data=await fetchData();
+  if(!data||data.error||!data.teams){
+    setStatus('error','Error fetching data');
+    document.getElementById('chartContainer').innerHTML='<div class="error-msg">Could not load data.json. It is generated by the Refresh GitHub Metrics workflow.</div>';
+    return;
+  }
+  appData=data;
+  appData.teams.forEach((t,i)=>{teamColorMap[t]=PALETTE[i%PALETTE.length];});
+  // keep team color stable & on-brand for the primary team
+  if(appData.teams.length)teamColorMap[appData.teams[0]]='#28bbbb';
+  selectedTeam=appData.teams[0];
+  document.getElementById('teamSel').innerHTML=appData.teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+  setStatus(appData.generatedAt?'live':'loading',appData.generatedAt?'Live':'No data yet');
+  render();
+}
+
+document.getElementById('metricSel').addEventListener('change',render);
+document.getElementById('viewSel').addEventListener('change',render);
+document.getElementById('teamSel').addEventListener('change',e=>{selectedTeam=e.target.value;render();});
+init();
+</script>
+</body>
+</html>

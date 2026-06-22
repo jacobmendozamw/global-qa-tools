@@ -1,0 +1,14 @@
+# Code owners for global-qa-tools
+#
+# Listed owners are automatically requested for review on PRs that touch the
+# matching paths. If "Require review from Code Owners" is enabled on the main
+# branch ruleset, their approval is also required to merge.
+#
+# NOTE: the LAST matching pattern wins (rules are not cumulative). A more
+# specific rule fully overrides "*", so any owner that should apply to a
+# subfolder must be repeated on that subfolder's line.
+#
+# Owners must have write access to the repo for the request to take effect.
+
+# Default owner for everything in the repo
+* @jacobmendozamw

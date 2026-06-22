@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # GitHub Actions used in workflows (e.g. refresh-github-metrics.yml).
+  # The site itself is fully static with no npm runtime dependencies; frontend
+  # libraries are pinned CDN <script> tags and are updated manually.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
