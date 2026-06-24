@@ -203,6 +203,14 @@ function mitigationMultiplier(mitScore) {
   return 1.10 - ((mitScore - 1) / 2) * 0.40;
 }
 
+// Escaped-defect bands (mirrors scripts/fetch-jira-metrics.mjs / Confluence §4.6).
+// Used to recompute the score live when an engineer manually excludes a ticket.
+function escapedDefectScore(total, critical) {
+  if (total >= 5 || critical >= 2) return 3;
+  if (total >= 2 || critical >= 1) return 2;
+  return 1;
+}
+
 function wavg(criteria, weights, scores) {
   const filled = criteria.filter(c => scores[c.id] != null);
   if (!filled.length) return null;
@@ -272,7 +280,7 @@ function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoa
 }
 
 // ── AssessView ────────────────────────────────────────────────────────────────
-function AssessView({ onSaved }) {
+function AssessView({ onSaved, jiraMetrics }) {
   const [project, setProject] = useState('');
   const [customProject, setCustomProject] = useState('');
   const [evaluator, setEvaluator] = useState('');
@@ -282,7 +290,8 @@ function AssessView({ onSaved }) {
   const [overrideJustification, setOverrideJustification] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
-  const [jiraMetrics, setJiraMetrics] = useState(null);
+  const [excludedKeys, setExcludedKeys] = useState({}); // manually excluded escaped-defect tickets
+  const [showTickets, setShowTickets] = useState(false);
 
   const finalProject = project === '__custom__' ? customProject.trim() : project;
 
@@ -292,14 +301,23 @@ function AssessView({ onSaved }) {
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
   const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
+
+  // Escaped-defect tickets + manual exclusions → effective counts and score.
+  const escapedTickets = jiraProject?.escapedDefects?.tickets || [];
+  const activeEscaped = escapedTickets.filter(t => !excludedKeys[t.key]);
+  const excludedCount = escapedTickets.length - activeEscaped.length;
+  const escTotalEff = activeEscaped.length;
+  const escCritEff = activeEscaped.filter(t => t.critical).length;
+  const escScoreEff = escapedTickets.length ? escapedDefectScore(escTotalEff, escCritEff) : jiraScore('escapedDefects');
+
   const jiraNote = id => {
     if (!jiraProject) return null;
     const upd = jiraMetrics.generatedAt ? ` · updated ${fmtUpdated(jiraMetrics.generatedAt)}` : '';
     const mr = jiraProject.needsManualReview;
     if (id === 'escapedDefects') {
-      const d = jiraProject.escapedDefects;
+      const exc = excludedCount ? ` · ${excludedCount} excluded` : '';
       const warn = mr?.escaped ? ` ⚠ ${mr.escaped} unlinked need manual review` : '';
-      return `From TRITON · ${d.total} escaped defect${d.total!==1?'s':''} (${d.critical} critical) this quarter${upd}${warn}`;
+      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical) this quarter${exc}${upd}${warn}`;
     }
     if (id === 'avgAgeOpenIssues') {
       const d = jiraProject.avgAgeOpenIssues;
@@ -309,14 +327,6 @@ function AssessView({ onSaved }) {
     }
     return null;
   };
-
-  // Load Jira metrics once on mount.
-  useEffect(() => {
-    fetch('./jira-metrics.json', {cache:'no-store'})
-      .then(r => r.ok ? r.json() : null)
-      .then(setJiraMetrics)
-      .catch(() => setJiraMetrics(null));
-  }, []);
 
   // Load defaults + overlay Jira scores when project (or Jira data) changes.
   useEffect(() => {
@@ -328,11 +338,20 @@ function AssessView({ onSaved }) {
       }
     }
     setScores(base);
+    setExcludedKeys({});
+    setShowTickets(false);
     setOverrideActive(false);
     setOverrideJustification('');
   }, [finalProject, jiraMetrics]);
 
+  // Keep the escaped-defects score in sync with manual ticket exclusions.
+  useEffect(() => {
+    if (!escapedTickets.length) return;
+    setScores(s => s.escapedDefects === escScoreEff ? s : ({...s, escapedDefects: escScoreEff}));
+  }, [escScoreEff, escapedTickets.length]);
+
   const setScore = (id, val) => setScores(s => ({...s, [id]: val}));
+  const toggleExclude = key => setExcludedKeys(m => ({...m, [key]: !m[key]}));
 
   const allCriteria = [...BASE_RISK_CRITERIA, ...TRITON_CRITERIA, ...MITIGATION_CRITERIA];
   const filledCount = allCriteria.filter(c => scores[c.id] != null).length;
@@ -365,12 +384,19 @@ function AssessView({ onSaved }) {
         finalRisk: result.finalRisk,
         level: rl?.label || '',
         notes: notes.trim(),
-        // Snapshot of the Jira-sourced inputs for transparency / auditability.
-        jira: jiraProject ? { source: 'TRITON', quarter: jiraMetrics?.quarter, generatedAt: jiraMetrics?.generatedAt, ...jiraProject } : null,
+        // Snapshot of the Jira-sourced inputs for transparency / auditability,
+        // including any tickets the engineer manually excluded.
+        jira: jiraProject ? {
+          source: 'TRITON', quarter: jiraMetrics?.quarter, window: jiraMetrics?.window, generatedAt: jiraMetrics?.generatedAt,
+          ...jiraProject,
+          excludedTickets: escapedTickets.filter(t => excludedKeys[t.key]).map(t => t.key),
+          escapedEffective: escapedTickets.length ? { total: escTotalEff, critical: escCritEff, score: escScoreEff } : null,
+        } : null,
       };
       saveAssessment(record);
       showToast('Assessment saved');
       setScores({});
+      setExcludedKeys({});
       setOverrideActive(false);
       setOverrideJustification('');
       setNotes('');
@@ -436,6 +462,36 @@ function AssessView({ onSaved }) {
               colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false}
               locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
           ))}
+
+          {/* Escaped-defect ticket viewer — see exactly which defects are counted
+              and manually exclude any service request the keyword filter missed. */}
+          {escapedTickets.length > 0 && (
+            <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTickets(v=>!v)}>
+                <span style={{fontSize:12,fontWeight:600}}>{showTickets?'▾':'▸'} Defects considered ({escTotalEff}{excludedCount?` of ${escapedTickets.length}`:''})</span>
+                <span style={{fontSize:10.5,color:'var(--text3)'}}>Exclude a ticket if it's a service request the keyword filter missed</span>
+              </div>
+              {showTickets && (
+                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
+                  {escapedTickets.map(t => {
+                    const ex = !!excludedKeys[t.key];
+                    const pc = t.critical ? {bg:'#FAECE7',bd:'#D85A30',tx:'#712B13'} : {bg:'var(--bg2)',bd:'var(--border2)',tx:'var(--text2)'};
+                    return (
+                      <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5,background:ex?'var(--bg2)':'transparent',opacity:ex?0.5:1}}>
+                        <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:pc.bg,color:pc.tx,border:`.5px solid ${pc.bd}`,whiteSpace:'nowrap'}}>{t.priority}</span>
+                        <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                        <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1,textDecoration:ex?'line-through':'none'}} title={t.summary}>{t.summary}</span>
+                        <button className="opt-btn" onClick={()=>toggleExclude(t.key)} style={{fontSize:10,padding:'2px 8px',flexShrink:0,cursor:'pointer'}}>{ex?'Restore':'Exclude'}</button>
+                      </div>
+                    );
+                  })}
+                  <div style={{fontSize:10.5,color:'var(--text3)',marginTop:5,borderTop:'.5px solid var(--border)',paddingTop:5}}>
+                    Effective: {escTotalEff} escaped ({escCritEff} critical) → score {escScoreEff}.{excludedCount?` ${excludedCount} excluded — recorded with the assessment.`:''}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mitigation Multiplier */}
           <div className="dim-header">
@@ -683,19 +739,33 @@ function HistoryView({ refreshKey }) {
 function App() {
   const [tab, setTab] = useState('assess');
   const [historyRefresh, setHistoryRefresh] = useState(0);
+  const [jiraMetrics, setJiraMetrics] = useState(null);
+
+  // Load Jira metrics once; shared by the header period label and the assessment.
+  useEffect(() => {
+    fetch('./jira-metrics.json', {cache:'no-store'})
+      .then(r => r.ok ? r.json() : null)
+      .then(setJiraMetrics)
+      .catch(() => setJiraMetrics(null));
+  }, []);
+
+  const fmtDay = s => { try { return new Date(s + (s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
+  const w = jiraMetrics?.window;
+  const periodText = w ? `TRITON data: ${fmtDay(w.from)} – ${fmtDay(w.to)}` : 'shared via data.json';
+
   return (
     <div>
       <div className="header">
         <div className="header-left">
           <h1>QA Risk Baseline</h1>
-          <p>Mira &amp; GenAI QA Team · Q3 2026 model · shared via data.json</p>
+          <p>Mira &amp; GenAI QA Team · Q3 2026 model · {periodText}</p>
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
         </div>
       </div>
-      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)}/>}
+      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
     </div>
   );

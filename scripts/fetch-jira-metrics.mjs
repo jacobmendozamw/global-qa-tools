@@ -124,10 +124,20 @@ async function computeProject(name, component) {
   const fields = base => needLinks ? base.concat('issuelinks') : base;
 
   // Escaped defects this calendar quarter (service requests excluded).
-  const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority']));
+  const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority', 'summary']));
   const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefixes);
   const total = escaped.length;
   const critical = escaped.filter(i => CRITICAL.includes(i.fields?.priority?.name)).length;
+  // Per-ticket detail so the UI can show exactly which defects are counted and
+  // let an engineer manually exclude one (e.g. a service request missed by the
+  // keyword list).
+  const tickets = escaped.map(i => ({
+    key: i.key,
+    summary: i.fields?.summary || '',
+    priority: i.fields?.priority?.name || '—',
+    critical: CRITICAL.includes(i.fields?.priority?.name),
+    url: `https://${SITE}/browse/${i.key}`,
+  }));
 
   // Open (unresolved) defects — average age in days since creation.
   const openRaw = await searchAll(`${base} AND resolution = Unresolved${EXCLUDE_CLAUSE}`, fields(['created']));
@@ -141,7 +151,7 @@ async function computeProject(name, component) {
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
   const result = {
-    escapedDefects: { score: escapedDefectScore(total, critical), total, critical },
+    escapedDefects: { score: escapedDefectScore(total, critical), total, critical, tickets },
     avgAgeOpenIssues: { score: ageScore(avgDays, openCount), avgDays, openCount },
   };
   if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
@@ -171,6 +181,8 @@ async function main() {
     quarter: quarterLabel(new Date()),
     project: PROJECT,
     criticalPriorities: CRITICAL,
+    // Period covered: from the start of the quarter to the extraction date.
+    window: { from: QUARTER_START, to: new Date().toISOString().slice(0, 10) },
     ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,
   };
