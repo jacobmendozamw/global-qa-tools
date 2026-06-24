@@ -22,14 +22,14 @@
     "scaleMax": 10
   },
   "exposure": {
-    "comment": "Exposure normalization (Rec #1). OFF until release data is validated. When enabled per product, the severity-weighted count is divided by exposure and multiplied by referenceExposure, so the score reflects DEFECT DENSITY (defects per release) rather than raw volume. method='releases' counts released fixVersions in the quarter for devProject; method='delivered' counts Done dev issues resolved in the quarter. Leave 'enabled' false for Q2 2026.",
+    "comment": "Exposure normalization (Rec #1) → DEFECT DENSITY = severity-weighted count / exposure * referenceExposure. OFF for Q2 2026. VERIFIED 2026-06 against Jira: method 'releases' is NOT viable (released fixVersions are not tied to issues: GAIL/HZN/MIRA=0, MOB=7), so method='delivered' (Done dev issues resolved in quarter) is the only available denominator. CAVEAT before enabling: 'delivered' counts all issue types and varies with each team's ticketing habits (Q2 denominators: GAIL 296, HZN 101, MIRA 93, MOB 893) — clean it (e.g. restrict to Story+Bug) and re-anchor mu in 'per referenceExposure' units before turning on.",
     "enabled": false,
-    "referenceExposure": 1,
+    "referenceExposure": 100,
     "byProject": {
-      "GenAI Lens": { "devProject": "GAIL", "method": "releases" },
-      "Mira Studio": { "devProject": "HZN", "method": "releases" },
-      "Mira": { "devProject": "MIRA", "method": "releases" },
-      "Mobile": { "devProject": "MOB", "method": "releases" }
+      "GenAI Lens": { "devProject": "GAIL", "method": "delivered", "q2Denominator": 296 },
+      "Mira Studio": { "devProject": "HZN", "method": "delivered", "q2Denominator": 101 },
+      "Mira": { "devProject": "MIRA", "method": "delivered", "q2Denominator": 93 },
+      "Mobile": { "devProject": "MOB", "method": "delivered", "q2Denominator": 893 }
     }
   },
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
