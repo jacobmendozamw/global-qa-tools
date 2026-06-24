@@ -14,16 +14,20 @@
   --text:#1a1a18;--text2:#6b6a64;--text3:#9c9a92;
   --border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);
   --purple:#534AB7;--radius:8px;--radius-lg:12px;
+  --green-bg:#E1F5EE;--green-text:#085041;--green-border:#1D9E75;
+  --amber-bg:#FAEEDA;--amber-text:#633806;--amber-border:#BA7517;
+  --red-bg:#FAECE7;--red-text:#712B13;--red-border:#D85A30;
+  --blue-bg:#E8F0FE;--blue-text:#1a3a6b;--blue-border:#4A6FA5;
 }
 @media(prefers-color-scheme:dark){
   :root{--bg:#1e1e1c;--bg2:#2a2a28;--bg3:#323230;--text:#e8e6de;--text2:#9c9a92;--text3:#6b6a64;--border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.22)}
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:2rem 1rem}
 .container{max-width:1100px;margin:0 auto}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap}
 .header-left h1{font-size:17px;font-weight:700}
 .header-left p{font-size:12px;color:var(--text2);margin-top:3px}
-.nav-tabs{display:flex;gap:6px}
+.nav-tabs{display:flex;gap:6px;flex-shrink:0}
 .nav-tab{font-size:12px;padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
 .nav-tab.active{background:var(--purple);color:#fff;border-color:var(--purple)}
 input,textarea,select{font-family:inherit;color:var(--text);background:transparent}
@@ -38,152 +42,235 @@ input:focus,textarea:focus,select:focus{outline:none}
 .btn-secondary{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
 .btn-secondary:hover{border-color:var(--purple);color:var(--purple)}
 .toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;animation:fadeIn .2s}
-.toast.success{background:#E1F5EE;color:#085041;border:1px solid #1D9E75}
-.toast.error{background:#FAECE7;color:#712B13;border:1px solid #D85A30}
+.toast.success{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-border)}
+.toast.error{background:var(--red-bg);color:var(--red-text);border:1px solid var(--red-border)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* History */
-.history-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.history-toolbar select{font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);height:30px}
-.toggle-wrap{display:flex;border:1px solid var(--border2);border-radius:6px;overflow:hidden}
-.toggle-btn{font-size:11px;padding:4px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
-.toggle-btn.active{background:var(--purple);color:#fff}
-.timeline-wrap{display:flex;flex-direction:column;gap:10px}
-.timeline-project{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
-.timeline-project-name{font-size:13px;font-weight:700;margin-bottom:10px}
-.timeline-points{display:flex;gap:8px;flex-wrap:wrap}
-.timeline-point{padding:8px 12px;border-radius:8px;font-size:11px;cursor:default;border:1px solid transparent}
-.timeline-point .tp-date{color:var(--text2);margin-bottom:3px}
-.timeline-point .tp-score{font-size:18px;font-weight:700;line-height:1}
-.timeline-point .tp-level{font-size:11px;font-weight:600;margin-top:2px}
-.timeline-point .tp-eval{font-size:10px;color:var(--text2);margin-top:4px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;margin-top:4px}
+.dim-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;margin-top:16px}
+.dim-title{font-size:14px;font-weight:700}
+.dim-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;border:1px solid}
+.criterion-card{border:.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
+.criterion-card.filled{background:var(--bg)}
+.criterion-card.empty{background:var(--bg2)}
+.criterion-card.auto-loaded{background:var(--bg);border-color:var(--purple);opacity:.85}
+.criterion-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:2px}
+.criterion-name{font-size:13px;font-weight:600}
+.criterion-meta{display:flex;gap:8px;align-items:center}
+.criterion-desc{font-size:11px;color:var(--text2);margin-bottom:10px}
+.options-row{display:flex;gap:8px;flex-wrap:wrap}
+.opt-btn{font-size:12px;padding:5px 12px;border-radius:20px;transition:all .15s;font-family:inherit}
+.auto-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border)}
+.confirm-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber-border)}
+.override-card{border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;background:var(--bg2)}
+.override-card.active{background:var(--red-bg);border-color:var(--red-border)}
+.override-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:0}
+.override-toggle input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#D85A30}
+.override-toggle-label{font-size:13px;font-weight:600}
+.override-justification{margin-top:10px}
+.score-display{border-radius:var(--radius-lg);padding:16px;text-align:center;transition:all .3s}
+.score-num{font-size:38px;font-weight:700;line-height:1}
+.score-level{font-size:16px;font-weight:600;margin-top:4px}
+.score-breakdown{font-size:11px;opacity:.8;margin-top:6px;line-height:1.5}
+.formula-display{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.formula-display code{font-family:monospace;font-size:10px;background:var(--bg3);padding:1px 4px;border-radius:3px}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 td{padding:8px 10px;border-bottom:.5px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 .empty-state{text-align:center;padding:48px;color:var(--text3);font-size:13px}
-.loading{text-align:center;padding:32px;color:var(--text3);font-size:13px}
+.timeline-wrap{display:flex;flex-direction:column;gap:10px}
+.timeline-project{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.timeline-project-name{font-size:13px;font-weight:700;margin-bottom:10px}
+.timeline-points{display:flex;gap:8px;flex-wrap:wrap}
+.timeline-point{padding:8px 12px;border-radius:8px;font-size:11px;border:1px solid transparent;min-width:90px}
+.tp-date{color:var(--text2);margin-bottom:3px;font-size:10px}
+.tp-score{font-size:18px;font-weight:700;line-height:1}
+.tp-level{font-size:11px;font-weight:600;margin-top:2px}
+.tp-eval{font-size:10px;color:var(--text2);margin-top:4px}
+.toggle-wrap{display:flex;border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+.toggle-btn{font-size:11px;padding:4px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.toggle-btn.active{background:var(--purple);color:#fff}
+.history-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.history-toolbar select{font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);height:30px}
 </style>
 </head>
 <body>
 <div class="container" id="root"></div>
-
 <script type="text/babel">
 const {useState, useEffect, useCallback} = React;
 
-/* ---- local storage (static build — saved per browser) ---- */
-const STORAGE_KEY = 'qa-risk-assessments';
+// ── Storage ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'qa-risk-assessments-v2';
 function loadAssessments() {
-  try {
-    const r = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    return Array.isArray(r) ? r : [];
-  } catch { return []; }
+  try { const r = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); return Array.isArray(r)?r:[]; }
+  catch { return []; }
 }
 function saveAssessment(record) {
-  const all = loadAssessments();
-  all.push(record);
+  const all = loadAssessments(); all.push(record);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
 }
 
-/* ---- scoring model ---- */
-const baseCriteria = [
-  {id:'complexity',label:'Module complexity',description:'Technical and functional complexity of the project',options:[{score:1,label:'Low',detail:'Simple flows, few integrations'},{score:2,label:'Medium',detail:'Some complex flows or integrations'},{score:3,label:'High',detail:'Many dependencies, complex logic'}]},
-  {id:'userImpact',label:'User impact',description:'Impact of a failure on end users or the business',options:[{score:1,label:'Low',detail:'Internal tool or low traffic'},{score:2,label:'Medium',detail:'Affects a subset of users'},{score:3,label:'High',detail:'Core product, wide user base'}]},
-  {id:'changeRate',label:'Rate of change',description:'How frequently the codebase changes',options:[{score:1,label:'Stable',detail:'Rarely updated'},{score:2,label:'Moderate',detail:'Updated every few weeks'},{score:3,label:'Rapid',detail:'Updated weekly or more'}]},
-  {id:'bugFreq',label:'Bug frequency in production',description:'How often bugs reach production in this project',options:[{score:1,label:'Rare',detail:'<1 bug/month'},{score:2,label:'Occasional',detail:'1-3 bugs/month'},{score:3,label:'Frequent',detail:'>3 bugs/month'}]},
+// ── Model ─────────────────────────────────────────────────────────────────────
+const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile'];
+
+// Project defaults map
+const PROJECT_DEFAULTS = {
+  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mira Studio': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mira':        { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:2, automationConfidence:2 },
+  'Mobile':      { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+};
+
+// Criteria definitions
+const BASE_RISK_CRITERIA = [
+  { id:'userImpact', label:'User impact', inputType:'auto',
+    description:'Business criticality and size of user base. Pre-loaded — update only if product scope changes.',
+    options:[{score:1,label:'Low',detail:'Internal tool or low traffic'},{score:2,label:'Medium',detail:'Affects a subset of users'},{score:3,label:'High',detail:'Core product, wide user base'}] },
+  { id:'rateOfChange', label:'Rate of change', inputType:'auto',
+    description:'Release frequency and sprint delivery cadence. Pre-loaded — update if cadence changes significantly.',
+    options:[{score:1,label:'Stable',detail:'Rarely updated'},{score:2,label:'Moderate',detail:'Updated every few weeks'},{score:3,label:'Rapid',detail:'Updated weekly or more'}] },
+  { id:'complexity', label:'Complexity', inputType:'auto',
+    description:'Integrations, dependencies, and system logic. Pre-loaded — update only after major architectural changes.',
+    options:[{score:1,label:'Low',detail:'Simple flows, few integrations'},{score:2,label:'Medium',detail:'Some complex flows or integrations'},{score:3,label:'High',detail:'Many dependencies, complex logic'}] },
 ];
-const mitigationCriteria = [
-  {id:'testCoverage',label:'Test coverage (%)',description:'Approximate automated + manual test coverage across critical flows',options:[{score:3,label:'High',detail:'>70% covered'},{score:2,label:'Medium',detail:'40-70% covered'},{score:1,label:'Low',detail:'<40% covered'}]},
-  {id:'automationConfidence',label:'Automation confidence',description:'How much automated coverage protects critical user/business flows',options:[{score:3,label:'High',detail:'Critical flows covered reliably'},{score:2,label:'Medium',detail:'Partial coverage or some gaps'},{score:1,label:'Low',detail:'Major flows rely on manual testing'}]},
-  {id:'testability',label:'Testability',description:'How easy it is to write and maintain meaningful tests',options:[{score:3,label:'Easy',detail:'Good structure, test hooks available'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:1,label:'Hard',detail:'Poor structure, hard to isolate'}]},
-  {id:'releaseSafety',label:'Release safety',description:'How safely changes can be deployed, monitored, and rolled back',options:[{score:3,label:'Strong',detail:'Flags, rollback, monitoring'},{score:2,label:'Moderate',detail:'Some safeguards available'},{score:1,label:'Weak',detail:'Limited visibility or rollback'}]},
+
+const TRITON_CRITERIA = [
+  { id:'escapedDefects', label:'Escaped defects', inputType:'jira',
+    description:'Count from TRITON filtered by project component, excluding service requests. Severity overrides volume: if ≤4 total but any ticket is P1/P2, use the severity band.',
+    options:[
+      {score:1,label:'Score 1',detail:'0–1 escapes and none critical (P1/P2)'},
+      {score:2,label:'Score 2',detail:'2–4 escapes, or 1 escape critical (P1/P2)'},
+      {score:3,label:'Score 3',detail:'5+ escapes, or 2+ escapes critical (P1/P2)'},
+    ] },
 ];
-const baseWeights = {complexity:.30,userImpact:.35,changeRate:.20,bugFreq:.15};
-const mitigationWeights = {automationConfidence:.40,testCoverage:.25,testability:.20,releaseSafety:.15};
-const mitigationMultiplier = s => 1.2 - (s/3)*0.6;
-const LEVELS = [{max:1.5,label:'Low',text:'#085041',bg:'#E1F5EE',border:'#1D9E75'},{max:2.2,label:'Medium',text:'#633806',bg:'#FAEEDA',border:'#BA7517'},{max:Infinity,label:'High',text:'#712B13',bg:'#FAECE7',border:'#D85A30'}];
-const optColors = {risk:{1:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'}},mitigation:{1:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'}}};
-const riskLevel = s => LEVELS.find(l => s <= l.max);
+
+const MITIGATION_CRITERIA = [
+  { id:'automationConfidence', label:'Automation confidence', inputType:'confirm',
+    description:'How reliably automated tests would catch a regression in critical user flows. Review each quarter.',
+    options:[{score:1,label:'Low',detail:'Major flows rely on manual testing'},{score:2,label:'Medium',detail:'Partial coverage or some gaps'},{score:3,label:'High',detail:'Critical flows covered reliably'}] },
+  { id:'testCoverage', label:'Test coverage', inputType:'confirm',
+    description:'Combined automated + manual coverage across critical flows. Review each quarter.',
+    options:[{score:1,label:'<40%',detail:'Low coverage'},{score:2,label:'40–70%',detail:'Medium coverage'},{score:3,label:'>70%',detail:'High coverage'}] },
+  { id:'testability', label:'Testability', inputType:'confirm',
+    description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
+    options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
+  { id:'avgAgeOpenIssues', label:'Avg. age of open issues', inputType:'jira',
+    description:'Average days since creation for unresolved TRITON issues linked to this project at end of quarter.',
+    options:[{score:1,label:'Slow',detail:'31+ days average'},{score:2,label:'Moderate',detail:'8–30 days average'},{score:3,label:'Fast',detail:'0–7 days average'}] },
+];
+
+// Weights
+const BASE_WEIGHTS  = { userImpact:0.40, rateOfChange:0.35, complexity:0.25 };
+const MIT_WEIGHTS   = { automationConfidence:0.35, testCoverage:0.30, testability:0.20, avgAgeOpenIssues:0.15 };
+
+// Mitigation multiplier: strong (all 3) → 0.70, weak (all 1) → 1.10
+function mitigationMultiplier(mitScore) {
+  // Linear mapping: score 1 → 1.10, score 3 → 0.70
+  return 1.10 - ((mitScore - 1) / 2) * 0.40;
+}
+
 function wavg(criteria, weights, scores) {
-  const filled = criteria.filter(c => scores[c.id]);
+  const filled = criteria.filter(c => scores[c.id] != null);
   if (!filled.length) return null;
-  const tw = filled.reduce((s,c) => s+weights[c.id], 0);
-  return filled.reduce((s,c) => s+scores[c.id]*weights[c.id], 0)/tw;
-}
-function compute(scores) {
-  const baseRisk = wavg(baseCriteria, baseWeights, scores);
-  const mitigation = wavg(mitigationCriteria, mitigationWeights, scores);
-  if (!baseRisk && !mitigation) return {baseRisk:null,mitigation:null,multiplier:null,finalRisk:null};
-  const multiplier = mitigation ? mitigationMultiplier(mitigation) : 1;
-  const finalRisk = baseRisk ? baseRisk*multiplier : null;
-  return {baseRisk, mitigation, multiplier, finalRisk};
+  const tw = filled.reduce((s,c) => s + weights[c.id], 0);
+  return filled.reduce((s,c) => s + scores[c.id] * weights[c.id], 0) / tw;
 }
 
-/* ---- known projects ---- */
-const PROJECTS = ['GenAI Lens','Mira','Mira Studio','Mobile','Engage Conversations'];
+function compute(scores, overrideActive) {
+  if (overrideActive) return { baseRisk:null, tritonScore:scores.escapedDefects||null, mitScore:null, multiplier:null, finalRisk:3.0, overridden:true };
+  const baseRisk   = wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores);
+  const tritonScore = scores.escapedDefects || null;
+  const mitScore   = wavg(MITIGATION_CRITERIA, MIT_WEIGHTS, scores);
+  if (!baseRisk && !tritonScore) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
+  const combined = ((baseRisk||0) * 0.40) + ((tritonScore||0) * 0.60);
+  const multiplier = mitScore ? mitigationMultiplier(mitScore) : 1.0;
+  const finalRisk = combined * multiplier;
+  return { baseRisk, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
+}
 
-/* ---- CriteriaGroup ---- */
-function CriteriaGroup({title, helper, criteria, weights, scores, setScore, type}) {
-  const colors = optColors[type];
+const LEVELS = [
+  {max:1.5, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
+  {max:2.2, label:'Medium', text:'#633806', bg:'#FAEEDA', border:'#BA7517'},
+  {max:Infinity, label:'High', text:'#712B13', bg:'#FAECE7', border:'#D85A30'},
+];
+const riskLevel = s => LEVELS.find(l => s <= l.max);
+
+// Option colors by criterion type
+const RISK_COLORS   = {1:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'}};
+const MIT_COLORS    = {1:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'}};
+const NEUTRAL_COLORS= {1:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},2:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},3:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'}};
+
+// ── CriterionCard ─────────────────────────────────────────────────────────────
+function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoaded }) {
+  const inputTypeLabel = criterion.inputType === 'auto' ? 'Auto' : criterion.inputType === 'confirm' ? 'Confirm' : 'Jira';
+  const inputTagClass  = criterion.inputType === 'auto' ? 'auto-tag' : criterion.inputType === 'confirm' ? 'confirm-tag' : 'auto-tag';
   return (
-    <div style={{marginBottom:18}}>
-      <div style={{marginBottom:8}}>
-        <div style={{fontSize:14,fontWeight:700}}>{title}</div>
-        <div className="helper">{helper}</div>
-      </div>
-      {criteria.map(c => (
-        <div key={c.id} style={{marginBottom:10,padding:'12px 14px',border:'.5px solid var(--border)',borderRadius:'var(--radius-lg)',background:scores[c.id]?'var(--bg)':'var(--bg2)'}}>
-          <div style={{display:'flex',justifyContent:'space-between',gap:12,alignItems:'baseline'}}>
-            <div>
-              <div style={{fontSize:13,fontWeight:600,marginBottom:2}}>{c.label}</div>
-              <div style={{fontSize:11,color:'var(--text2)',marginBottom:10}}>{c.description}</div>
-            </div>
-            <div style={{fontSize:11,color:'var(--text2)',whiteSpace:'nowrap'}}>{Math.round(weights[c.id]*100)}%</div>
-          </div>
-          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-            {c.options.map(o => {
-              const sel = scores[c.id]===o.score;
-              const col = colors[o.score];
-              return (
-                <button key={o.score} onClick={()=>setScore(c.id,o.score)} style={{fontSize:12,padding:'5px 12px',borderRadius:20,border:sel?`1.5px solid ${col.border}`:'0.5px solid var(--border)',background:sel?col.bg:'transparent',color:sel?col.text:'var(--text2)',fontWeight:sel?600:400,transition:'all .15s'}}>
-                  {o.label} <span style={{opacity:.75}}>· {o.detail}</span>
-                </button>
-              );
-            })}
-          </div>
+    <div className={`criterion-card ${score != null ? 'filled' : 'empty'} ${autoLoaded ? 'auto-loaded' : ''}`}>
+      <div className="criterion-top">
+        <div className="criterion-name">{criterion.label}</div>
+        <div className="criterion-meta">
+          {weightPct && <span style={{fontSize:11,color:'var(--text2)'}}>{weightPct}</span>}
+          <span className={inputTagClass}>{inputTypeLabel}</span>
         </div>
-      ))}
+      </div>
+      <div className="criterion-desc">{criterion.description}</div>
+      <div className="options-row">
+        {criterion.options.map(o => {
+          const sel = score === o.score;
+          const col = colorMap[o.score];
+          return (
+            <button key={o.score} className="opt-btn" onClick={() => onScore(criterion.id, o.score)}
+              style={{border: sel ? `1.5px solid ${col.border}` : '.5px solid var(--border)', background: sel ? col.bg : 'transparent', color: sel ? col.text : 'var(--text2)', fontWeight: sel ? 600 : 400}}>
+              {o.label} <span style={{opacity:.75}}>· {o.detail}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-/* ---- AssessView ---- */
-function AssessView({onSaved}) {
+// ── AssessView ────────────────────────────────────────────────────────────────
+function AssessView({ onSaved }) {
   const [project, setProject] = useState('');
   const [customProject, setCustomProject] = useState('');
   const [evaluator, setEvaluator] = useState('');
   const [notes, setNotes] = useState('');
   const [scores, setScores] = useState({});
+  const [overrideActive, setOverrideActive] = useState(false);
+  const [overrideJustification, setOverrideJustification] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const setScore = (id, val) => setScores(s => ({...s,[id]:val}));
-  const result = compute(scores);
-  const allCriteria = [...baseCriteria,...mitigationCriteria];
-  const filledCount = allCriteria.filter(c=>scores[c.id]).length;
-  const pct = Math.round(filledCount/allCriteria.length*100);
-  const finalProject = project==='__custom__' ? customProject.trim() : project;
-  const canSave = filledCount===allCriteria.length && evaluator.trim() && finalProject;
+  const finalProject = project === '__custom__' ? customProject.trim() : project;
 
-  const showToast = (msg, type='success') => {
-    setToast({msg,type});
-    setTimeout(()=>setToast(null), 3000);
-  };
+  // Load defaults when project changes
+  useEffect(() => {
+    if (finalProject && PROJECT_DEFAULTS[finalProject]) {
+      setScores(PROJECT_DEFAULTS[finalProject]);
+      setOverrideActive(false);
+      setOverrideJustification('');
+    } else {
+      setScores({});
+    }
+  }, [finalProject]);
 
-  const handleSave = async () => {
+  const setScore = (id, val) => setScores(s => ({...s, [id]: val}));
+
+  const allCriteria = [...BASE_RISK_CRITERIA, ...TRITON_CRITERIA, ...MITIGATION_CRITERIA];
+  const filledCount = allCriteria.filter(c => scores[c.id] != null).length;
+  const pct = Math.round(filledCount / allCriteria.length * 100);
+
+  const result = compute(scores, overrideActive);
+  const rl = result.finalRisk != null ? riskLevel(result.finalRisk) : null;
+
+  const canSave = filledCount === allCriteria.length && evaluator.trim() && finalProject &&
+    (!overrideActive || overrideJustification.trim().length > 0);
+
+  const showToast = (msg, type='success') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
+
+  const handleSave = () => {
     if (!canSave) return;
-    const r = compute(scores);
-    const level = r.finalRisk ? riskLevel(r.finalRisk) : null;
     setSaving(true);
     try {
       const record = {
@@ -192,46 +279,44 @@ function AssessView({onSaved}) {
         project: finalProject,
         evaluator: evaluator.trim(),
         scores,
-        baseRisk: r.baseRisk,
-        mitigation: r.mitigation,
-        multiplier: r.multiplier,
-        finalRisk: r.finalRisk,
-        level: level?.label || '',
-        notes: notes.trim()
+        overrideActive,
+        overrideJustification: overrideJustification.trim(),
+        baseRisk: result.baseRisk,
+        tritonScore: result.tritonScore,
+        mitScore: result.mitScore,
+        multiplier: result.multiplier,
+        finalRisk: result.finalRisk,
+        level: rl?.label || '',
+        notes: notes.trim(),
       };
       saveAssessment(record);
-      showToast('Assessment saved (stored in this browser)');
+      showToast('Assessment saved');
       setScores({});
+      setOverrideActive(false);
+      setOverrideJustification('');
       setNotes('');
       onSaved();
-    } catch(e) {
-      showToast(e.message, 'error');
-    } finally {
-      setSaving(false);
-    }
+    } catch(e) { showToast(e.message,'error'); }
+    finally { setSaving(false); }
   };
-
-  const rl = result.finalRisk ? riskLevel(result.finalRisk) : null;
 
   return (
     <div>
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
 
-      {/* Meta row */}
+      {/* Meta */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}}>
         <div className="card">
-          <div style={{fontSize:11,fontWeight:600,color:'var(--text2)',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:8}}>Project</div>
+          <div className="section-label">Project</div>
           <select value={project} onChange={e=>setProject(e.target.value)} style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}>
             <option value="">Select a project...</option>
             {PROJECTS.map(p=><option key={p} value={p}>{p}</option>)}
             <option value="__custom__">Other...</option>
           </select>
-          {project==='__custom__' && (
-            <input value={customProject} onChange={e=>setCustomProject(e.target.value)} placeholder="Project name" style={{width:'100%',fontSize:13,marginTop:8,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>
-          )}
+          {project==='__custom__' && <input value={customProject} onChange={e=>setCustomProject(e.target.value)} placeholder="Project name" style={{width:'100%',fontSize:13,marginTop:8,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>}
         </div>
         <div className="card">
-          <div style={{fontSize:11,fontWeight:600,color:'var(--text2)',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:8}}>Evaluator</div>
+          <div className="section-label">Evaluator</div>
           <input value={evaluator} onChange={e=>setEvaluator(e.target.value)} placeholder="Your name" style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>
         </div>
       </div>
@@ -249,30 +334,107 @@ function AssessView({onSaved}) {
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 280px',gap:16,alignItems:'start'}}>
         <div>
-          <CriteriaGroup title="Base risk" helper="Things that make the product inherently risky. Higher scores increase risk." criteria={baseCriteria} weights={baseWeights} scores={scores} setScore={setScore} type="risk"/>
-          <CriteriaGroup title="QA / release mitigations" helper="Things that reduce the chance of regressions escaping. Higher scores reduce final risk." criteria={mitigationCriteria} weights={mitigationWeights} scores={scores} setScore={setScore} type="mitigation"/>
+          {/* Base Risk */}
+          <div className="dim-header">
+            <div className="dim-title">Base Risk Manual</div>
+            <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>40% of Final Risk</span>
+          </div>
+          <div className="helper" style={{marginBottom:10}}>Inherent product risk. Pre-loaded from known project characteristics — review and adjust if something has changed.</div>
+          {BASE_RISK_CRITERIA.map(c => (
+            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+              colorMap={RISK_COLORS} weightPct={`${Math.round(BASE_WEIGHTS[c.id]*100)}% of group`}
+              autoLoaded={PROJECT_DEFAULTS[finalProject] != null} />
+          ))}
+
+          {/* TRITON Score */}
+          <div className="dim-header">
+            <div className="dim-title">TRITON Score</div>
+            <span className="dim-badge" style={{background:'#E8F0FE',color:'#1a3a6b',borderColor:'#4A6FA5'}}>60% of Final Risk</span>
+          </div>
+          <div className="helper" style={{marginBottom:10}}>Enter the score calculated from TRITON production defects for this project this quarter. See the Escaped Defect Methodology in Confluence for the JQL filter and scoring bands.</div>
+          {TRITON_CRITERIA.map(c => (
+            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+              colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false} />
+          ))}
+
+          {/* Mitigation Multiplier */}
+          <div className="dim-header">
+            <div className="dim-title">Mitigation Multiplier</div>
+            <span className="dim-badge" style={{background:'#E1F5EE',color:'#085041',borderColor:'#1D9E75'}}>Range 0.70 – 1.10</span>
+          </div>
+          <div className="helper" style={{marginBottom:10}}>Higher scores = stronger mitigations = lower multiplier = lower final risk. Confirm each quarter.</div>
+          {MITIGATION_CRITERIA.map(c => (
+            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+              colorMap={MIT_COLORS} weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
+              autoLoaded={c.inputType==='confirm' && PROJECT_DEFAULTS[finalProject] != null} />
+          ))}
+
+          {/* Manual Override */}
+          <div className="dim-header">
+            <div className="dim-title">Manual Override</div>
+            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 3.0</span>
+          </div>
+          <div className="helper" style={{marginBottom:10}}>Activate only if forward-looking signals indicate risk not yet reflected in data. Written justification is required.</div>
+          <div className={`override-card ${overrideActive ? 'active' : ''}`}>
+            <label className="override-toggle">
+              <input type="checkbox" checked={overrideActive} onChange={e=>setOverrideActive(e.target.checked)}/>
+              <span className="override-toggle-label" style={{color: overrideActive ? 'var(--red-text)' : 'var(--text)'}}>
+                Activate override — set Final Risk to 3.0 (High)
+              </span>
+            </label>
+            {overrideActive && (
+              <div className="override-justification">
+                <div style={{fontSize:11,color:'var(--red-text)',fontWeight:600,marginBottom:6}}>Justification required</div>
+                <textarea value={overrideJustification} onChange={e=>setOverrideJustification(e.target.value)}
+                  placeholder="Describe the forward-looking risk signal that justifies this override (e.g. major architectural change upcoming, critical feature entering production without adequate coverage)..."
+                  rows={3} style={{width:'100%',fontSize:12,border:'.5px solid var(--red-border)',borderRadius:6,padding:'8px 10px',resize:'vertical',color:'var(--text)',background:'var(--bg)'}}/>
+              </div>
+            )}
+          </div>
 
           {/* Notes */}
-          <div className="card" style={{marginTop:4}}>
-            <div style={{fontSize:11,fontWeight:600,color:'var(--text2)',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:8}}>Notes (optional)</div>
+          <div className="card" style={{marginTop:8}}>
+            <div className="section-label">Notes (optional)</div>
             <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Context, observations, blockers..." rows={3} style={{width:'100%',fontSize:12,border:'none',resize:'vertical',color:'var(--text)',background:'transparent'}}/>
           </div>
         </div>
 
         {/* Sidebar */}
-        <div style={{display:'flex',flexDirection:'column',gap:12}}>
-          <div style={{border:rl?`1.5px solid ${rl.border}`:'.5px solid var(--border)',borderRadius:'var(--radius-lg)',padding:16,background:rl?rl.bg:'var(--bg2)',textAlign:'center'}}>
-            <div style={{fontSize:11,fontWeight:600,color:rl?rl.text:'var(--text2)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:6}}>Overall risk</div>
-            <div style={{fontSize:34,fontWeight:600,color:rl?rl.text:'var(--text3)',marginBottom:4}}>{result.finalRisk?result.finalRisk.toFixed(2):'—'}</div>
-            <div style={{fontSize:16,fontWeight:600,color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'Pending'}</div>
-            {result.baseRisk && result.mitigation && (
-              <div style={{fontSize:11,color:rl.text,opacity:.8,marginTop:7}}>Base {result.baseRisk.toFixed(2)} x {result.multiplier.toFixed(2)}</div>
+        <div style={{display:'flex',flexDirection:'column',gap:12,position:'sticky',top:16}}>
+          {/* Score display */}
+          <div className="score-display" style={{
+            border: rl ? `1.5px solid ${rl.border}` : '.5px solid var(--border)',
+            background: rl ? rl.bg : 'var(--bg2)'
+          }}>
+            <div style={{fontSize:11,fontWeight:600,color:rl?rl.text:'var(--text2)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:6}}>
+              {result.overridden ? 'Override active' : 'Final Risk'}
+            </div>
+            <div className="score-num" style={{color:rl?rl.text:'var(--text3)'}}>
+              {result.finalRisk != null ? result.finalRisk.toFixed(2) : '—'}
+            </div>
+            <div className="score-level" style={{color:rl?rl.text:'var(--text3)'}}>
+              {rl ? rl.label : 'Pending'}
+            </div>
+            {result.baseRisk != null && result.tritonScore != null && !result.overridden && (
+              <div className="score-breakdown" style={{color:rl?.text}}>
+                Base {result.baseRisk.toFixed(2)} × 0.40<br/>
+                TRITON {result.tritonScore.toFixed(2)} × 0.60<br/>
+                × {result.multiplier.toFixed(2)} multiplier
+              </div>
             )}
           </div>
 
+          {/* Formula */}
+          <div className="formula-display">
+            <strong>Formula</strong><br/>
+            <code>(Base × 0.40 + TRITON × 0.60) × Multiplier</code><br/>
+            <span style={{fontSize:10}}>Override → Final Risk = 3.0</span>
+          </div>
+
+          {/* Legend */}
           <div className="card">
-            <div style={{fontSize:11,fontWeight:700,color:'var(--text2)',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:8}}>Score legend</div>
-            {[{l:'Low',r:'1.0 - 1.5',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'1.6 - 2.2',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'2.3 - 3.0',c:'#712B13',bg:'#FAECE7'}].map(x=>(
+            <div className="section-label">Risk levels</div>
+            {[{l:'Low',r:'1.0 – 1.5',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'1.6 – 2.2',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'2.3 – 3.0',c:'#712B13',bg:'#FAECE7'}].map(x=>(
               <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
                 <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
                 <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
@@ -280,10 +442,13 @@ function AssessView({onSaved}) {
             ))}
           </div>
 
+          {/* Multiplier legend */}
           <div className="card">
-            <div style={{fontSize:11,fontWeight:700,color:'var(--text2)',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:8}}>Formula</div>
-            <div style={{fontSize:12,lineHeight:1.5}}><strong>Overall Risk</strong><br/>= Base Risk x Mitigation Multiplier</div>
-            <div style={{fontSize:11,color:'var(--text2)',marginTop:8,lineHeight:1.45}}>Strong mitigations push the multiplier toward 0.60. Weak mitigations keep it near 1.00.</div>
+            <div className="section-label">Mitigation multiplier</div>
+            <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.6}}>
+              Strong mitigations → <strong>0.70</strong> (reduces risk by 30%)<br/>
+              Weak mitigations → <strong>1.10</strong> (increases risk by 10%)
+            </div>
           </div>
 
           <button className="btn-primary" onClick={handleSave} disabled={!canSave||saving} style={{width:'100%',padding:'10px',fontSize:13}}>
@@ -291,7 +456,10 @@ function AssessView({onSaved}) {
           </button>
           {!canSave && (
             <div style={{fontSize:11,color:'var(--text3)',textAlign:'center'}}>
-              {!finalProject ? 'Select a project' : !evaluator.trim() ? 'Enter your name' : `Score all ${allCriteria.length} criteria to save`}
+              {!finalProject ? 'Select a project' :
+               !evaluator.trim() ? 'Enter your name' :
+               filledCount < allCriteria.length ? `Score all ${allCriteria.length} criteria` :
+               overrideActive && !overrideJustification.trim() ? 'Add override justification' : ''}
             </div>
           )}
         </div>
@@ -300,35 +468,30 @@ function AssessView({onSaved}) {
   );
 }
 
-/* ---- HistoryView ---- */
-function HistoryView({refreshKey}) {
+// ── HistoryView ───────────────────────────────────────────────────────────────
+function HistoryView({ refreshKey }) {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterProject, setFilterProject] = useState('');
-  const [viewMode, setViewMode] = useState('timeline'); // 'timeline' | 'table'
+  const [viewMode, setViewMode] = useState('timeline');
 
   useEffect(()=>{
     setLoading(true);
     const all = loadAssessments().sort((a,b)=>new Date(b.date)-new Date(a.date));
     setRecords(filterProject ? all.filter(r=>r.project===filterProject) : all);
     setLoading(false);
-  },[filterProject, refreshKey]);
+  },[filterProject,refreshKey]);
 
   const projects = [...new Set(records.map(r=>r.project))].sort();
-
-  const byProject = projects.reduce((acc,p)=>{
-    acc[p] = records.filter(r=>r.project===p).sort((a,b)=>new Date(a.date)-new Date(b.date));
-    return acc;
-  },{});
-
+  const byProject = projects.reduce((acc,p)=>{ acc[p]=records.filter(r=>r.project===p).sort((a,b)=>new Date(a.date)-new Date(b.date)); return acc; },{});
   const fmtDate = iso => new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
   return (
     <div>
       <div className="history-toolbar">
-        <select value={filterProject} onChange={e=>setFilterProject(e.target.value)} >
+        <select value={filterProject} onChange={e=>setFilterProject(e.target.value)}>
           <option value="">All projects</option>
-          {[...new Set([...PROJECTS, ...projects])].map(p=><option key={p} value={p}>{p}</option>)}
+          {[...new Set([...PROJECTS,...projects])].map(p=><option key={p} value={p}>{p}</option>)}
         </select>
         <div className="toggle-wrap">
           <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Timeline</button>
@@ -337,22 +500,22 @@ function HistoryView({refreshKey}) {
         <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{records.length} assessment{records.length!==1?'s':''}</span>
       </div>
 
-      {loading && <div className="loading">Loading history...</div>}
-      {!loading && records.length===0 && <div className="empty-state">No assessments saved yet. Run the first one from the Assessment tab.</div>}
+      {loading && <div className="empty-state">Loading...</div>}
+      {!loading && records.length===0 && <div className="empty-state">No assessments yet. Run the first one from the Assessment tab.</div>}
 
       {!loading && records.length>0 && viewMode==='timeline' && (
         <div className="timeline-wrap">
-          {Object.entries(byProject).map(([proj, recs])=>(
+          {Object.entries(byProject).map(([proj,recs])=>(
             <div key={proj} className="timeline-project">
               <div className="timeline-project-name">{proj}</div>
               <div className="timeline-points">
                 {recs.map(r=>{
-                  const rl = r.finalRisk ? riskLevel(r.finalRisk) : null;
+                  const rl = r.finalRisk != null ? riskLevel(r.finalRisk) : null;
                   return (
-                    <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.notes||''}>
+                    <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.overrideActive?`Override: ${r.overrideJustification}`:r.notes||''}>
                       <div className="tp-date">{fmtDate(r.date)}</div>
-                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk?r.finalRisk.toFixed(2):'—'}</div>
-                      <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}</div>
+                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</div>
+                      <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
                   );
@@ -368,29 +531,26 @@ function HistoryView({refreshKey}) {
           <table>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Project</th>
-                <th>Final Risk</th>
-                <th>Level</th>
-                <th>Base Risk</th>
-                <th>Mitigation</th>
-                <th>Evaluator</th>
-                <th>Notes</th>
+                <th>Date</th><th>Project</th><th>Final Risk</th><th>Level</th>
+                <th>Base Risk</th><th>TRITON</th><th>Multiplier</th>
+                <th>Override</th><th>Evaluator</th><th>Notes</th>
               </tr>
             </thead>
             <tbody>
               {records.map(r=>{
-                const rl = r.finalRisk ? riskLevel(r.finalRisk) : null;
+                const rl = r.finalRisk!=null?riskLevel(r.finalRisk):null;
                 return (
                   <tr key={r.id}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
-                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk?r.finalRisk.toFixed(2):'—'}</td>
-                    <td>{rl && <span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
-                    <td style={{color:'var(--text2)'}}>{r.baseRisk?r.baseRisk.toFixed(2):'—'}</td>
-                    <td style={{color:'var(--text2)'}}>{r.mitigation?r.mitigation.toFixed(2):'—'}</td>
+                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</td>
+                    <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
+                    <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(2):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(2):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</td>
+                    <td style={{color:r.overrideActive?'var(--red-text)':'var(--text3)'}}>{r.overrideActive?'⚑ Yes':'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.evaluator}</td>
-                    <td style={{color:'var(--text2)',maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.notes||'—'}</td>
+                    <td style={{color:'var(--text2)',maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.notes||'—'}</td>
                   </tr>
                 );
               })}
@@ -402,29 +562,23 @@ function HistoryView({refreshKey}) {
   );
 }
 
-/* ---- App ---- */
+// ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab] = useState('assess');
   const [historyRefresh, setHistoryRefresh] = useState(0);
-
-  const handleSaved = () => {
-    setHistoryRefresh(n=>n+1);
-  };
-
   return (
     <div>
       <div className="header">
         <div className="header-left">
           <h1>QA Risk Baseline</h1>
-          <p>Mira & GenAI QA Team — score and track project risk over time · saved in this browser</p>
+          <p>Mira &amp; GenAI QA Team · Q3 2026 model · saved in this browser</p>
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
         </div>
       </div>
-
-      {tab==='assess' && <AssessView onSaved={handleSaved}/>}
+      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
     </div>
   );
