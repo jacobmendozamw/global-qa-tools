@@ -97,17 +97,51 @@ tr:last-child td{border-bottom:none}
 <body>
 <div class="container" id="root"></div>
 <script type="text/babel">
-const {useState, useEffect, useCallback} = React;
+const {useState, useEffect, useCallback, useRef} = React;
 
 // ── Storage ──────────────────────────────────────────────────────────────────
+// Shared assessments live in the committed ./data.json (visible to everyone).
+// Local additions are kept in localStorage until exported and committed to the repo.
 const STORAGE_KEY = 'qa-risk-assessments-v2';
-function loadAssessments() {
+const DATA_URL = './data.json';
+
+function loadLocalAssessments() {
   try { const r = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); return Array.isArray(r)?r:[]; }
   catch { return []; }
 }
+
+async function fetchSharedAssessments() {
+  try {
+    const res = await fetch(DATA_URL, {cache:'no-store'});
+    if (!res.ok) return [];
+    const r = await res.json();
+    return Array.isArray(r) ? r : [];
+  } catch { return []; }
+}
+
+// Merge shared (data.json) + local (localStorage) by id; local wins on conflict.
+async function loadAssessments() {
+  const [shared, local] = [await fetchSharedAssessments(), loadLocalAssessments()];
+  const byId = new Map();
+  shared.forEach(r => byId.set(r.id, r));
+  local.forEach(r => byId.set(r.id, r));
+  return [...byId.values()];
+}
+
 function saveAssessment(record) {
-  const all = loadAssessments(); all.push(record);
+  const all = loadLocalAssessments(); all.push(record);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+}
+
+// Download the full merged set as data.json so it can be committed to the repo.
+function exportAssessments(records) {
+  const sorted = [...records].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const blob = new Blob([JSON.stringify(sorted, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
@@ -201,31 +235,38 @@ const MIT_COLORS    = {1:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'},2:{bg:'#
 const NEUTRAL_COLORS= {1:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},2:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},3:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'}};
 
 // ── CriterionCard ─────────────────────────────────────────────────────────────
-function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoaded }) {
+function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoaded, reverseOptions, locked, lockedNote }) {
   const inputTypeLabel = criterion.inputType === 'auto' ? 'Auto' : criterion.inputType === 'confirm' ? 'Confirm' : 'Jira';
   const inputTagClass  = criterion.inputType === 'auto' ? 'auto-tag' : criterion.inputType === 'confirm' ? 'confirm-tag' : 'auto-tag';
+  // Display order only — score values stay attached to each option.
+  // Reversed so green (lower final risk) is always leftmost, red rightmost, across all sections.
+  const orderedOptions = reverseOptions ? [...criterion.options].reverse() : criterion.options;
   return (
     <div className={`criterion-card ${score != null ? 'filled' : 'empty'} ${autoLoaded ? 'auto-loaded' : ''}`}>
       <div className="criterion-top">
         <div className="criterion-name">{criterion.label}</div>
         <div className="criterion-meta">
           {weightPct && <span style={{fontSize:11,color:'var(--text2)'}}>{weightPct}</span>}
-          <span className={inputTagClass}>{inputTypeLabel}</span>
+          <span className={inputTagClass}>{locked ? '🔒 Jira' : inputTypeLabel}</span>
         </div>
       </div>
       <div className="criterion-desc">{criterion.description}</div>
       <div className="options-row">
-        {criterion.options.map(o => {
+        {orderedOptions.map(o => {
           const sel = score === o.score;
           const col = colorMap[o.score];
+          // When locked (value sourced from Jira), only the selected option is shown
+          // and it is not clickable — it's read-only data, not a choice.
+          if (locked && !sel) return null;
           return (
-            <button key={o.score} className="opt-btn" onClick={() => onScore(criterion.id, o.score)}
-              style={{border: sel ? `1.5px solid ${col.border}` : '.5px solid var(--border)', background: sel ? col.bg : 'transparent', color: sel ? col.text : 'var(--text2)', fontWeight: sel ? 600 : 400}}>
+            <button key={o.score} className="opt-btn" disabled={locked} onClick={() => !locked && onScore(criterion.id, o.score)}
+              style={{cursor: locked ? 'default' : 'pointer', border: sel ? `1.5px solid ${col.border}` : '.5px solid var(--border)', background: sel ? col.bg : 'transparent', color: sel ? col.text : 'var(--text2)', fontWeight: sel ? 600 : 400}}>
               {o.label} <span style={{opacity:.75}}>· {o.detail}</span>
             </button>
           );
         })}
       </div>
+      {locked && lockedNote && <div style={{fontSize:10.5,color:'var(--text3)',marginTop:6}}>{lockedNote}</div>}
     </div>
   );
 }
@@ -241,19 +282,51 @@ function AssessView({ onSaved }) {
   const [overrideJustification, setOverrideJustification] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [jiraMetrics, setJiraMetrics] = useState(null);
 
   const finalProject = project === '__custom__' ? customProject.trim() : project;
 
-  // Load defaults when project changes
-  useEffect(() => {
-    if (finalProject && PROJECT_DEFAULTS[finalProject]) {
-      setScores(PROJECT_DEFAULTS[finalProject]);
-      setOverrideActive(false);
-      setOverrideJustification('');
-    } else {
-      setScores({});
+  // The "Jira" criteria — pre-loaded and locked from jira-metrics.json when available.
+  const JIRA_IDS = ['escapedDefects', 'avgAgeOpenIssues'];
+  const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
+  const jiraScore = id => jiraProject?.[id]?.score;
+  const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
+  const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
+  const jiraNote = id => {
+    if (!jiraProject) return null;
+    const upd = jiraMetrics.generatedAt ? ` · updated ${fmtUpdated(jiraMetrics.generatedAt)}` : '';
+    if (id === 'escapedDefects') {
+      const d = jiraProject.escapedDefects;
+      return `From TRITON · ${d.total} escaped defect${d.total!==1?'s':''} (${d.critical} critical) this quarter${upd}`;
     }
-  }, [finalProject]);
+    if (id === 'avgAgeOpenIssues') {
+      const d = jiraProject.avgAgeOpenIssues;
+      return d.openCount === 0 ? `From TRITON · no open defects${upd}` : `From TRITON · ${d.openCount} open · avg ${d.avgDays}d${upd}`;
+    }
+    return null;
+  };
+
+  // Load Jira metrics once on mount.
+  useEffect(() => {
+    fetch('./jira-metrics.json', {cache:'no-store'})
+      .then(r => r.ok ? r.json() : null)
+      .then(setJiraMetrics)
+      .catch(() => setJiraMetrics(null));
+  }, []);
+
+  // Load defaults + overlay Jira scores when project (or Jira data) changes.
+  useEffect(() => {
+    const base = (finalProject && PROJECT_DEFAULTS[finalProject]) ? {...PROJECT_DEFAULTS[finalProject]} : {};
+    const jp = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
+    if (jp) {
+      for (const id of JIRA_IDS) {
+        if (jp[id]?.score != null) base[id] = jp[id].score;
+      }
+    }
+    setScores(base);
+    setOverrideActive(false);
+    setOverrideJustification('');
+  }, [finalProject, jiraMetrics]);
 
   const setScore = (id, val) => setScores(s => ({...s, [id]: val}));
 
@@ -288,6 +361,8 @@ function AssessView({ onSaved }) {
         finalRisk: result.finalRisk,
         level: rl?.label || '',
         notes: notes.trim(),
+        // Snapshot of the Jira-sourced inputs for transparency / auditability.
+        jira: jiraProject ? { source: 'TRITON', quarter: jiraMetrics?.quarter, generatedAt: jiraMetrics?.generatedAt, ...jiraProject } : null,
       };
       saveAssessment(record);
       showToast('Assessment saved');
@@ -351,10 +426,11 @@ function AssessView({ onSaved }) {
             <div className="dim-title">TRITON Score</div>
             <span className="dim-badge" style={{background:'#E8F0FE',color:'#1a3a6b',borderColor:'#4A6FA5'}}>60% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Enter the score calculated from TRITON production defects for this project this quarter. See the Escaped Defect Methodology in Confluence for the JQL filter and scoring bands.</div>
+          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON when available (🔒 locked) — escaped Defects created this quarter, scored by the bands below. Falls back to manual entry for projects not mapped in Jira. See the Escaped Defect Methodology in Confluence for the JQL filter.</div>
           {TRITON_CRITERIA.map(c => (
             <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
-              colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false} />
+              colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false}
+              locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
           ))}
 
           {/* Mitigation Multiplier */}
@@ -366,7 +442,9 @@ function AssessView({ onSaved }) {
           {MITIGATION_CRITERIA.map(c => (
             <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
               colorMap={MIT_COLORS} weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
-              autoLoaded={c.inputType==='confirm' && PROJECT_DEFAULTS[finalProject] != null} />
+              autoLoaded={c.inputType==='confirm' && PROJECT_DEFAULTS[finalProject] != null}
+              reverseOptions={true}
+              locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
           ))}
 
           {/* Manual Override */}
@@ -471,16 +549,45 @@ function AssessView({ onSaved }) {
 // ── HistoryView ───────────────────────────────────────────────────────────────
 function HistoryView({ refreshKey }) {
   const [records, setRecords] = useState([]);
+  const [allRecords, setAllRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterProject, setFilterProject] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
+  const [localRefresh, setLocalRefresh] = useState(0);
+  const fileRef = useRef(null);
 
   useEffect(()=>{
+    let cancelled = false;
     setLoading(true);
-    const all = loadAssessments().sort((a,b)=>new Date(b.date)-new Date(a.date));
-    setRecords(filterProject ? all.filter(r=>r.project===filterProject) : all);
-    setLoading(false);
-  },[filterProject,refreshKey]);
+    loadAssessments().then(list=>{
+      if (cancelled) return;
+      const all = list.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      setAllRecords(all);
+      setRecords(filterProject ? all.filter(r=>r.project===filterProject) : all);
+      setLoading(false);
+    });
+    return ()=>{ cancelled = true; };
+  },[filterProject,refreshKey,localRefresh]);
+
+  const handleImport = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) throw new Error('not an array');
+        // Merge imported into local store by id (imported wins on conflict).
+        const byId = new Map();
+        loadLocalAssessments().forEach(r=>byId.set(r.id,r));
+        imported.forEach(r=>byId.set(r.id,r));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...byId.values()]));
+        setLocalRefresh(n=>n+1);
+      } catch { alert('Invalid data.json file'); }
+    };
+    reader.readAsText(f);
+    e.target.value = '';
+  };
 
   const projects = [...new Set(records.map(r=>r.project))].sort();
   const byProject = projects.reduce((acc,p)=>{ acc[p]=records.filter(r=>r.project===p).sort((a,b)=>new Date(a.date)-new Date(b.date)); return acc; },{});
@@ -498,6 +605,12 @@ function HistoryView({ refreshKey }) {
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
         <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{records.length} assessment{records.length!==1?'s':''}</span>
+        <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
+        <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import data.json</button>
+        <button className="btn-primary" style={{fontSize:11,padding:'5px 12px'}} onClick={()=>exportAssessments(allRecords)} disabled={!allRecords.length}>Export data.json</button>
+      </div>
+      <div className="helper" style={{marginBottom:16}}>
+        To share your assessments with the team, click <strong>Export data.json</strong> and commit the downloaded file to <code>risk-baseline/data.json</code> in the repo. Everyone who opens this page then sees the committed assessments.
       </div>
 
       {loading && <div className="empty-state">Loading...</div>}
@@ -571,7 +684,7 @@ function App() {
       <div className="header">
         <div className="header-left">
           <h1>QA Risk Baseline</h1>
-          <p>Mira &amp; GenAI QA Team · Q3 2026 model · saved in this browser</p>
+          <p>Mira &amp; GenAI QA Team · Q3 2026 model · shared via data.json</p>
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>

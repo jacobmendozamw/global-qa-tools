@@ -1,0 +1,13 @@
+{
+  "site": "meltwater.atlassian.net",
+  "jiraProject": "TRITON",
+  "defectIssueType": "Defect",
+  "criticalPriorities": ["Blocker", "Critical"],
+  "comment": "Maps each Risk Baseline project to its TRITON component. Edit here (no code change) when components or projects change.",
+  "projects": {
+    "GenAI Lens": "GenAI Lens",
+    "Mira Studio": "Mira Studio",
+    "Mira": "Mira",
+    "Mobile": "Mobile"
+  }
+}
