@@ -1,21 +1,55 @@
 {
-  "generatedAt": "2026-06-24T20:04:24.877Z",
+  "generatedAt": "2026-06-24T20:22:26.337Z",
   "quarter": "2026-Q2",
   "project": "TRITON",
-  "criticalPriorities": ["Blocker", "Critical"],
-  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
+  "criticalPriorities": [
+    "Blocker",
+    "Critical"
+  ],
   "projects": {
     "GenAI Lens": {
-      "escapedDefects": { "score": 3, "total": 6, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 1, "avgDays": 79, "openCount": 4 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 6,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 1,
+        "avgDays": 80,
+        "openCount": 4
+      }
     },
     "Mira Studio": {
-      "escapedDefects": { "score": 2, "total": 3, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 1, "avgDays": 48, "openCount": 3 }
+      "escapedDefects": {
+        "score": 2,
+        "total": 3,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 1,
+        "avgDays": 48,
+        "openCount": 3
+      },
+      "needsManualReview": {
+        "escaped": 0,
+        "open": 0
+      }
     },
     "Mira": {
-      "escapedDefects": { "score": 3, "total": 11, "critical": 2 },
-      "avgAgeOpenIssues": { "score": 1, "avgDays": 34, "openCount": 9 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 11,
+        "critical": 2
+      },
+      "avgAgeOpenIssues": {
+        "score": 1,
+        "avgDays": 34,
+        "openCount": 9
+      },
+      "needsManualReview": {
+        "escaped": 0,
+        "open": 0
+      }
     },
     "Mobile": {
       "escapedDefects": {
