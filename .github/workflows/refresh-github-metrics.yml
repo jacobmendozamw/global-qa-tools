@@ -39,9 +39,7 @@ jobs:
           assignees: |
             jacobmendozamw
           reviewers: |
-            oscarlimonmw
             jacobmendozamw
-            dcaballero-meltwater
           body: |
             Automated refresh of `git-metrics/data.json` by the **Refresh GitHub Metrics** workflow.
 
