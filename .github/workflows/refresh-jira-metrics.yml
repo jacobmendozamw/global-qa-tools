@@ -1,0 +1,51 @@
+name: Refresh Jira Metrics
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch: {} # allow manual runs
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Fetch Jira metrics
+        env:
+          # Atlassian account email + API token with read access to the TRITON
+          # project. Create the token at id.atlassian.com (Security → API tokens)
+          # and store both as repo secrets (Settings → Secrets and variables → Actions).
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: node scripts/fetch-jira-metrics.mjs
+
+      # main is protected (changes must go through a PR), so instead of pushing
+      # directly we open/update a single rolling PR with the refreshed JSON.
+      - name: Open or update PR with refreshed data
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: risk-baseline/jira-metrics.json
+          branch: automated/jira-metrics-refresh
+          base: main
+          commit-message: "chore: refresh Jira (TRITON) metrics data"
+          title: "chore: refresh Jira (TRITON) metrics data"
+          assignees: |
+            jacobmendozamw
+          reviewers: |
+            jacobmendozamw
+          body: |
+            Automated refresh of `risk-baseline/jira-metrics.json` by the **Refresh Jira Metrics** workflow.
+
+            Pulls TRITON escaped-defect and open-issue-age scores per project. Merge to publish the latest values into the QA Risk Baseline tool.
+          labels: |
+            automated
+            metrics
