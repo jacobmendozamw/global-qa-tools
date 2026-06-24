@@ -412,7 +412,6 @@ function AssessView({ onSaved, jiraMetrics }) {
         finalRisk: result.finalRisk,
         level: rl?.label || '',
         scaleMax: 10,
-        expertLevel: expertLevel || null,
         notes: notes.trim(),
         // Snapshot of the Jira-sourced inputs for transparency / auditability,
         // including any tickets the engineer manually excluded.
@@ -427,7 +426,6 @@ function AssessView({ onSaved, jiraMetrics }) {
       showToast('Assessment saved');
       setScores({});
       setExcludedKeys({});
-      setExpertLevel('');
       setOverrideActive(false);
       setOverrideJustification('');
       setNotes('');
@@ -454,19 +452,6 @@ function AssessView({ onSaved, jiraMetrics }) {
         <div className="card">
           <div className="section-label">Evaluator</div>
           <input value={evaluator} onChange={e=>setEvaluator(e.target.value)} placeholder="Your name" style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>
-        </div>
-      </div>
-
-      {/* #8 validation: capture the evaluator's independent gut call BEFORE seeing the
-          computed score, so over quarters we can measure model-vs-human agreement. */}
-      <div className="card" style={{marginBottom:20}}>
-        <div className="section-label">Your gut call — what risk level do you expect? <span style={{textTransform:'none',fontWeight:400,color:'var(--text3)'}}>(optional, for model validation)</span></div>
-        <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-          {['Low','Medium','High'].map(l=>(
-            <button key={l} className="opt-btn" onClick={()=>setExpertLevel(expertLevel===l?'':l)}
-              style={{border: expertLevel===l?'1.5px solid var(--purple)':'.5px solid var(--border)', background: expertLevel===l?'var(--bg2)':'transparent', color: expertLevel===l?'var(--purple)':'var(--text2)', fontWeight: expertLevel===l?600:400}}>{l}</button>
-          ))}
-          <span className="helper" style={{flex:1,minWidth:180}}>Recorded next to the model's result so the team can validate calibration over time (Rec #8).</span>
         </div>
       </div>
 
@@ -793,7 +778,7 @@ function HistoryView({ refreshKey }) {
           <table>
             <thead>
               <tr>
-                <th>Date</th><th>Project</th><th>Final Risk</th><th>Level</th><th>Gut call</th>
+                <th>Date</th><th>Project</th><th>Final Risk</th><th>Level</th>
                 <th>Base Risk</th><th>TRITON</th><th>Multiplier</th>
                 <th>Override</th><th>Evaluator</th><th>Notes</th>
               </tr>
@@ -801,14 +786,12 @@ function HistoryView({ refreshKey }) {
             <tbody>
               {records.map(r=>{
                 const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
-                const agree = r.expertLevel ? (r.expertLevel===r.level) : null;
                 return (
                   <tr key={r.id}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
                     <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</td>
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
-                    <td style={{whiteSpace:'nowrap',color:agree==null?'var(--text3)':agree?'var(--green-text)':'var(--red-text)'}}>{r.expertLevel?`${r.expertLevel} ${agree?'✓':'≠'}`:'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</td>
@@ -827,7 +810,7 @@ function HistoryView({ refreshKey }) {
 }
 
 // ── ConfigView — what the calculation is using right now, with plain meanings ──
-function ConfigView({ jiraMetrics }) {
+function ConfigView({ jiraMetrics, jiraHistory }) {
   const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
   const sev = jiraMetrics?.severityWeights || DEFAULT_SEV_WEIGHTS;
   const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
@@ -929,6 +912,25 @@ function ConfigView({ jiraMetrics }) {
         </Group>
       )}
 
+      {jiraHistory?.projects && (
+        <Group title="TRITON history (backfilled)" badge="Rec #5/#8">
+          <div className="helper" style={{marginBottom:8}}>Escaped-defect TRITON score per quarter, reconstructed from Jira with this methodology. Used to validate the anchor and watch trends — informational, not the official score.</div>
+          <div style={{display:'grid',gridTemplateColumns:`1fr ${(jiraHistory.quarters||[]).map(()=>'66px').join(' ')}`,gap:6,fontSize:11.5}}>
+            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+            {(jiraHistory.quarters||[]).map(qq=><div key={qq} style={{fontWeight:600,textAlign:'center',color:'var(--text2)'}}>{qq.replace('-'," ")}</div>)}
+            {Object.entries(jiraHistory.projects).map(([p,qd])=>(
+              <React.Fragment key={p}>
+                <div style={{padding:'3px 0'}}>{p}</div>
+                {(jiraHistory.quarters||[]).map(qq=>{const c=qd[qq];const s=c?c.tritonScore:null;const rl=s!=null?riskLevel(s):null;return (
+                  <div key={qq} style={{textAlign:'center',padding:'3px 0',borderRadius:4,background:rl?rl.bg:'transparent',color:rl?rl.text:'var(--text3)'}}>{s!=null?s.toFixed(1):'—'}</div>
+                );})}
+              </React.Fragment>
+            ))}
+          </div>
+          {jiraHistory.calibrationStats && <div className="helper" style={{marginTop:8}}>Calibration check: across {jiraHistory.calibrationStats.n} real values, median {jiraHistory.calibrationStats.median} / mean {jiraHistory.calibrationStats.mean} → μ={curve.mu} sits near the center (anchor validated). Note the quarter-to-quarter volatility — read the trend, not a single point.</div>}
+        </Group>
+      )}
+
       <Group title="Calibration cadence" badge="Rec #5">
         <Row k="Last reviewed" v={cal?.lastReviewed||'—'} meaning="When μ/σ were last set/validated." />
         <Row k="Next review" v={cal?.nextReview||'—'} meaning="μ/σ are anchored and reviewed on a cadence (not per quarter) so scores stay comparable over time." />
@@ -951,9 +953,11 @@ function App() {
   const [tab, setTab] = useState('assess');
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const [jiraMetrics, setJiraMetrics] = useState(null);
+  const [jiraHistory, setJiraHistory] = useState(null);
 
   // Load Jira metrics once; shared by the header period label and the assessment.
   useEffect(() => {
+    fetch('./jira-history.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).then(setJiraHistory).catch(()=>setJiraHistory(null));
     fetch('./jira-metrics.json', {cache:'no-store'})
       .then(r => r.ok ? r.json() : null)
       .then(setJiraMetrics)
@@ -979,7 +983,7 @@ function App() {
       </div>
       {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
-      {tab==='config' && <ConfigView jiraMetrics={jiraMetrics}/>}
+      {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
     </div>
   );
 }
