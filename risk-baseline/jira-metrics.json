@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T06:00:00.000Z",
+  "generatedAt": "2026-06-24T20:04:24.877Z",
   "quarter": "2026-Q2",
   "project": "TRITON",
   "criticalPriorities": ["Blocker", "Critical"],
@@ -18,8 +18,16 @@
       "avgAgeOpenIssues": { "score": 1, "avgDays": 34, "openCount": 9 }
     },
     "Mobile": {
-      "escapedDefects": { "score": 3, "total": 5, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 2, "avgDays": 8, "openCount": 5 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 5,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 2,
+        "avgDays": 9,
+        "openCount": 5
+      }
     }
   }
 }
