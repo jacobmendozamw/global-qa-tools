@@ -1,24 +1,59 @@
 {
-  "generatedAt": "2026-06-24T06:00:00.000Z",
+  "generatedAt": "2026-06-24T20:04:24.877Z",
   "quarter": "2026-Q2",
   "project": "TRITON",
-  "criticalPriorities": ["Blocker", "Critical"],
+  "criticalPriorities": [
+    "Blocker",
+    "Critical"
+  ],
   "projects": {
     "GenAI Lens": {
-      "escapedDefects": { "score": 3, "total": 10, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 1, "avgDays": 71, "openCount": 7 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 10,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 1,
+        "avgDays": 71,
+        "openCount": 7
+      }
     },
     "Mira Studio": {
-      "escapedDefects": { "score": 1, "total": 0, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 3, "avgDays": 0, "openCount": 0 }
+      "escapedDefects": {
+        "score": 1,
+        "total": 0,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 3,
+        "avgDays": 0,
+        "openCount": 0
+      }
     },
     "Mira": {
-      "escapedDefects": { "score": 3, "total": 14, "critical": 2 },
-      "avgAgeOpenIssues": { "score": 1, "avgDays": 37, "openCount": 12 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 14,
+        "critical": 2
+      },
+      "avgAgeOpenIssues": {
+        "score": 1,
+        "avgDays": 38,
+        "openCount": 12
+      }
     },
     "Mobile": {
-      "escapedDefects": { "score": 3, "total": 5, "critical": 0 },
-      "avgAgeOpenIssues": { "score": 2, "avgDays": 8, "openCount": 5 }
+      "escapedDefects": {
+        "score": 3,
+        "total": 5,
+        "critical": 0
+      },
+      "avgAgeOpenIssues": {
+        "score": 2,
+        "avgDays": 9,
+        "openCount": 5
+      }
     }
   }
 }
