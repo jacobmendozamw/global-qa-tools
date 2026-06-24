@@ -94,38 +94,44 @@ function linkedKeys(issue) {
     .filter(Boolean);
 }
 
+// Normalize a linkAttribution entry to an array of project-key prefixes.
+const prefixesFor = name => [].concat(LINK_ATTRIBUTION[name] || []);
+// Every prefix claimed by any shared project (used to detect "linked to the other project").
+const ALL_PREFIXES = Object.keys(LINK_ATTRIBUTION).flatMap(prefixesFor);
+const matchesPrefix = (key, prefixes) => prefixes.some(p => key.startsWith(`${p}-`));
+
 // Mira and Mira Studio share the TRITON component "Mira" (§4.6). When a project
-// declares a linkAttribution prefix, keep only tickets linked to that project
-// (e.g. HZN-* -> Mira Studio, MIRA-* -> Mira). Tickets with no matching link are
-// set aside as "needsManualReview" rather than silently attributed.
-function partitionByLink(issues, prefix) {
-  if (!prefix) return { matched: issues, manualReview: 0 };
+// declares linkAttribution prefixes, keep only tickets linked to that project
+// (e.g. HZN-* -> Mira Studio, MIRA-*/MIRALEGACY-* -> Mira). Tickets linked to no
+// recognized project are set aside as "needsManualReview" rather than silently
+// attributed; tickets linked to the *other* shared project are excluded here.
+function partitionByLink(issues, prefixes) {
+  if (!prefixes.length) return { matched: issues, manualReview: 0 };
   const matched = [];
   let manualReview = 0;
   for (const i of issues) {
     const keys = linkedKeys(i);
-    if (keys.some(k => k.startsWith(`${prefix}-`))) matched.push(i);
-    else if (!keys.some(k => Object.values(LINK_ATTRIBUTION).some(p => k.startsWith(`${p}-`)))) manualReview++;
-    // else: linked to the *other* shared project — correctly excluded here.
+    if (keys.some(k => matchesPrefix(k, prefixes))) matched.push(i);
+    else if (!keys.some(k => matchesPrefix(k, ALL_PREFIXES))) manualReview++;
   }
   return { matched, manualReview };
 }
 
 async function computeProject(name, component) {
-  const linkPrefix = LINK_ATTRIBUTION[name];
-  const needLinks = !!linkPrefix;
+  const linkPrefixes = prefixesFor(name);
+  const needLinks = linkPrefixes.length > 0;
   const base = `project = ${PROJECT} AND issuetype = ${q(DEFECT_TYPE)} AND component = ${q(component)}`;
   const fields = base => needLinks ? base.concat('issuelinks') : base;
 
   // Escaped defects this calendar quarter (service requests excluded).
   const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority']));
-  const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefix);
+  const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefixes);
   const total = escaped.length;
   const critical = escaped.filter(i => CRITICAL.includes(i.fields?.priority?.name)).length;
 
   // Open (unresolved) defects — average age in days since creation.
   const openRaw = await searchAll(`${base} AND resolution = Unresolved${EXCLUDE_CLAUSE}`, fields(['created']));
-  const { matched: open, manualReview: openMR } = partitionByLink(openRaw, linkPrefix);
+  const { matched: open, manualReview: openMR } = partitionByLink(openRaw, linkPrefixes);
   const now = Date.now();
   const ages = open
     .map(i => i.fields?.created)
