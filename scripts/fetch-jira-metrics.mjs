@@ -27,6 +27,8 @@ const SITE = cfg.site;
 const PROJECT = cfg.jiraProject;
 const DEFECT_TYPE = cfg.defectIssueType || 'Defect';
 const CRITICAL = cfg.criticalPriorities || ['Blocker', 'Critical'];
+const EXCLUDE_KEYWORDS = cfg.excludeKeywords || [];
+const LINK_ATTRIBUTION = cfg.linkAttribution || {};
 
 const auth = Buffer.from(`${email}:${token}`).toString('base64');
 const headers = { Authorization: `Basic ${auth}`, Accept: 'application/json' };
@@ -81,16 +83,55 @@ function ageScore(avgDays, openCount) {
   return 1;
 }
 
-async function computeProject(component) {
-  const base = `project = ${PROJECT} AND issuetype = ${q(DEFECT_TYPE)} AND component = ${q(component)}`;
+// Service-request exclusion clause (Confluence §4.6): drop tickets whose summary
+// matches any configured keyword. JQL "!~" is a fuzzy text match on summary.
+const EXCLUDE_CLAUSE = EXCLUDE_KEYWORDS.map(k => ` AND summary !~ ${q(k)}`).join('');
 
-  // Escaped defects this calendar quarter.
-  const escaped = await searchAll(`${base} AND created >= ${q(QUARTER_START)}`, ['priority']);
+// All issue keys linked to a ticket (both inward and outward link directions).
+function linkedKeys(issue) {
+  return (issue.fields?.issuelinks || [])
+    .flatMap(l => [l.inwardIssue?.key, l.outwardIssue?.key])
+    .filter(Boolean);
+}
+
+// Normalize a linkAttribution entry to an array of project-key prefixes.
+const prefixesFor = name => [].concat(LINK_ATTRIBUTION[name] || []);
+// Every prefix claimed by any shared project (used to detect "linked to the other project").
+const ALL_PREFIXES = Object.keys(LINK_ATTRIBUTION).flatMap(prefixesFor);
+const matchesPrefix = (key, prefixes) => prefixes.some(p => key.startsWith(`${p}-`));
+
+// Mira and Mira Studio share the TRITON component "Mira" (§4.6). When a project
+// declares linkAttribution prefixes, keep only tickets linked to that project
+// (e.g. HZN-* -> Mira Studio, MIRA-*/MIRALEGACY-* -> Mira). Tickets linked to no
+// recognized project are set aside as "needsManualReview" rather than silently
+// attributed; tickets linked to the *other* shared project are excluded here.
+function partitionByLink(issues, prefixes) {
+  if (!prefixes.length) return { matched: issues, manualReview: 0 };
+  const matched = [];
+  let manualReview = 0;
+  for (const i of issues) {
+    const keys = linkedKeys(i);
+    if (keys.some(k => matchesPrefix(k, prefixes))) matched.push(i);
+    else if (!keys.some(k => matchesPrefix(k, ALL_PREFIXES))) manualReview++;
+  }
+  return { matched, manualReview };
+}
+
+async function computeProject(name, component) {
+  const linkPrefixes = prefixesFor(name);
+  const needLinks = linkPrefixes.length > 0;
+  const base = `project = ${PROJECT} AND issuetype = ${q(DEFECT_TYPE)} AND component = ${q(component)}`;
+  const fields = base => needLinks ? base.concat('issuelinks') : base;
+
+  // Escaped defects this calendar quarter (service requests excluded).
+  const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority']));
+  const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefixes);
   const total = escaped.length;
   const critical = escaped.filter(i => CRITICAL.includes(i.fields?.priority?.name)).length;
 
   // Open (unresolved) defects — average age in days since creation.
-  const open = await searchAll(`${base} AND resolution = Unresolved`, ['created']);
+  const openRaw = await searchAll(`${base} AND resolution = Unresolved${EXCLUDE_CLAUSE}`, fields(['created']));
+  const { matched: open, manualReview: openMR } = partitionByLink(openRaw, linkPrefixes);
   const now = Date.now();
   const ages = open
     .map(i => i.fields?.created)
@@ -99,10 +140,12 @@ async function computeProject(component) {
   const openCount = ages.length;
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
-  return {
+  const result = {
     escapedDefects: { score: escapedDefectScore(total, critical), total, critical },
     avgAgeOpenIssues: { score: ageScore(avgDays, openCount), avgDays, openCount },
   };
+  if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
+  return result;
 }
 
 function quarterLabel(d) {
@@ -113,9 +156,10 @@ async function main() {
   const projects = {};
   for (const [name, component] of Object.entries(cfg.projects)) {
     try {
-      projects[name] = await computeProject(component);
+      projects[name] = await computeProject(name, component);
       const e = projects[name].escapedDefects, a = projects[name].avgAgeOpenIssues;
-      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) → ${e.score}; open=${a.openCount} avg ${a.avgDays}d → ${a.score}`);
+      const mr = projects[name].needsManualReview ? ` [manual review: ${projects[name].needsManualReview.escaped} esc / ${projects[name].needsManualReview.open} open]` : '';
+      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) → ${e.score}; open=${a.openCount} avg ${a.avgDays}d → ${a.score}${mr}`);
     } catch (err) {
       console.error(`Failed for ${name} (${component}): ${err.message}`);
       projects[name] = { error: err.message };

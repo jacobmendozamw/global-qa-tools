@@ -3,10 +3,15 @@
   "jiraProject": "TRITON",
   "defectIssueType": "Defect",
   "criticalPriorities": ["Blocker", "Critical"],
-  "comment": "Maps each Risk Baseline project to its TRITON component. Edit here (no code change) when components or projects change.",
+  "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
+  "linkAttribution": {
+    "Mira Studio": ["HZN"],
+    "Mira": ["MIRA", "MIRALEGACY"]
+  },
   "projects": {
     "GenAI Lens": "GenAI Lens",
-    "Mira Studio": "Mira Studio",
+    "Mira Studio": "Mira",
     "Mira": "Mira",
     "Mobile": "Mobile"
   }
