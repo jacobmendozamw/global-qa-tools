@@ -149,10 +149,10 @@ const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile'];
 
 // Project defaults map
 const PROJECT_DEFAULTS = {
-  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:1, testability:3, testCoverage:3, automationConfidence:3 },
   'Mira Studio': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
-  'Mira':        { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:2, automationConfidence:2 },
-  'Mobile':      { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mira':        { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:3, automationConfidence:1 },
+  'Mobile':      { userImpact:2, rateOfChange:3, complexity:2, testability:3, testCoverage:3, automationConfidence:1 },
 };
 
 // Criteria definitions
@@ -800,6 +800,89 @@ function HistoryView({ refreshKey }) {
   );
 }
 
+// ── ConfigView — what the calculation is using right now, with plain meanings ──
+function ConfigView({ jiraMetrics }) {
+  const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
+  const sev = jiraMetrics?.severityWeights || DEFAULT_SEV_WEIGHTS;
+  const win = jiraMetrics?.window;
+  const pct = v => `${Math.round(v*100)}%`;
+  const fmtDay = s => { try { return new Date(s + (s && s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
+
+  const Row = ({k, v, meaning}) => (
+    <div style={{display:'grid',gridTemplateColumns:'150px 70px 1fr',gap:10,alignItems:'baseline',padding:'6px 0',borderBottom:'.5px solid var(--border)'}}>
+      <div style={{fontSize:12,fontWeight:600}}>{k}</div>
+      <div style={{fontSize:12,fontWeight:700,color:'var(--purple)'}}>{v}</div>
+      <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.45}}>{meaning}</div>
+    </div>
+  );
+  const Group = ({title, badge, children}) => (
+    <div className="card" style={{marginBottom:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+        <div style={{fontSize:13,fontWeight:700}}>{title}</div>
+        {badge && <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>{badge}</span>}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:760}}>
+      <div className="helper" style={{marginBottom:14}}>
+        These are the exact parameters the calculation is using right now. Scores are sourced from TRITON and computed with the model below; values marked as policy are team decisions, not auto-derived.
+      </div>
+
+      <Group title="Overview">
+        <Row k="Model version" v={jiraMetrics?.modelVersion || '—'} meaning="Identifies the formula version, so historical assessments stay comparable when the model changes." />
+        <Row k="Quarter" v={jiraMetrics?.quarter || '—'} meaning="Evaluation period." />
+        <Row k="TRITON data" v={win?`${win.elapsedPct}%`:'—'} meaning={win?`Pulled ${fmtDay(win.from)} – ${fmtDay(win.to)}. The quarter is ${win.elapsedPct}% elapsed — early readings count fewer days, so treat them as partial.`:'Extraction window.'} />
+        <Row k="Final scale" v="0–10" meaning="Final Risk runs 0 (none) to 10 (max). Levels: Low 0–5.0 · Medium 5.1–7.3 · High 7.4–10." />
+      </Group>
+
+      <Group title="Formula" badge="how the final is built">
+        <div style={{fontFamily:'monospace',fontSize:12,background:'var(--bg2)',borderRadius:6,padding:'8px 10px',marginBottom:8}}>
+          Final = (Base × 0.40 + TRITON × 0.60) × Multiplier
+        </div>
+        <div className="helper">Inherent product risk (Base, 40%) and objective production defects (TRITON, 60%), then scaled up/down by QA mitigation capacity. Manual Override forces Final = 10.</div>
+      </Group>
+
+      <Group title="Base Risk — inherent product risk" badge="40% of final">
+        <Row k="User impact" v={pct(BASE_WEIGHTS.userImpact)} meaning="Business criticality & size of user base." />
+        <Row k="Rate of change" v={pct(BASE_WEIGHTS.rateOfChange)} meaning="Release frequency / how fast the product moves." />
+        <Row k="Complexity" v={pct(BASE_WEIGHTS.complexity)} meaning="Integrations, dependencies, system logic." />
+        <div className="helper" style={{marginTop:6}}>Pre-loaded per project (1–3, mapped to 0–10); confirmed quarterly. Weights are within this group.</div>
+      </Group>
+
+      <Group title="TRITON Score — escaped defects curve" badge="60% of final">
+        <Row k="μ (mu)" v={curve.mu} meaning="POLICY: the number of severity-weighted escaped defects/quarter treated as MEDIUM risk (5/10). The target you measure against — set by the team. Lower μ = stricter; higher μ = more lenient." />
+        <Row k="σ (sigma)" v={curve.sigma} meaning="Spread: how quickly the score rises/falls around μ. Smaller = sharper separation between projects." />
+        <Row k="Scale" v={`0–${curve.scaleMax||10}`} meaning="Curve output range. Score = 10 × normalCDF((weightedCount − μ)/σ)." />
+        <div style={{marginTop:8,marginBottom:4,fontSize:11,fontWeight:600,color:'var(--text2)'}}>Severity weights (each defect counts as):</div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+          {Object.entries(sev).map(([p,w]) => (
+            <span key={p} className="pill" style={{background:'var(--bg2)',color:'var(--text2)',border:'.5px solid var(--border2)'}}>{p} ×{w}</span>
+          ))}
+        </div>
+        <div className="helper" style={{marginTop:6}}>Higher severity counts more (continuously) toward the weighted count that feeds the curve.</div>
+      </Group>
+
+      <Group title="Mitigation Multiplier — QA capacity" badge="range 0.70 – 1.10">
+        <Row k="Automation conf." v={pct(MIT_WEIGHTS.automationConfidence)} meaning="How reliably automation catches regressions in critical flows." />
+        <Row k="Test coverage" v={pct(MIT_WEIGHTS.testCoverage)} meaning="Combined automated + manual coverage of critical flows." />
+        <Row k="Testability" v={pct(MIT_WEIGHTS.testability)} meaning="How easy it is to write/maintain meaningful tests." />
+        <div className="helper" style={{marginTop:6}}>Higher mitigation score → lower multiplier → lower final risk (strong = 0.70, weak = 1.10). “Avg. age of open issues” was removed from scoring in v2 (it overlapped with escaped defects) — shown as informational only.</div>
+      </Group>
+
+      <Group title="Exposure normalization (defect density)" badge={jiraMetrics?.exposureEnabled ? 'ON' : 'OFF'}>
+        <div className="helper">
+          {jiraMetrics?.exposureEnabled
+            ? 'Active: escaped defects are normalized by delivery volume (defects per unit shipped).'
+            : 'Disabled. When on, the weighted count is divided by delivery volume so a high-throughput product isn’t penalized for raw count. Pending a clean denominator + μ re-anchoring (planned Q4).'}
+        </div>
+      </Group>
+    </div>
+  );
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab] = useState('assess');
@@ -828,10 +911,12 @@ function App() {
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
+          <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
       {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
+      {tab==='config' && <ConfigView jiraMetrics={jiraMetrics}/>}
     </div>
   );
 }
