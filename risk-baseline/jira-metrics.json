@@ -30,8 +30,8 @@
   "modelParams": {
     "curveType": "gaussian",
     "baseFloor": 0,
-    "multiplierMin": 0.7,
-    "multiplierMax": 1.1
+    "multiplierMin": 0.8,
+    "multiplierMax": 1.2
   },
   "calibration": {
     "lastReviewed": "2026-Q3",
