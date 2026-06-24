@@ -170,11 +170,12 @@ const BASE_RISK_CRITERIA = [
 
 const TRITON_CRITERIA = [
   { id:'escapedDefects', label:'Escaped defects', inputType:'jira',
-    description:'Count from TRITON filtered by project component, excluding service requests. Severity overrides volume: if ≤4 total but any ticket is P1/P2, use the severity band.',
+    description:'TRITON Defects this quarter (service requests excluded), scored 0–10 on an anchored Gaussian curve. Severity overrides volume: P1/P2 tickets raise the floor. Sourced automatically from TRITON; the options below are only a manual fallback for unmapped projects.',
+    // Manual-fallback options on the 0–10 scale (used only when no Jira data).
     options:[
-      {score:1,label:'Score 1',detail:'0–1 escapes and none critical (P1/P2)'},
-      {score:2,label:'Score 2',detail:'2–4 escapes, or 1 escape critical (P1/P2)'},
-      {score:3,label:'Score 3',detail:'5+ escapes, or 2+ escapes critical (P1/P2)'},
+      {score:2,label:'Low',detail:'Few escaped defects this quarter'},
+      {score:5,label:'Medium',detail:'A moderate number of escaped defects'},
+      {score:9,label:'High',detail:'Many escaped defects, or critical (P1/P2) present'},
     ] },
 ];
 
@@ -203,12 +204,21 @@ function mitigationMultiplier(mitScore) {
   return 1.10 - ((mitScore - 1) / 2) * 0.40;
 }
 
-// Escaped-defect bands (mirrors scripts/fetch-jira-metrics.mjs / Confluence §4.6).
-// Used to recompute the score live when an engineer manually excludes a ticket.
-function escapedDefectScore(total, critical) {
-  if (total >= 5 || critical >= 2) return 3;
-  if (total >= 2 || critical >= 1) return 2;
-  return 1;
+// TRITON escaped-defect score on a 0–10 scale via an anchored Gaussian curve
+// (mirrors scripts/fetch-jira-metrics.mjs). Used to recompute the score live when
+// an engineer manually excludes a ticket. Curve params come from jira-metrics.json.
+const DEFAULT_CURVE = { mu: 6, sigma: 3, severityFloor1: 5, severityFloor2: 8.5, scaleMax: 10 };
+function normalCDF(z) {
+  const t = 1 / (1 + 0.3275911 * Math.abs(z / Math.SQRT2));
+  const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - 0.284496736)*t + 0.254829592) * t * Math.exp(-(z/Math.SQRT2)*(z/Math.SQRT2));
+  const erf = z >= 0 ? y : -y;
+  return 0.5 * (1 + erf);
+}
+function tritonScore10(total, critical, curve) {
+  const { mu, sigma, severityFloor1 = 0, severityFloor2 = 0, scaleMax = 10 } = curve || DEFAULT_CURVE;
+  const c = scaleMax * normalCDF((total - mu) / sigma);
+  const floor = critical >= 2 ? severityFloor2 : critical >= 1 ? severityFloor1 : 0;
+  return Math.round(Math.max(c, floor) * 10) / 10;
 }
 
 function wavg(criteria, weights, scores) {
@@ -218,24 +228,30 @@ function wavg(criteria, weights, scores) {
   return filled.reduce((s,c) => s + scores[c.id] * weights[c.id], 0) / tw;
 }
 
+const SCALE_MAX = 10;
+// Map a 1–3 weighted-average (manual criteria) onto the 0–10 scale.
+const to10 = v => v == null ? null : (v - 1) / 2 * SCALE_MAX;
+
 function compute(scores, overrideActive) {
-  if (overrideActive) return { baseRisk:null, tritonScore:scores.escapedDefects||null, mitScore:null, multiplier:null, finalRisk:3.0, overridden:true };
-  const baseRisk   = wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores);
-  const tritonScore = scores.escapedDefects || null;
+  if (overrideActive) return { baseRisk:null, tritonScore:(scores.escapedDefects ?? null), mitScore:null, multiplier:null, finalRisk:SCALE_MAX, overridden:true };
+  const base10     = to10(wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores));
+  const tritonScore = scores.escapedDefects ?? null; // already on the 0–10 scale
   const mitScore   = wavg(MITIGATION_CRITERIA, MIT_WEIGHTS, scores);
-  if (!baseRisk && !tritonScore) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
-  const combined = ((baseRisk||0) * 0.40) + ((tritonScore||0) * 0.60);
+  if (base10 == null && tritonScore == null) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
+  const combined = ((base10||0) * 0.40) + ((tritonScore||0) * 0.60);
   const multiplier = mitScore ? mitigationMultiplier(mitScore) : 1.0;
-  const finalRisk = combined * multiplier;
-  return { baseRisk, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
+  const finalRisk = Math.min(SCALE_MAX, combined * multiplier);
+  return { baseRisk:base10, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
 }
 
+// 0–10 scale (linear rescale of the previous 1.5 / 2.2 thresholds × 10/3).
 const LEVELS = [
-  {max:1.5, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
-  {max:2.2, label:'Medium', text:'#633806', bg:'#FAEEDA', border:'#BA7517'},
+  {max:5.0, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
+  {max:7.3, label:'Medium', text:'#633806', bg:'#FAEEDA', border:'#BA7517'},
   {max:Infinity, label:'High', text:'#712B13', bg:'#FAECE7', border:'#D85A30'},
 ];
 const riskLevel = s => LEVELS.find(l => s <= l.max);
+const levelByLabel = lbl => LEVELS.find(l => l.label === lbl);
 
 // Option colors by criterion type
 const RISK_COLORS   = {1:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'}};
@@ -308,7 +324,7 @@ function AssessView({ onSaved, jiraMetrics }) {
   const excludedCount = escapedTickets.length - activeEscaped.length;
   const escTotalEff = activeEscaped.length;
   const escCritEff = activeEscaped.filter(t => t.critical).length;
-  const escScoreEff = escapedTickets.length ? escapedDefectScore(escTotalEff, escCritEff) : jiraScore('escapedDefects');
+  const escScoreEff = escapedTickets.length ? tritonScore10(escTotalEff, escCritEff, jiraMetrics?.tritonCurve) : jiraScore('escapedDefects');
 
   const jiraNote = id => {
     if (!jiraProject) return null;
@@ -383,6 +399,7 @@ function AssessView({ onSaved, jiraMetrics }) {
         multiplier: result.multiplier,
         finalRisk: result.finalRisk,
         level: rl?.label || '',
+        scaleMax: 10,
         notes: notes.trim(),
         // Snapshot of the Jira-sourced inputs for transparency / auditability,
         // including any tickets the engineer manually excluded.
@@ -456,12 +473,35 @@ function AssessView({ onSaved, jiraMetrics }) {
             <div className="dim-title">TRITON Score</div>
             <span className="dim-badge" style={{background:'#E8F0FE',color:'#1a3a6b',borderColor:'#4A6FA5'}}>60% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON when available (🔒 locked) — escaped Defects created this quarter, scored by the bands below. Falls back to manual entry for projects not mapped in Jira. See the Escaped Defect Methodology in Confluence for the JQL filter.</div>
-          {TRITON_CRITERIA.map(c => (
-            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
-              colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false}
-              locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
-          ))}
+          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON (🔒 locked) — Defects this quarter scored 0–10 on an anchored Gaussian curve, severity-adjusted. Falls back to manual entry for projects not mapped in Jira. See §4.6 in Confluence for the JQL filter and curve.</div>
+          {TRITON_CRITERIA.map(c => {
+            if (isJiraLocked(c)) {
+              const lvl = riskLevel(escScoreEff) || {};
+              return (
+                <div key={c.id} className="criterion-card filled">
+                  <div className="criterion-top">
+                    <div className="criterion-name">{c.label}</div>
+                    <div className="criterion-meta">
+                      <span style={{fontSize:11,color:'var(--text2)'}}>60% effective</span>
+                      <span className="auto-tag">🔒 Jira</span>
+                    </div>
+                  </div>
+                  <div className="criterion-desc">{c.description}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:12,marginTop:6}}>
+                    <div style={{minWidth:62,textAlign:'center',padding:'6px 8px',borderRadius:8,border:`1.5px solid ${lvl.border||'var(--border2)'}`,background:lvl.bg||'var(--bg2)'}}>
+                      <div style={{fontSize:22,fontWeight:700,lineHeight:1,color:lvl.text||'var(--text)'}}>{escScoreEff!=null?escScoreEff.toFixed(1):'—'}</div>
+                      <div style={{fontSize:9,color:lvl.text||'var(--text3)'}}>of 10</div>
+                    </div>
+                    <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.5}}>{jiraNote(c.id)}</div>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+                colorMap={{2:RISK_COLORS[1],5:RISK_COLORS[2],9:RISK_COLORS[3]}} weightPct="60% effective" autoLoaded={false} />
+            );
+          })}
 
           {/* Escaped-defect ticket viewer — see exactly which defects are counted
               and manually exclude any service request the keyword filter missed. */}
@@ -510,14 +550,14 @@ function AssessView({ onSaved, jiraMetrics }) {
           {/* Manual Override */}
           <div className="dim-header">
             <div className="dim-title">Manual Override</div>
-            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 3.0</span>
+            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 10</span>
           </div>
           <div className="helper" style={{marginBottom:10}}>Activate only if forward-looking signals indicate risk not yet reflected in data. Written justification is required.</div>
           <div className={`override-card ${overrideActive ? 'active' : ''}`}>
             <label className="override-toggle">
               <input type="checkbox" checked={overrideActive} onChange={e=>setOverrideActive(e.target.checked)}/>
               <span className="override-toggle-label" style={{color: overrideActive ? 'var(--red-text)' : 'var(--text)'}}>
-                Activate override — set Final Risk to 3.0 (High)
+                Activate override — set Final Risk to 10 (High)
               </span>
             </label>
             {overrideActive && (
@@ -548,15 +588,15 @@ function AssessView({ onSaved, jiraMetrics }) {
               {result.overridden ? 'Override active' : 'Final Risk'}
             </div>
             <div className="score-num" style={{color:rl?rl.text:'var(--text3)'}}>
-              {result.finalRisk != null ? result.finalRisk.toFixed(2) : '—'}
+              {result.finalRisk != null ? result.finalRisk.toFixed(1) : '—'}<span style={{fontSize:'0.4em',fontWeight:500,opacity:.7}}> / 10</span>
             </div>
             <div className="score-level" style={{color:rl?rl.text:'var(--text3)'}}>
               {rl ? rl.label : 'Pending'}
             </div>
             {result.baseRisk != null && result.tritonScore != null && !result.overridden && (
               <div className="score-breakdown" style={{color:rl?.text}}>
-                Base {result.baseRisk.toFixed(2)} × 0.40<br/>
-                TRITON {result.tritonScore.toFixed(2)} × 0.60<br/>
+                Base {result.baseRisk.toFixed(1)} × 0.40<br/>
+                TRITON {result.tritonScore.toFixed(1)} × 0.60<br/>
                 × {result.multiplier.toFixed(2)} multiplier
               </div>
             )}
@@ -564,15 +604,15 @@ function AssessView({ onSaved, jiraMetrics }) {
 
           {/* Formula */}
           <div className="formula-display">
-            <strong>Formula</strong><br/>
+            <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
             <code>(Base × 0.40 + TRITON × 0.60) × Multiplier</code><br/>
-            <span style={{fontSize:10}}>Override → Final Risk = 3.0</span>
+            <span style={{fontSize:10}}>Override → Final Risk = 10</span>
           </div>
 
           {/* Legend */}
           <div className="card">
             <div className="section-label">Risk levels</div>
-            {[{l:'Low',r:'1.0 – 1.5',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'1.6 – 2.2',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'2.3 – 3.0',c:'#712B13',bg:'#FAECE7'}].map(x=>(
+            {[{l:'Low',r:'0.0 – 5.0',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'5.1 – 7.3',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'7.4 – 10',c:'#712B13',bg:'#FAECE7'}].map(x=>(
               <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
                 <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
                 <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
@@ -683,11 +723,11 @@ function HistoryView({ refreshKey }) {
               <div className="timeline-project-name">{proj}</div>
               <div className="timeline-points">
                 {recs.map(r=>{
-                  const rl = r.finalRisk != null ? riskLevel(r.finalRisk) : null;
+                  const rl = r.level ? levelByLabel(r.level) : (r.finalRisk != null ? riskLevel(r.finalRisk) : null);
                   return (
                     <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.overrideActive?`Override: ${r.overrideJustification}`:r.notes||''}>
                       <div className="tp-date">{fmtDate(r.date)}</div>
-                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</div>
+                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</div>
                       <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
@@ -711,15 +751,15 @@ function HistoryView({ refreshKey }) {
             </thead>
             <tbody>
               {records.map(r=>{
-                const rl = r.finalRisk!=null?riskLevel(r.finalRisk):null;
+                const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
                 return (
                   <tr key={r.id}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
-                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</td>
+                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</td>
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
-                    <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(2):'—'}</td>
-                    <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(2):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</td>
                     <td style={{color:r.overrideActive?'var(--red-text)':'var(--text3)'}}>{r.overrideActive?'⚑ Yes':'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.evaluator}</td>

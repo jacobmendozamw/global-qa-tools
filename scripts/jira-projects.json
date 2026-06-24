@@ -4,6 +4,14 @@
   "defectIssueType": "Defect",
   "criticalPriorities": ["Blocker", "Critical"],
   "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "tritonCurve": {
+    "comment": "Anchored Gaussian curve mapping escaped-defect count to a 0-10 TRITON score: 10 * normalCDF((count - mu) / sigma). mu/sigma calibrated once from the Q2 2026 observed distribution (mean ~6, std ~3). severityFloorN = minimum score when N+ critical (P1/P2) defects exist (severity overrides volume, §4.6). Revisit calibration only at the documented review, not per quarter.",
+    "mu": 6,
+    "sigma": 3,
+    "severityFloor1": 5.0,
+    "severityFloor2": 8.5,
+    "scaleMax": 10
+  },
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
   "linkAttribution": {

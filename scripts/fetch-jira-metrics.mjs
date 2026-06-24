@@ -29,6 +29,7 @@ const DEFECT_TYPE = cfg.defectIssueType || 'Defect';
 const CRITICAL = cfg.criticalPriorities || ['Blocker', 'Critical'];
 const EXCLUDE_KEYWORDS = cfg.excludeKeywords || [];
 const LINK_ATTRIBUTION = cfg.linkAttribution || {};
+const TRITON_CURVE = cfg.tritonCurve || { mu: 6, sigma: 3, severityFloor1: 5, severityFloor2: 8.5, scaleMax: 10 };
 
 const auth = Buffer.from(`${email}:${token}`).toString('base64');
 const headers = { Authorization: `Basic ${auth}`, Accept: 'application/json' };
@@ -63,14 +64,21 @@ async function searchAll(jql, fields) {
   return out;
 }
 
-// Bands from the risk-baseline model:
-//   1 → 0–1 escapes and none critical
-//   2 → 2–4 escapes, or 1 critical
-//   3 → 5+ escapes, or 2+ critical   (severity overrides volume)
-function escapedDefectScore(total, critical) {
-  if (total >= 5 || critical >= 2) return 3;
-  if (total >= 2 || critical >= 1) return 2;
-  return 1;
+// Standard normal CDF via the Abramowitz-Stegun erf approximation (7.1.26).
+function normalCDF(z) {
+  const t = 1 / (1 + 0.3275911 * Math.abs(z / Math.SQRT2));
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(z / Math.SQRT2) * (z / Math.SQRT2));
+  const erf = z >= 0 ? y : -y;
+  return 0.5 * (1 + erf);
+}
+
+// TRITON escaped-defect score on a 0–10 scale via an anchored Gaussian curve.
+// Severity overrides volume: a floor is applied when critical (P1/P2) defects exist.
+function tritonScore10(total, critical) {
+  const { mu, sigma, severityFloor1 = 0, severityFloor2 = 0, scaleMax = 10 } = TRITON_CURVE;
+  const curve = scaleMax * normalCDF((total - mu) / sigma);
+  const floor = critical >= 2 ? severityFloor2 : critical >= 1 ? severityFloor1 : 0;
+  return Math.round(Math.max(curve, floor) * 10) / 10;
 }
 
 // Bands (mitigation — higher score = faster = better):
@@ -151,7 +159,7 @@ async function computeProject(name, component) {
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
   const result = {
-    escapedDefects: { score: escapedDefectScore(total, critical), total, critical, tickets },
+    escapedDefects: { score: tritonScore10(total, critical), total, critical, tickets },
     avgAgeOpenIssues: { score: ageScore(avgDays, openCount), avgDays, openCount },
   };
   if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
@@ -183,6 +191,8 @@ async function main() {
     criticalPriorities: CRITICAL,
     // Period covered: from the start of the quarter to the extraction date.
     window: { from: QUARTER_START, to: new Date().toISOString().slice(0, 10) },
+    // Curve params so the UI can recompute the TRITON score identically on exclusion.
+    tritonCurve: TRITON_CURVE,
     ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,
   };

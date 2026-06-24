@@ -10,11 +10,18 @@
     "from": "2026-04-01",
     "to": "2026-06-24"
   },
+  "tritonCurve": {
+    "mu": 6,
+    "sigma": 3,
+    "severityFloor1": 5.0,
+    "severityFloor2": 8.5,
+    "scaleMax": 10
+  },
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "projects": {
     "GenAI Lens": {
       "escapedDefects": {
-        "score": 3,
+        "score": 5.0,
         "total": 6,
         "critical": 0,
         "tickets": [
@@ -30,7 +37,7 @@
     },
     "Mira Studio": {
       "escapedDefects": {
-        "score": 2,
+        "score": 1.6,
         "total": 3,
         "critical": 0,
         "tickets": [
@@ -44,7 +51,7 @@
     },
     "Mira": {
       "escapedDefects": {
-        "score": 3,
+        "score": 9.5,
         "total": 11,
         "critical": 2,
         "tickets": [
@@ -66,7 +73,7 @@
     },
     "Mobile": {
       "escapedDefects": {
-        "score": 3,
+        "score": 3.7,
         "total": 5,
         "critical": 0,
         "tickets": [
