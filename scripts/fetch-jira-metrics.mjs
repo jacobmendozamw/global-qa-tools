@@ -33,6 +33,9 @@ const TRITON_CURVE = cfg.tritonCurve || { mu: 5, sigma: 4, scaleMax: 10 };
 const SEVERITY_WEIGHTS = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
 const EXPOSURE = cfg.exposure || { enabled: false };
 const MODEL_VERSION = cfg.modelVersion || 'unversioned';
+const stripComment = o => { if (!o) return o; const { comment, ...rest } = o; return rest; };
+const MODEL_PARAMS = stripComment(cfg.modelParams) || { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
+const CALIBRATION = stripComment(cfg.calibration);
 const sevWeight = priority => SEVERITY_WEIGHTS[priority] != null ? SEVERITY_WEIGHTS[priority] : 1;
 
 const auth = Buffer.from(`${email}:${token}`).toString('base64');
@@ -76,11 +79,15 @@ function normalCDF(z) {
   return 0.5 * (1 + erf);
 }
 
-// TRITON escaped-defect score on a 0–10 scale via an SLA-anchored Gaussian curve
-// over a severity-weighted count. mu = weighted escapes/quarter treated as "medium".
+// Logistic CDF — interchangeable with the Gaussian via modelParams.curveType (Rec #5).
+const logisticCDF = z => 1 / (1 + Math.exp(-z * 1.7));
+
+// TRITON escaped-defect score on a 0–10 scale via an SLA-anchored curve over a
+// severity-weighted count. mu = weighted escapes/quarter treated as "medium".
 function tritonScore10(weightedCount) {
   const { mu, sigma, scaleMax = 10 } = TRITON_CURVE;
-  return Math.round(scaleMax * normalCDF((weightedCount - mu) / sigma) * 10) / 10;
+  const cdf = MODEL_PARAMS.curveType === 'logistic' ? logisticCDF : normalCDF;
+  return Math.round(scaleMax * cdf((weightedCount - mu) / sigma) * 10) / 10;
 }
 
 // Service-request exclusion clause (Confluence §4.6): drop tickets whose summary
@@ -125,8 +132,10 @@ async function getExposure(name) {
   const conf = EXPOSURE.byProject?.[name];
   if (!conf?.devProject) return null;
   try {
-    if (conf.method === 'delivered') {
-      const done = await searchAll(`project = ${conf.devProject} AND statusCategory = Done AND resolved >= ${q(QUARTER_START)}`, ['key']);
+    if (EXPOSURE.method === 'delivered' || conf.method === 'delivered') {
+      // Clean denominator (Rec #1): restrict to delivery-bearing issue types.
+      const types = (EXPOSURE.deliveredIssueTypes || ['Story', 'User Story', 'Bug']).map(q).join(', ');
+      const done = await searchAll(`project = ${conf.devProject} AND issuetype in (${types}) AND statusCategory = Done AND resolved >= ${q(QUARTER_START)}`, ['key']);
       return done.length;
     }
     // default: 'releases'
@@ -226,9 +235,11 @@ async function main() {
     project: PROJECT,
     criticalPriorities: CRITICAL,
     window: { from: QUARTER_START, to: nowD.toISOString().slice(0, 10), quarterEnd: qEndD.toISOString().slice(0, 10), elapsedPct },
-    // Params so the UI recomputes the TRITON score identically on manual exclusion.
+    // Params so the UI recomputes scores identically (and shows them in the Model tab).
     tritonCurve: TRITON_CURVE,
     severityWeights: SEVERITY_WEIGHTS,
+    modelParams: MODEL_PARAMS,
+    ...(CALIBRATION ? { calibration: CALIBRATION } : {}),
     exposureEnabled: !!EXPOSURE.enabled,
     ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,

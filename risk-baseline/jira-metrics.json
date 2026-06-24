@@ -27,6 +27,17 @@
     "Minor": 1,
     "Low": 1
   },
+  "modelParams": {
+    "curveType": "gaussian",
+    "baseFloor": 0,
+    "multiplierMin": 0.7,
+    "multiplierMax": 1.1
+  },
+  "calibration": {
+    "lastReviewed": "2026-Q3",
+    "nextReview": "2027-Q3",
+    "basis": "Q2-2026 observed distribution + team SLA target"
+  },
   "exposureEnabled": false,
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira). v2: severity-weighted count, SLA-anchored curve (mu=5), avg-age informational only.",
   "projects": {
