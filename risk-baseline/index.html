@@ -295,13 +295,17 @@ function AssessView({ onSaved }) {
   const jiraNote = id => {
     if (!jiraProject) return null;
     const upd = jiraMetrics.generatedAt ? ` · updated ${fmtUpdated(jiraMetrics.generatedAt)}` : '';
+    const mr = jiraProject.needsManualReview;
     if (id === 'escapedDefects') {
       const d = jiraProject.escapedDefects;
-      return `From TRITON · ${d.total} escaped defect${d.total!==1?'s':''} (${d.critical} critical) this quarter${upd}`;
+      const warn = mr?.escaped ? ` ⚠ ${mr.escaped} unlinked need manual review` : '';
+      return `From TRITON · ${d.total} escaped defect${d.total!==1?'s':''} (${d.critical} critical) this quarter${upd}${warn}`;
     }
     if (id === 'avgAgeOpenIssues') {
       const d = jiraProject.avgAgeOpenIssues;
-      return d.openCount === 0 ? `From TRITON · no open defects${upd}` : `From TRITON · ${d.openCount} open · avg ${d.avgDays}d${upd}`;
+      const warn = mr?.open ? ` ⚠ ${mr.open} unlinked need manual review` : '';
+      const core = d.openCount === 0 ? `From TRITON · no open defects${upd}` : `From TRITON · ${d.openCount} open · avg ${d.avgDays}d${upd}`;
+      return core + warn;
     }
     return null;
   };
