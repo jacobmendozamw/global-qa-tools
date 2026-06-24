@@ -2,15 +2,35 @@
   "site": "meltwater.atlassian.net",
   "jiraProject": "TRITON",
   "defectIssueType": "Defect",
+  "modelVersion": "2026-Q3-v2",
   "criticalPriorities": ["Blocker", "Critical"],
   "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "severityWeights": {
+    "comment": "Each escaped Defect contributes its priority weight to a severity-weighted count (Rec #3). Higher severity counts more, continuously — replaces the old crude floor. Unlisted priorities default to 1.",
+    "Blocker": 3,
+    "Critical": 2,
+    "Major": 1.5,
+    "High": 1.5,
+    "Medium": 1,
+    "Minor": 1,
+    "Low": 1
+  },
   "tritonCurve": {
-    "comment": "Anchored Gaussian curve mapping escaped-defect count to a 0-10 TRITON score: 10 * normalCDF((count - mu) / sigma). mu/sigma calibrated once from the Q2 2026 observed distribution (mean ~6, std ~3). severityFloorN = minimum score when N+ critical (P1/P2) defects exist (severity overrides volume, §4.6). Revisit calibration only at the documented review, not per quarter.",
-    "mu": 6,
-    "sigma": 3,
-    "severityFloor1": 5.0,
-    "severityFloor2": 8.5,
+    "comment": "0-10 TRITON score = 10 * normalCDF((weightedCount - mu) / sigma). mu is the SLA ANCHOR: the severity-weighted escapes/quarter treated as 'medium' (5/10) — set to a target, not the observed mean (Rec #2,#5). sigma controls spread. Team-confirmed mu=5 for Q3 2026.",
+    "mu": 5,
+    "sigma": 4,
     "scaleMax": 10
+  },
+  "exposure": {
+    "comment": "Exposure normalization (Rec #1). OFF until release data is validated. When enabled per product, the severity-weighted count is divided by exposure and multiplied by referenceExposure, so the score reflects DEFECT DENSITY (defects per release) rather than raw volume. method='releases' counts released fixVersions in the quarter for devProject; method='delivered' counts Done dev issues resolved in the quarter. Leave 'enabled' false for Q2 2026.",
+    "enabled": false,
+    "referenceExposure": 1,
+    "byProject": {
+      "GenAI Lens": { "devProject": "GAIL", "method": "releases" },
+      "Mira Studio": { "devProject": "HZN", "method": "releases" },
+      "Mira": { "devProject": "MIRA", "method": "releases" },
+      "Mobile": { "devProject": "MOB", "method": "releases" }
+    }
   },
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",

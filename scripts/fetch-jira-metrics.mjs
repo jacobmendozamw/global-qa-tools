@@ -29,7 +29,11 @@ const DEFECT_TYPE = cfg.defectIssueType || 'Defect';
 const CRITICAL = cfg.criticalPriorities || ['Blocker', 'Critical'];
 const EXCLUDE_KEYWORDS = cfg.excludeKeywords || [];
 const LINK_ATTRIBUTION = cfg.linkAttribution || {};
-const TRITON_CURVE = cfg.tritonCurve || { mu: 6, sigma: 3, severityFloor1: 5, severityFloor2: 8.5, scaleMax: 10 };
+const TRITON_CURVE = cfg.tritonCurve || { mu: 5, sigma: 4, scaleMax: 10 };
+const SEVERITY_WEIGHTS = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
+const EXPOSURE = cfg.exposure || { enabled: false };
+const MODEL_VERSION = cfg.modelVersion || 'unversioned';
+const sevWeight = priority => SEVERITY_WEIGHTS[priority] != null ? SEVERITY_WEIGHTS[priority] : 1;
 
 const auth = Buffer.from(`${email}:${token}`).toString('base64');
 const headers = { Authorization: `Basic ${auth}`, Accept: 'application/json' };
@@ -72,23 +76,11 @@ function normalCDF(z) {
   return 0.5 * (1 + erf);
 }
 
-// TRITON escaped-defect score on a 0–10 scale via an anchored Gaussian curve.
-// Severity overrides volume: a floor is applied when critical (P1/P2) defects exist.
-function tritonScore10(total, critical) {
-  const { mu, sigma, severityFloor1 = 0, severityFloor2 = 0, scaleMax = 10 } = TRITON_CURVE;
-  const curve = scaleMax * normalCDF((total - mu) / sigma);
-  const floor = critical >= 2 ? severityFloor2 : critical >= 1 ? severityFloor1 : 0;
-  return Math.round(Math.max(curve, floor) * 10) / 10;
-}
-
-// Bands (mitigation — higher score = faster = better):
-//   3 → 0–7 days avg | 2 → 8–30 | 1 → 31+
-// No open issues → nothing aging → best (3).
-function ageScore(avgDays, openCount) {
-  if (openCount === 0) return 3;
-  if (avgDays <= 7) return 3;
-  if (avgDays <= 30) return 2;
-  return 1;
+// TRITON escaped-defect score on a 0–10 scale via an SLA-anchored Gaussian curve
+// over a severity-weighted count. mu = weighted escapes/quarter treated as "medium".
+function tritonScore10(weightedCount) {
+  const { mu, sigma, scaleMax = 10 } = TRITON_CURVE;
+  return Math.round(scaleMax * normalCDF((weightedCount - mu) / sigma) * 10) / 10;
 }
 
 // Service-request exclusion clause (Confluence §4.6): drop tickets whose summary
@@ -125,6 +117,29 @@ function partitionByLink(issues, prefixes) {
   return { matched, manualReview };
 }
 
+// Exposure for defect-density normalization (Rec #1). Returns a count or null.
+// 'releases' = released fixVersions in the quarter; 'delivered' = Done dev issues
+// resolved in the quarter. Disabled unless cfg.exposure.enabled.
+async function getExposure(name) {
+  if (!EXPOSURE.enabled) return null;
+  const conf = EXPOSURE.byProject?.[name];
+  if (!conf?.devProject) return null;
+  try {
+    if (conf.method === 'delivered') {
+      const done = await searchAll(`project = ${conf.devProject} AND statusCategory = Done AND resolved >= ${q(QUARTER_START)}`, ['key']);
+      return done.length;
+    }
+    // default: 'releases'
+    const resp = await fetch(`https://${SITE}/rest/api/3/project/${conf.devProject}/versions`, { headers, signal: AbortSignal.timeout(20000) });
+    if (!resp.ok) throw new Error(`versions ${resp.status}`);
+    const versions = await resp.json();
+    return versions.filter(v => v.released && v.releaseDate && v.releaseDate >= QUARTER_START).length;
+  } catch (e) {
+    console.error(`Exposure for ${name} (${conf.devProject}): ${e.message}`);
+    return null;
+  }
+}
+
 async function computeProject(name, component) {
   const linkPrefixes = prefixesFor(name);
   const needLinks = linkPrefixes.length > 0;
@@ -136,6 +151,8 @@ async function computeProject(name, component) {
   const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefixes);
   const total = escaped.length;
   const critical = escaped.filter(i => CRITICAL.includes(i.fields?.priority?.name)).length;
+  // Severity-weighted count (Rec #3): each defect contributes its priority weight.
+  const weighted = Math.round(escaped.reduce((s, i) => s + sevWeight(i.fields?.priority?.name), 0) * 100) / 100;
   // Per-ticket detail so the UI can show exactly which defects are counted and
   // let an engineer manually exclude one (e.g. a service request missed by the
   // keyword list).
@@ -143,11 +160,18 @@ async function computeProject(name, component) {
     key: i.key,
     summary: i.fields?.summary || '',
     priority: i.fields?.priority?.name || '—',
+    weight: sevWeight(i.fields?.priority?.name),
     critical: CRITICAL.includes(i.fields?.priority?.name),
     url: `https://${SITE}/browse/${i.key}`,
   }));
 
-  // Open (unresolved) defects — average age in days since creation.
+  // Optional exposure normalization → defect density.
+  const exposure = await getExposure(name);
+  const refExp = EXPOSURE.referenceExposure || 1;
+  const tritonInput = (exposure && exposure > 0) ? (weighted / exposure) * refExp : weighted;
+
+  // Open (unresolved) defects — average age in days (informational only; removed
+  // from the mitigation score in v2 to avoid double-counting with escapes, Rec #4).
   const openRaw = await searchAll(`${base} AND resolution = Unresolved${EXCLUDE_CLAUSE}`, fields(['created']));
   const { matched: open, manualReview: openMR } = partitionByLink(openRaw, linkPrefixes);
   const now = Date.now();
@@ -159,8 +183,10 @@ async function computeProject(name, component) {
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
   const result = {
-    escapedDefects: { score: tritonScore10(total, critical), total, critical, tickets },
-    avgAgeOpenIssues: { score: ageScore(avgDays, openCount), avgDays, openCount },
+    escapedDefects: { score: tritonScore10(tritonInput), total, critical, weighted, tickets,
+      ...(exposure != null ? { exposure } : {}) },
+    avgAgeOpenIssues: { avgDays, openCount, informational: true },
+    dataQuality: { manualReview: needLinks ? { escaped: escMR, open: openMR } : { escaped: 0, open: 0 } },
   };
   if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
   return result;
@@ -175,24 +201,35 @@ async function main() {
   for (const [name, component] of Object.entries(cfg.projects)) {
     try {
       projects[name] = await computeProject(name, component);
-      const e = projects[name].escapedDefects, a = projects[name].avgAgeOpenIssues;
+      const e = projects[name].escapedDefects;
       const mr = projects[name].needsManualReview ? ` [manual review: ${projects[name].needsManualReview.escaped} esc / ${projects[name].needsManualReview.open} open]` : '';
-      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) → ${e.score}; open=${a.openCount} avg ${a.avgDays}d → ${a.score}${mr}`);
+      const exp = e.exposure != null ? ` /exp ${e.exposure}` : '';
+      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${mr}`);
     } catch (err) {
       console.error(`Failed for ${name} (${component}): ${err.message}`);
       projects[name] = { error: err.message };
     }
   }
 
+  // Period covered + how far into the quarter we are (a confidence signal: early
+  // in the quarter, low counts are partly just "not enough time yet").
+  const nowD = new Date();
+  const qm = Math.floor(nowD.getUTCMonth() / 3) * 3;
+  const qEndD = new Date(Date.UTC(nowD.getUTCFullYear(), qm + 3, 0));
+  const qStartD = new Date(`${QUARTER_START}T00:00:00Z`);
+  const elapsedPct = Math.max(0, Math.min(100, Math.round((nowD - qStartD) / (qEndD - qStartD) * 100)));
+
   const out = {
-    generatedAt: new Date().toISOString(),
-    quarter: quarterLabel(new Date()),
+    generatedAt: nowD.toISOString(),
+    modelVersion: MODEL_VERSION,
+    quarter: quarterLabel(nowD),
     project: PROJECT,
     criticalPriorities: CRITICAL,
-    // Period covered: from the start of the quarter to the extraction date.
-    window: { from: QUARTER_START, to: new Date().toISOString().slice(0, 10) },
-    // Curve params so the UI can recompute the TRITON score identically on exclusion.
+    window: { from: QUARTER_START, to: nowD.toISOString().slice(0, 10), quarterEnd: qEndD.toISOString().slice(0, 10), elapsedPct },
+    // Params so the UI recomputes the TRITON score identically on manual exclusion.
     tritonCurve: TRITON_CURVE,
+    severityWeights: SEVERITY_WEIGHTS,
+    exposureEnabled: !!EXPOSURE.enabled,
     ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,
   };

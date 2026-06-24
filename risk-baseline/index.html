@@ -189,14 +189,13 @@ const MITIGATION_CRITERIA = [
   { id:'testability', label:'Testability', inputType:'confirm',
     description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
     options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
-  { id:'avgAgeOpenIssues', label:'Avg. age of open issues', inputType:'jira',
-    description:'Average days since creation for unresolved TRITON issues linked to this project at end of quarter.',
-    options:[{score:1,label:'Slow',detail:'31+ days average'},{score:2,label:'Moderate',detail:'8–30 days average'},{score:3,label:'Fast',detail:'0–7 days average'}] },
+  // v2 (Rec #4): "Avg. age of open issues" removed from the mitigation score — it
+  // overlapped with escaped defects (double-counting). Still shown as informational.
 ];
 
-// Weights
+// Weights — mitigation re-normalized to 1.0 after dropping avg-age (was .35/.30/.20/.15).
 const BASE_WEIGHTS  = { userImpact:0.40, rateOfChange:0.35, complexity:0.25 };
-const MIT_WEIGHTS   = { automationConfidence:0.35, testCoverage:0.30, testability:0.20, avgAgeOpenIssues:0.15 };
+const MIT_WEIGHTS   = { automationConfidence:0.41, testCoverage:0.35, testability:0.24 };
 
 // Mitigation multiplier: strong (all 3) → 0.70, weak (all 1) → 1.10
 function mitigationMultiplier(mitScore) {
@@ -207,18 +206,20 @@ function mitigationMultiplier(mitScore) {
 // TRITON escaped-defect score on a 0–10 scale via an anchored Gaussian curve
 // (mirrors scripts/fetch-jira-metrics.mjs). Used to recompute the score live when
 // an engineer manually excludes a ticket. Curve params come from jira-metrics.json.
-const DEFAULT_CURVE = { mu: 6, sigma: 3, severityFloor1: 5, severityFloor2: 8.5, scaleMax: 10 };
+const DEFAULT_CURVE = { mu: 5, sigma: 4, scaleMax: 10 };
+const DEFAULT_SEV_WEIGHTS = { Blocker: 3, Critical: 2, Major: 1.5, High: 1.5, Medium: 1, Minor: 1, Low: 1 };
 function normalCDF(z) {
   const t = 1 / (1 + 0.3275911 * Math.abs(z / Math.SQRT2));
   const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - 0.284496736)*t + 0.254829592) * t * Math.exp(-(z/Math.SQRT2)*(z/Math.SQRT2));
   const erf = z >= 0 ? y : -y;
   return 0.5 * (1 + erf);
 }
-function tritonScore10(total, critical, curve) {
-  const { mu, sigma, severityFloor1 = 0, severityFloor2 = 0, scaleMax = 10 } = curve || DEFAULT_CURVE;
-  const c = scaleMax * normalCDF((total - mu) / sigma);
-  const floor = critical >= 2 ? severityFloor2 : critical >= 1 ? severityFloor1 : 0;
-  return Math.round(Math.max(c, floor) * 10) / 10;
+// Severity-weighted count of a ticket list, then the SLA-anchored 0–10 curve.
+const weightOf = (priority, weights) => (weights || DEFAULT_SEV_WEIGHTS)[priority] ?? 1;
+const weightedCount = (tickets, weights) => tickets.reduce((s, t) => s + weightOf(t.priority, weights), 0);
+function tritonScore10(weighted, curve) {
+  const { mu, sigma, scaleMax = 10 } = curve || DEFAULT_CURVE;
+  return Math.round(scaleMax * normalCDF((weighted - mu) / sigma) * 10) / 10;
 }
 
 function wavg(criteria, weights, scores) {
@@ -311,20 +312,21 @@ function AssessView({ onSaved, jiraMetrics }) {
 
   const finalProject = project === '__custom__' ? customProject.trim() : project;
 
-  // The "Jira" criteria — pre-loaded and locked from jira-metrics.json when available.
-  const JIRA_IDS = ['escapedDefects', 'avgAgeOpenIssues'];
+  // The only Jira-locked scoring criterion (v2). avg-age is informational only.
+  const JIRA_IDS = ['escapedDefects'];
   const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
   const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
 
-  // Escaped-defect tickets + manual exclusions → effective counts and score.
+  // Escaped-defect tickets + manual exclusions → severity-weighted count and score.
   const escapedTickets = jiraProject?.escapedDefects?.tickets || [];
   const activeEscaped = escapedTickets.filter(t => !excludedKeys[t.key]);
   const excludedCount = escapedTickets.length - activeEscaped.length;
   const escTotalEff = activeEscaped.length;
   const escCritEff = activeEscaped.filter(t => t.critical).length;
-  const escScoreEff = escapedTickets.length ? tritonScore10(escTotalEff, escCritEff, jiraMetrics?.tritonCurve) : jiraScore('escapedDefects');
+  const escWeightedEff = weightedCount(activeEscaped, jiraMetrics?.severityWeights);
+  const escScoreEff = escapedTickets.length ? tritonScore10(escWeightedEff, jiraMetrics?.tritonCurve) : jiraScore('escapedDefects');
 
   const jiraNote = id => {
     if (!jiraProject) return null;
@@ -333,7 +335,7 @@ function AssessView({ onSaved, jiraMetrics }) {
     if (id === 'escapedDefects') {
       const exc = excludedCount ? ` · ${excludedCount} excluded` : '';
       const warn = mr?.escaped ? ` ⚠ ${mr.escaped} unlinked need manual review` : '';
-      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical) this quarter${exc}${upd}${warn}`;
+      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical, weighted ${escWeightedEff})${exc}${upd}${warn}`;
     }
     if (id === 'avgAgeOpenIssues') {
       const d = jiraProject.avgAgeOpenIssues;
@@ -388,6 +390,7 @@ function AssessView({ onSaved, jiraMetrics }) {
       const record = {
         id: `${Date.now()}`,
         date: new Date().toISOString(),
+        modelVersion: jiraMetrics?.modelVersion || 'manual',
         project: finalProject,
         evaluator: evaluator.trim(),
         scores,
@@ -532,6 +535,22 @@ function AssessView({ onSaved, jiraMetrics }) {
               )}
             </div>
           )}
+
+          {/* Data confidence (Rec #6) + informational avg-age (Rec #4 — no longer scored). */}
+          {jiraProject && (() => {
+            const mr = jiraProject.needsManualReview || jiraProject.dataQuality?.manualReview || {escaped:0,open:0};
+            const elapsed = jiraMetrics.window?.elapsedPct;
+            const age = jiraProject.avgAgeOpenIssues;
+            const flags = (mr.escaped||mr.open) > 0;
+            return (
+              <div className="card" style={{marginTop:8,padding:'8px 12px',fontSize:11,color:'var(--text2)',display:'flex',flexWrap:'wrap',gap:'4px 14px',alignItems:'center'}}>
+                <span style={{fontWeight:600,color:'var(--text)'}}>Data confidence</span>
+                {elapsed!=null && <span>Quarter {elapsed}% elapsed</span>}
+                <span style={{color:flags?'var(--red-text)':'var(--text2)'}}>{flags?`⚠ ${mr.escaped} esc / ${mr.open} open in manual review`:'No tickets in manual review'}</span>
+                {age && <span style={{color:'var(--text3)'}}>Open-issue age (info, not scored): {age.openCount} open · avg {age.avgDays}d</span>}
+              </div>
+            );
+          })()}
 
           {/* Mitigation Multiplier */}
           <div className="dim-header">
@@ -722,13 +741,19 @@ function HistoryView({ refreshKey }) {
             <div key={proj} className="timeline-project">
               <div className="timeline-project-name">{proj}</div>
               <div className="timeline-points">
-                {recs.map(r=>{
+                {recs.map((r,i)=>{
                   const rl = r.level ? levelByLabel(r.level) : (r.finalRisk != null ? riskLevel(r.finalRisk) : null);
+                  // Quarter-over-quarter trend vs the previous assessment (Rec #10).
+                  const prev = i>0 ? recs[i-1] : null;
+                  const delta = (prev && prev.finalRisk!=null && r.finalRisk!=null) ? r.finalRisk - prev.finalRisk : null;
+                  const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
+                  const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                   return (
                     <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.overrideActive?`Override: ${r.overrideJustification}`:r.notes||''}>
                       <div className="tp-date">{fmtDate(r.date)}</div>
                       <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</div>
                       <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
+                      {dtxt && <div style={{fontSize:10,fontWeight:600,color:dcol}}>{dtxt}</div>}
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
                   );
