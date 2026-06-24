@@ -22,11 +22,11 @@
     "scaleMax": 10
   },
   "modelParams": {
-    "comment": "UI scoring knobs emitted for the page (Rec #5,#7). curveType: gaussian|logistic (#5). baseFloor: min Base-Risk value on 0-10 at the lowest qualitative level — 0 = current mapping (1->0); 3.33 keeps a floor so a core product is never 0 inherent risk (#7). multiplierMin/Max: mitigation multiplier at strongest/weakest — 0.70/1.10 current (asymmetric -30%/+10%); a symmetric alt is 0.80/1.20 (#7). Defaults preserve Q2 behavior.",
+    "comment": "UI scoring knobs emitted for the page (Rec #5,#7). curveType: gaussian|logistic (#5). baseFloor: min Base-Risk value on 0-10 at the lowest qualitative level — 0 = mapping 1->0 (recommended, max discrimination); 1.5-3.33 keeps a floor so a core product is never 0 inherent risk (#7). multiplierMin/Max: mitigation multiplier at strongest/weakest. Team chose SYMMETRIC 0.80/1.20 for Q3 (weak mitigation penalized as much as strong is rewarded, ±20%); the original asymmetric was 0.70/1.10.",
     "curveType": "gaussian",
     "baseFloor": 0,
-    "multiplierMin": 0.70,
-    "multiplierMax": 1.10
+    "multiplierMin": 0.80,
+    "multiplierMax": 1.20
   },
   "calibration": {
     "comment": "Recalibration cadence (Rec #5). mu/sigma are anchored, reviewed on this cadence — NOT per quarter — to keep quarter-over-quarter scores comparable. Recompute basis from accumulated history once >=4 quarters exist.",
