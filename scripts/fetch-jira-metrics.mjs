@@ -171,6 +171,7 @@ async function main() {
     quarter: quarterLabel(new Date()),
     project: PROJECT,
     criticalPriorities: CRITICAL,
+    ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,
   };
   await writeFile(new URL('../risk-baseline/jira-metrics.json', import.meta.url), JSON.stringify(out, null, 2) + '\n');

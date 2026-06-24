@@ -4,6 +4,7 @@
   "defectIssueType": "Defect",
   "criticalPriorities": ["Blocker", "Critical"],
   "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
   "linkAttribution": {
     "Mira Studio": ["HZN"],
