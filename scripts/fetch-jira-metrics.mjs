@@ -29,6 +29,14 @@ const DEFECT_TYPE = cfg.defectIssueType || 'Defect';
 const CRITICAL = cfg.criticalPriorities || ['Blocker', 'Critical'];
 const EXCLUDE_KEYWORDS = cfg.excludeKeywords || [];
 const LINK_ATTRIBUTION = cfg.linkAttribution || {};
+const TRITON_CURVE = cfg.tritonCurve || { mu: 5, sigma: 4, scaleMax: 10 };
+const SEVERITY_WEIGHTS = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
+const EXPOSURE = cfg.exposure || { enabled: false };
+const MODEL_VERSION = cfg.modelVersion || 'unversioned';
+const stripComment = o => { if (!o) return o; const { comment, ...rest } = o; return rest; };
+const MODEL_PARAMS = stripComment(cfg.modelParams) || { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
+const CALIBRATION = stripComment(cfg.calibration);
+const sevWeight = priority => SEVERITY_WEIGHTS[priority] != null ? SEVERITY_WEIGHTS[priority] : 1;
 
 const auth = Buffer.from(`${email}:${token}`).toString('base64');
 const headers = { Authorization: `Basic ${auth}`, Accept: 'application/json' };
@@ -63,24 +71,23 @@ async function searchAll(jql, fields) {
   return out;
 }
 
-// Bands from the risk-baseline model:
-//   1 → 0–1 escapes and none critical
-//   2 → 2–4 escapes, or 1 critical
-//   3 → 5+ escapes, or 2+ critical   (severity overrides volume)
-function escapedDefectScore(total, critical) {
-  if (total >= 5 || critical >= 2) return 3;
-  if (total >= 2 || critical >= 1) return 2;
-  return 1;
+// Standard normal CDF via the Abramowitz-Stegun erf approximation (7.1.26).
+function normalCDF(z) {
+  const t = 1 / (1 + 0.3275911 * Math.abs(z / Math.SQRT2));
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-(z / Math.SQRT2) * (z / Math.SQRT2));
+  const erf = z >= 0 ? y : -y;
+  return 0.5 * (1 + erf);
 }
 
-// Bands (mitigation — higher score = faster = better):
-//   3 → 0–7 days avg | 2 → 8–30 | 1 → 31+
-// No open issues → nothing aging → best (3).
-function ageScore(avgDays, openCount) {
-  if (openCount === 0) return 3;
-  if (avgDays <= 7) return 3;
-  if (avgDays <= 30) return 2;
-  return 1;
+// Logistic CDF — interchangeable with the Gaussian via modelParams.curveType (Rec #5).
+const logisticCDF = z => 1 / (1 + Math.exp(-z * 1.7));
+
+// TRITON escaped-defect score on a 0–10 scale via an SLA-anchored curve over a
+// severity-weighted count. mu = weighted escapes/quarter treated as "medium".
+function tritonScore10(weightedCount) {
+  const { mu, sigma, scaleMax = 10 } = TRITON_CURVE;
+  const cdf = MODEL_PARAMS.curveType === 'logistic' ? logisticCDF : normalCDF;
+  return Math.round(scaleMax * cdf((weightedCount - mu) / sigma) * 10) / 10;
 }
 
 // Service-request exclusion clause (Confluence §4.6): drop tickets whose summary
@@ -117,6 +124,31 @@ function partitionByLink(issues, prefixes) {
   return { matched, manualReview };
 }
 
+// Exposure for defect-density normalization (Rec #1). Returns a count or null.
+// 'releases' = released fixVersions in the quarter; 'delivered' = Done dev issues
+// resolved in the quarter. Disabled unless cfg.exposure.enabled.
+async function getExposure(name) {
+  if (!EXPOSURE.enabled) return null;
+  const conf = EXPOSURE.byProject?.[name];
+  if (!conf?.devProject) return null;
+  try {
+    if (EXPOSURE.method === 'delivered' || conf.method === 'delivered') {
+      // Clean denominator (Rec #1): restrict to delivery-bearing issue types.
+      const types = (EXPOSURE.deliveredIssueTypes || ['Story', 'User Story', 'Bug']).map(q).join(', ');
+      const done = await searchAll(`project = ${conf.devProject} AND issuetype in (${types}) AND statusCategory = Done AND resolved >= ${q(QUARTER_START)}`, ['key']);
+      return done.length;
+    }
+    // default: 'releases'
+    const resp = await fetch(`https://${SITE}/rest/api/3/project/${conf.devProject}/versions`, { headers, signal: AbortSignal.timeout(20000) });
+    if (!resp.ok) throw new Error(`versions ${resp.status}`);
+    const versions = await resp.json();
+    return versions.filter(v => v.released && v.releaseDate && v.releaseDate >= QUARTER_START).length;
+  } catch (e) {
+    console.error(`Exposure for ${name} (${conf.devProject}): ${e.message}`);
+    return null;
+  }
+}
+
 async function computeProject(name, component) {
   const linkPrefixes = prefixesFor(name);
   const needLinks = linkPrefixes.length > 0;
@@ -124,12 +156,31 @@ async function computeProject(name, component) {
   const fields = base => needLinks ? base.concat('issuelinks') : base;
 
   // Escaped defects this calendar quarter (service requests excluded).
-  const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority']));
+  const escapedRaw = await searchAll(`${base} AND created >= ${q(QUARTER_START)}${EXCLUDE_CLAUSE}`, fields(['priority', 'summary']));
   const { matched: escaped, manualReview: escMR } = partitionByLink(escapedRaw, linkPrefixes);
   const total = escaped.length;
   const critical = escaped.filter(i => CRITICAL.includes(i.fields?.priority?.name)).length;
+  // Severity-weighted count (Rec #3): each defect contributes its priority weight.
+  const weighted = Math.round(escaped.reduce((s, i) => s + sevWeight(i.fields?.priority?.name), 0) * 100) / 100;
+  // Per-ticket detail so the UI can show exactly which defects are counted and
+  // let an engineer manually exclude one (e.g. a service request missed by the
+  // keyword list).
+  const tickets = escaped.map(i => ({
+    key: i.key,
+    summary: i.fields?.summary || '',
+    priority: i.fields?.priority?.name || '—',
+    weight: sevWeight(i.fields?.priority?.name),
+    critical: CRITICAL.includes(i.fields?.priority?.name),
+    url: `https://${SITE}/browse/${i.key}`,
+  }));
 
-  // Open (unresolved) defects — average age in days since creation.
+  // Optional exposure normalization → defect density.
+  const exposure = await getExposure(name);
+  const refExp = EXPOSURE.referenceExposure || 1;
+  const tritonInput = (exposure && exposure > 0) ? (weighted / exposure) * refExp : weighted;
+
+  // Open (unresolved) defects — average age in days (informational only; removed
+  // from the mitigation score in v2 to avoid double-counting with escapes, Rec #4).
   const openRaw = await searchAll(`${base} AND resolution = Unresolved${EXCLUDE_CLAUSE}`, fields(['created']));
   const { matched: open, manualReview: openMR } = partitionByLink(openRaw, linkPrefixes);
   const now = Date.now();
@@ -141,8 +192,10 @@ async function computeProject(name, component) {
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
   const result = {
-    escapedDefects: { score: escapedDefectScore(total, critical), total, critical },
-    avgAgeOpenIssues: { score: ageScore(avgDays, openCount), avgDays, openCount },
+    escapedDefects: { score: tritonScore10(tritonInput), total, critical, weighted, tickets,
+      ...(exposure != null ? { exposure } : {}) },
+    avgAgeOpenIssues: { avgDays, openCount, informational: true },
+    dataQuality: { manualReview: needLinks ? { escaped: escMR, open: openMR } : { escaped: 0, open: 0 } },
   };
   if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
   return result;
@@ -157,20 +210,38 @@ async function main() {
   for (const [name, component] of Object.entries(cfg.projects)) {
     try {
       projects[name] = await computeProject(name, component);
-      const e = projects[name].escapedDefects, a = projects[name].avgAgeOpenIssues;
+      const e = projects[name].escapedDefects;
       const mr = projects[name].needsManualReview ? ` [manual review: ${projects[name].needsManualReview.escaped} esc / ${projects[name].needsManualReview.open} open]` : '';
-      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) → ${e.score}; open=${a.openCount} avg ${a.avgDays}d → ${a.score}${mr}`);
+      const exp = e.exposure != null ? ` /exp ${e.exposure}` : '';
+      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${mr}`);
     } catch (err) {
       console.error(`Failed for ${name} (${component}): ${err.message}`);
       projects[name] = { error: err.message };
     }
   }
 
+  // Period covered + how far into the quarter we are (a confidence signal: early
+  // in the quarter, low counts are partly just "not enough time yet").
+  const nowD = new Date();
+  const qm = Math.floor(nowD.getUTCMonth() / 3) * 3;
+  const qEndD = new Date(Date.UTC(nowD.getUTCFullYear(), qm + 3, 0));
+  const qStartD = new Date(`${QUARTER_START}T00:00:00Z`);
+  const elapsedPct = Math.max(0, Math.min(100, Math.round((nowD - qStartD) / (qEndD - qStartD) * 100)));
+
   const out = {
-    generatedAt: new Date().toISOString(),
-    quarter: quarterLabel(new Date()),
+    generatedAt: nowD.toISOString(),
+    modelVersion: MODEL_VERSION,
+    quarter: quarterLabel(nowD),
     project: PROJECT,
     criticalPriorities: CRITICAL,
+    window: { from: QUARTER_START, to: nowD.toISOString().slice(0, 10), quarterEnd: qEndD.toISOString().slice(0, 10), elapsedPct },
+    // Params so the UI recomputes scores identically (and shows them in the Model tab).
+    tritonCurve: TRITON_CURVE,
+    severityWeights: SEVERITY_WEIGHTS,
+    modelParams: MODEL_PARAMS,
+    ...(CALIBRATION ? { calibration: CALIBRATION } : {}),
+    exposureEnabled: !!EXPOSURE.enabled,
+    ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
     projects,
   };
   await writeFile(new URL('../risk-baseline/jira-metrics.json', import.meta.url), JSON.stringify(out, null, 2) + '\n');

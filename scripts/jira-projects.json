@@ -2,8 +2,52 @@
   "site": "meltwater.atlassian.net",
   "jiraProject": "TRITON",
   "defectIssueType": "Defect",
+  "modelVersion": "2026-Q3-v2",
   "criticalPriorities": ["Blocker", "Critical"],
   "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "severityWeights": {
+    "comment": "Each escaped Defect contributes its priority weight to a severity-weighted count (Rec #3). Higher severity counts more, continuously — replaces the old crude floor. Unlisted priorities default to 1.",
+    "Blocker": 3,
+    "Critical": 2,
+    "Major": 1.5,
+    "High": 1.5,
+    "Medium": 1,
+    "Minor": 1,
+    "Low": 1
+  },
+  "tritonCurve": {
+    "comment": "0-10 TRITON score = scaleMax * CDF((weightedCount - mu)/sigma), CDF per modelParams.curveType. mu is the SLA ANCHOR: severity-weighted escapes/quarter treated as 'medium' (5/10) — a target, not the observed mean (Rec #2,#5). Team-confirmed mu=5 for Q3 2026.",
+    "mu": 5,
+    "sigma": 4,
+    "scaleMax": 10
+  },
+  "modelParams": {
+    "comment": "UI scoring knobs emitted for the page (Rec #5,#7). curveType: gaussian|logistic (#5). baseFloor: min Base-Risk value on 0-10 at the lowest qualitative level. TEAM-CONFIRMED baseFloor=0 for Q3 2026 (mapping 1->0, max discrimination); 1.5-3.33 would keep a floor so a core product is never 0 inherent risk (#7). multiplierMin/Max: mitigation multiplier at strongest/weakest. Team chose SYMMETRIC 0.80/1.20 for Q3 (weak mitigation penalized as much as strong is rewarded, ±20%); the original asymmetric was 0.70/1.10.",
+    "curveType": "gaussian",
+    "baseFloor": 0,
+    "multiplierMin": 0.80,
+    "multiplierMax": 1.20
+  },
+  "calibration": {
+    "comment": "Recalibration cadence (Rec #5). mu/sigma are anchored, reviewed on this cadence — NOT per quarter — to keep quarter-over-quarter scores comparable. Recompute basis from accumulated history once >=4 quarters exist.",
+    "lastReviewed": "2026-Q3",
+    "nextReview": "2027-Q3",
+    "basis": "Q2-2026 observed distribution + team SLA target"
+  },
+  "exposure": {
+    "comment": "Exposure normalization (Rec #1) -> DEFECT DENSITY = weightedCount / exposure * referenceExposure. OFF. FINDING (verified 2026-06 in Jira): cross-team density is NOT viable with current data. 'releases' unusable (fixVersions not tied to issues). 'delivered' denominators are wildly inconsistent across teams — even clean User-Story counts this quarter: GAIL 67, HZN 62, MIRA 12, MOB 378 (31x spread reflecting ticketing style, not real output). Normalizing cross-team would peg Mira at max and Mobile near zero. VIABLE PATH instead: per-project trend (each project vs its OWN history), which needs accumulated quarters (ties to #5/#8). Keep disabled until then.",
+    "enabled": false,
+    "method": "delivered",
+    "deliveredIssueTypes": ["Story", "User Story", "Bug"],
+    "referenceExposure": 100,
+    "byProject": {
+      "GenAI Lens": { "devProject": "GAIL", "q2_storyDone": 67, "q2_allDone": 296 },
+      "Mira Studio": { "devProject": "HZN", "q2_storyDone": 62, "q2_allDone": 101 },
+      "Mira": { "devProject": "MIRA", "q2_storyDone": 12, "q2_allDone": 93 },
+      "Mobile": { "devProject": "MOB", "q2_storyDone": 378, "q2_allDone": 893 }
+    }
+  },
+  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
   "linkAttribution": {
     "Mira Studio": ["HZN"],

@@ -149,10 +149,10 @@ const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile'];
 
 // Project defaults map
 const PROJECT_DEFAULTS = {
-  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:1, testability:3, testCoverage:3, automationConfidence:3 },
   'Mira Studio': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
-  'Mira':        { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:2, automationConfidence:2 },
-  'Mobile':      { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mira':        { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:3, automationConfidence:1 },
+  'Mobile':      { userImpact:2, rateOfChange:3, complexity:2, testability:3, testCoverage:3, automationConfidence:1 },
 };
 
 // Criteria definitions
@@ -170,11 +170,12 @@ const BASE_RISK_CRITERIA = [
 
 const TRITON_CRITERIA = [
   { id:'escapedDefects', label:'Escaped defects', inputType:'jira',
-    description:'Count from TRITON filtered by project component, excluding service requests. Severity overrides volume: if ≤4 total but any ticket is P1/P2, use the severity band.',
+    description:'TRITON Defects this quarter (service requests excluded), scored 0–10 on an anchored Gaussian curve. Severity overrides volume: P1/P2 tickets raise the floor. Sourced automatically from TRITON; the options below are only a manual fallback for unmapped projects.',
+    // Manual-fallback options on the 0–10 scale (used only when no Jira data).
     options:[
-      {score:1,label:'Score 1',detail:'0–1 escapes and none critical (P1/P2)'},
-      {score:2,label:'Score 2',detail:'2–4 escapes, or 1 escape critical (P1/P2)'},
-      {score:3,label:'Score 3',detail:'5+ escapes, or 2+ escapes critical (P1/P2)'},
+      {score:2,label:'Low',detail:'Few escaped defects this quarter'},
+      {score:5,label:'Medium',detail:'A moderate number of escaped defects'},
+      {score:9,label:'High',detail:'Many escaped defects, or critical (P1/P2) present'},
     ] },
 ];
 
@@ -188,19 +189,39 @@ const MITIGATION_CRITERIA = [
   { id:'testability', label:'Testability', inputType:'confirm',
     description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
     options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
-  { id:'avgAgeOpenIssues', label:'Avg. age of open issues', inputType:'jira',
-    description:'Average days since creation for unresolved TRITON issues linked to this project at end of quarter.',
-    options:[{score:1,label:'Slow',detail:'31+ days average'},{score:2,label:'Moderate',detail:'8–30 days average'},{score:3,label:'Fast',detail:'0–7 days average'}] },
+  // v2 (Rec #4): "Avg. age of open issues" removed from the mitigation score — it
+  // overlapped with escaped defects (double-counting). Still shown as informational.
 ];
 
-// Weights
+// Weights — mitigation re-normalized to 1.0 after dropping avg-age (was .35/.30/.20/.15).
 const BASE_WEIGHTS  = { userImpact:0.40, rateOfChange:0.35, complexity:0.25 };
-const MIT_WEIGHTS   = { automationConfidence:0.35, testCoverage:0.30, testability:0.20, avgAgeOpenIssues:0.15 };
+const MIT_WEIGHTS   = { automationConfidence:0.41, testCoverage:0.35, testability:0.24 };
 
-// Mitigation multiplier: strong (all 3) → 0.70, weak (all 1) → 1.10
-function mitigationMultiplier(mitScore) {
-  // Linear mapping: score 1 → 1.10, score 3 → 0.70
-  return 1.10 - ((mitScore - 1) / 2) * 0.40;
+const DEFAULT_CURVE = { mu: 5, sigma: 4, scaleMax: 10 };
+const DEFAULT_SEV_WEIGHTS = { Blocker: 3, Critical: 2, Major: 1.5, High: 1.5, Medium: 1, Minor: 1, Low: 1 };
+const DEFAULT_MODEL_PARAMS = { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
+
+// Mitigation multiplier: strong (all 3) → min, weak (all 1) → max (Rec #7 configurable).
+function mitigationMultiplier(mitScore, mp) {
+  const { multiplierMin = 0.70, multiplierMax = 1.10 } = mp || DEFAULT_MODEL_PARAMS;
+  return multiplierMax - ((mitScore - 1) / 2) * (multiplierMax - multiplierMin);
+}
+
+// TRITON escaped-defect score on a 0–10 scale via an anchored curve (Gaussian or
+// logistic, Rec #5). Mirrors scripts/fetch-jira-metrics.mjs. Params from jira-metrics.json.
+function normalCDF(z) {
+  const t = 1 / (1 + 0.3275911 * Math.abs(z / Math.SQRT2));
+  const y = 1 - (((((1.061405429*t - 1.453152027)*t) + 1.421413741)*t - 0.284496736)*t + 0.254829592) * t * Math.exp(-(z/Math.SQRT2)*(z/Math.SQRT2));
+  const erf = z >= 0 ? y : -y;
+  return 0.5 * (1 + erf);
+}
+const logisticCDF = z => 1 / (1 + Math.exp(-z * 1.7));
+const weightOf = (priority, weights) => (weights || DEFAULT_SEV_WEIGHTS)[priority] ?? 1;
+const weightedCount = (tickets, weights) => tickets.reduce((s, t) => s + weightOf(t.priority, weights), 0);
+function tritonScore10(weighted, curve, mp) {
+  const { mu, sigma, scaleMax = 10 } = curve || DEFAULT_CURVE;
+  const cdf = (mp || DEFAULT_MODEL_PARAMS).curveType === 'logistic' ? logisticCDF : normalCDF;
+  return Math.round(scaleMax * cdf((weighted - mu) / sigma) * 10) / 10;
 }
 
 function wavg(criteria, weights, scores) {
@@ -210,24 +231,36 @@ function wavg(criteria, weights, scores) {
   return filled.reduce((s,c) => s + scores[c.id] * weights[c.id], 0) / tw;
 }
 
-function compute(scores, overrideActive) {
-  if (overrideActive) return { baseRisk:null, tritonScore:scores.escapedDefects||null, mitScore:null, multiplier:null, finalRisk:3.0, overridden:true };
-  const baseRisk   = wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores);
-  const tritonScore = scores.escapedDefects || null;
+const SCALE_MAX = 10;
+// Map a 1–3 weighted-average (manual criteria) onto 0–10, honoring a base floor
+// (Rec #7): floor at the lowest qualitative level so a core product is never 0.
+const to10 = (v, mp) => {
+  if (v == null) return null;
+  const floor = (mp || DEFAULT_MODEL_PARAMS).baseFloor || 0;
+  return floor + ((v - 1) / 2) * (SCALE_MAX - floor);
+};
+
+function compute(scores, overrideActive, mp) {
+  mp = mp || DEFAULT_MODEL_PARAMS;
+  if (overrideActive) return { baseRisk:null, tritonScore:(scores.escapedDefects ?? null), mitScore:null, multiplier:null, finalRisk:SCALE_MAX, overridden:true };
+  const base10     = to10(wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores), mp);
+  const tritonScore = scores.escapedDefects ?? null; // already on the 0–10 scale
   const mitScore   = wavg(MITIGATION_CRITERIA, MIT_WEIGHTS, scores);
-  if (!baseRisk && !tritonScore) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
-  const combined = ((baseRisk||0) * 0.40) + ((tritonScore||0) * 0.60);
-  const multiplier = mitScore ? mitigationMultiplier(mitScore) : 1.0;
-  const finalRisk = combined * multiplier;
-  return { baseRisk, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
+  if (base10 == null && tritonScore == null) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
+  const combined = ((base10||0) * 0.40) + ((tritonScore||0) * 0.60);
+  const multiplier = mitScore ? mitigationMultiplier(mitScore, mp) : 1.0;
+  const finalRisk = Math.min(SCALE_MAX, combined * multiplier);
+  return { baseRisk:base10, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
 }
 
+// 0–10 scale (linear rescale of the previous 1.5 / 2.2 thresholds × 10/3).
 const LEVELS = [
-  {max:1.5, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
-  {max:2.2, label:'Medium', text:'#633806', bg:'#FAEEDA', border:'#BA7517'},
+  {max:5.0, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
+  {max:7.3, label:'Medium', text:'#633806', bg:'#FAEEDA', border:'#BA7517'},
   {max:Infinity, label:'High', text:'#712B13', bg:'#FAECE7', border:'#D85A30'},
 ];
 const riskLevel = s => LEVELS.find(l => s <= l.max);
+const levelByLabel = lbl => LEVELS.find(l => l.label === lbl);
 
 // Option colors by criterion type
 const RISK_COLORS   = {1:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'}};
@@ -272,7 +305,7 @@ function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoa
 }
 
 // ── AssessView ────────────────────────────────────────────────────────────────
-function AssessView({ onSaved }) {
+function AssessView({ onSaved, jiraMetrics }) {
   const [project, setProject] = useState('');
   const [customProject, setCustomProject] = useState('');
   const [evaluator, setEvaluator] = useState('');
@@ -282,24 +315,36 @@ function AssessView({ onSaved }) {
   const [overrideJustification, setOverrideJustification] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
-  const [jiraMetrics, setJiraMetrics] = useState(null);
+  const [excludedKeys, setExcludedKeys] = useState({}); // manually excluded escaped-defect tickets
+  const [showTickets, setShowTickets] = useState(false);
+  const [expertLevel, setExpertLevel] = useState(''); // #8 validation: evaluator's independent gut call
 
   const finalProject = project === '__custom__' ? customProject.trim() : project;
 
-  // The "Jira" criteria — pre-loaded and locked from jira-metrics.json when available.
-  const JIRA_IDS = ['escapedDefects', 'avgAgeOpenIssues'];
+  // The only Jira-locked scoring criterion (v2). avg-age is informational only.
+  const JIRA_IDS = ['escapedDefects'];
   const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
   const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
+
+  // Escaped-defect tickets + manual exclusions → severity-weighted count and score.
+  const escapedTickets = jiraProject?.escapedDefects?.tickets || [];
+  const activeEscaped = escapedTickets.filter(t => !excludedKeys[t.key]);
+  const excludedCount = escapedTickets.length - activeEscaped.length;
+  const escTotalEff = activeEscaped.length;
+  const escCritEff = activeEscaped.filter(t => t.critical).length;
+  const escWeightedEff = weightedCount(activeEscaped, jiraMetrics?.severityWeights);
+  const escScoreEff = escapedTickets.length ? tritonScore10(escWeightedEff, jiraMetrics?.tritonCurve, jiraMetrics?.modelParams) : jiraScore('escapedDefects');
+
   const jiraNote = id => {
     if (!jiraProject) return null;
     const upd = jiraMetrics.generatedAt ? ` · updated ${fmtUpdated(jiraMetrics.generatedAt)}` : '';
     const mr = jiraProject.needsManualReview;
     if (id === 'escapedDefects') {
-      const d = jiraProject.escapedDefects;
+      const exc = excludedCount ? ` · ${excludedCount} excluded` : '';
       const warn = mr?.escaped ? ` ⚠ ${mr.escaped} unlinked need manual review` : '';
-      return `From TRITON · ${d.total} escaped defect${d.total!==1?'s':''} (${d.critical} critical) this quarter${upd}${warn}`;
+      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical, weighted ${escWeightedEff})${exc}${upd}${warn}`;
     }
     if (id === 'avgAgeOpenIssues') {
       const d = jiraProject.avgAgeOpenIssues;
@@ -309,14 +354,6 @@ function AssessView({ onSaved }) {
     }
     return null;
   };
-
-  // Load Jira metrics once on mount.
-  useEffect(() => {
-    fetch('./jira-metrics.json', {cache:'no-store'})
-      .then(r => r.ok ? r.json() : null)
-      .then(setJiraMetrics)
-      .catch(() => setJiraMetrics(null));
-  }, []);
 
   // Load defaults + overlay Jira scores when project (or Jira data) changes.
   useEffect(() => {
@@ -328,17 +365,26 @@ function AssessView({ onSaved }) {
       }
     }
     setScores(base);
+    setExcludedKeys({});
+    setShowTickets(false);
     setOverrideActive(false);
     setOverrideJustification('');
   }, [finalProject, jiraMetrics]);
 
+  // Keep the escaped-defects score in sync with manual ticket exclusions.
+  useEffect(() => {
+    if (!escapedTickets.length) return;
+    setScores(s => s.escapedDefects === escScoreEff ? s : ({...s, escapedDefects: escScoreEff}));
+  }, [escScoreEff, escapedTickets.length]);
+
   const setScore = (id, val) => setScores(s => ({...s, [id]: val}));
+  const toggleExclude = key => setExcludedKeys(m => ({...m, [key]: !m[key]}));
 
   const allCriteria = [...BASE_RISK_CRITERIA, ...TRITON_CRITERIA, ...MITIGATION_CRITERIA];
   const filledCount = allCriteria.filter(c => scores[c.id] != null).length;
   const pct = Math.round(filledCount / allCriteria.length * 100);
 
-  const result = compute(scores, overrideActive);
+  const result = compute(scores, overrideActive, jiraMetrics?.modelParams);
   const rl = result.finalRisk != null ? riskLevel(result.finalRisk) : null;
 
   const canSave = filledCount === allCriteria.length && evaluator.trim() && finalProject &&
@@ -353,6 +399,7 @@ function AssessView({ onSaved }) {
       const record = {
         id: `${Date.now()}`,
         date: new Date().toISOString(),
+        modelVersion: jiraMetrics?.modelVersion || 'manual',
         project: finalProject,
         evaluator: evaluator.trim(),
         scores,
@@ -364,13 +411,21 @@ function AssessView({ onSaved }) {
         multiplier: result.multiplier,
         finalRisk: result.finalRisk,
         level: rl?.label || '',
+        scaleMax: 10,
         notes: notes.trim(),
-        // Snapshot of the Jira-sourced inputs for transparency / auditability.
-        jira: jiraProject ? { source: 'TRITON', quarter: jiraMetrics?.quarter, generatedAt: jiraMetrics?.generatedAt, ...jiraProject } : null,
+        // Snapshot of the Jira-sourced inputs for transparency / auditability,
+        // including any tickets the engineer manually excluded.
+        jira: jiraProject ? {
+          source: 'TRITON', quarter: jiraMetrics?.quarter, window: jiraMetrics?.window, generatedAt: jiraMetrics?.generatedAt,
+          ...jiraProject,
+          excludedTickets: escapedTickets.filter(t => excludedKeys[t.key]).map(t => t.key),
+          escapedEffective: escapedTickets.length ? { total: escTotalEff, critical: escCritEff, score: escScoreEff } : null,
+        } : null,
       };
       saveAssessment(record);
       showToast('Assessment saved');
       setScores({});
+      setExcludedKeys({});
       setOverrideActive(false);
       setOverrideJustification('');
       setNotes('');
@@ -430,12 +485,81 @@ function AssessView({ onSaved }) {
             <div className="dim-title">TRITON Score</div>
             <span className="dim-badge" style={{background:'#E8F0FE',color:'#1a3a6b',borderColor:'#4A6FA5'}}>60% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON when available (🔒 locked) — escaped Defects created this quarter, scored by the bands below. Falls back to manual entry for projects not mapped in Jira. See the Escaped Defect Methodology in Confluence for the JQL filter.</div>
-          {TRITON_CRITERIA.map(c => (
-            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
-              colorMap={RISK_COLORS} weightPct="60% effective" autoLoaded={false}
-              locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
-          ))}
+          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON (🔒 locked) — Defects this quarter scored 0–10 on an anchored Gaussian curve, severity-adjusted. Falls back to manual entry for projects not mapped in Jira. See §4.6 in Confluence for the JQL filter and curve.</div>
+          {TRITON_CRITERIA.map(c => {
+            if (isJiraLocked(c)) {
+              const lvl = riskLevel(escScoreEff) || {};
+              return (
+                <div key={c.id} className="criterion-card filled">
+                  <div className="criterion-top">
+                    <div className="criterion-name">{c.label}</div>
+                    <div className="criterion-meta">
+                      <span style={{fontSize:11,color:'var(--text2)'}}>60% effective</span>
+                      <span className="auto-tag">🔒 Jira</span>
+                    </div>
+                  </div>
+                  <div className="criterion-desc">{c.description}</div>
+                  <div style={{display:'flex',alignItems:'center',gap:12,marginTop:6}}>
+                    <div style={{minWidth:62,textAlign:'center',padding:'6px 8px',borderRadius:8,border:`1.5px solid ${lvl.border||'var(--border2)'}`,background:lvl.bg||'var(--bg2)'}}>
+                      <div style={{fontSize:22,fontWeight:700,lineHeight:1,color:lvl.text||'var(--text)'}}>{escScoreEff!=null?escScoreEff.toFixed(1):'—'}</div>
+                      <div style={{fontSize:9,color:lvl.text||'var(--text3)'}}>of 10</div>
+                    </div>
+                    <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.5}}>{jiraNote(c.id)}</div>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+                colorMap={{2:RISK_COLORS[1],5:RISK_COLORS[2],9:RISK_COLORS[3]}} weightPct="60% effective" autoLoaded={false} />
+            );
+          })}
+
+          {/* Escaped-defect ticket viewer — see exactly which defects are counted
+              and manually exclude any service request the keyword filter missed. */}
+          {escapedTickets.length > 0 && (
+            <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTickets(v=>!v)}>
+                <span style={{fontSize:12,fontWeight:600}}>{showTickets?'▾':'▸'} Defects considered ({escTotalEff}{excludedCount?` of ${escapedTickets.length}`:''})</span>
+                <span style={{fontSize:10.5,color:'var(--text3)'}}>Exclude a ticket if it's a service request the keyword filter missed</span>
+              </div>
+              {showTickets && (
+                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
+                  {escapedTickets.map(t => {
+                    const ex = !!excludedKeys[t.key];
+                    const pc = t.critical ? {bg:'#FAECE7',bd:'#D85A30',tx:'#712B13'} : {bg:'var(--bg2)',bd:'var(--border2)',tx:'var(--text2)'};
+                    return (
+                      <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5,background:ex?'var(--bg2)':'transparent',opacity:ex?0.5:1}}>
+                        <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:pc.bg,color:pc.tx,border:`.5px solid ${pc.bd}`,whiteSpace:'nowrap'}}>{t.priority}</span>
+                        <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                        <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1,textDecoration:ex?'line-through':'none'}} title={t.summary}>{t.summary}</span>
+                        <button className="opt-btn" onClick={()=>toggleExclude(t.key)} style={{fontSize:10,padding:'2px 8px',flexShrink:0,cursor:'pointer'}}>{ex?'Restore':'Exclude'}</button>
+                      </div>
+                    );
+                  })}
+                  <div style={{fontSize:10.5,color:'var(--text3)',marginTop:5,borderTop:'.5px solid var(--border)',paddingTop:5}}>
+                    Effective: {escTotalEff} escaped ({escCritEff} critical) → score {escScoreEff}.{excludedCount?` ${excludedCount} excluded — recorded with the assessment.`:''}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Data confidence (Rec #6) + informational avg-age (Rec #4 — no longer scored). */}
+          {jiraProject && (() => {
+            const mr = jiraProject.needsManualReview || jiraProject.dataQuality?.manualReview || {escaped:0,open:0};
+            const elapsed = jiraMetrics.window?.elapsedPct;
+            const age = jiraProject.avgAgeOpenIssues;
+            const flags = (mr.escaped||mr.open) > 0;
+            return (
+              <div className="card" style={{marginTop:8,padding:'8px 12px',fontSize:11,color:'var(--text2)',display:'flex',flexWrap:'wrap',gap:'4px 14px',alignItems:'center'}}>
+                <span style={{fontWeight:600,color:'var(--text)'}}>Data confidence</span>
+                {elapsed!=null && <span>Quarter {elapsed}% elapsed</span>}
+                <span style={{color:flags?'var(--red-text)':'var(--text2)'}}>{flags?`⚠ ${mr.escaped} esc / ${mr.open} open in manual review`:'No tickets in manual review'}</span>
+                {age && <span style={{color:'var(--text3)'}}>Open-issue age (info, not scored): {age.openCount} open · avg {age.avgDays}d</span>}
+              </div>
+            );
+          })()}
 
           {/* Mitigation Multiplier */}
           <div className="dim-header">
@@ -454,14 +578,14 @@ function AssessView({ onSaved }) {
           {/* Manual Override */}
           <div className="dim-header">
             <div className="dim-title">Manual Override</div>
-            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 3.0</span>
+            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 10</span>
           </div>
           <div className="helper" style={{marginBottom:10}}>Activate only if forward-looking signals indicate risk not yet reflected in data. Written justification is required.</div>
           <div className={`override-card ${overrideActive ? 'active' : ''}`}>
             <label className="override-toggle">
               <input type="checkbox" checked={overrideActive} onChange={e=>setOverrideActive(e.target.checked)}/>
               <span className="override-toggle-label" style={{color: overrideActive ? 'var(--red-text)' : 'var(--text)'}}>
-                Activate override — set Final Risk to 3.0 (High)
+                Activate override — set Final Risk to 10 (High)
               </span>
             </label>
             {overrideActive && (
@@ -492,15 +616,15 @@ function AssessView({ onSaved }) {
               {result.overridden ? 'Override active' : 'Final Risk'}
             </div>
             <div className="score-num" style={{color:rl?rl.text:'var(--text3)'}}>
-              {result.finalRisk != null ? result.finalRisk.toFixed(2) : '—'}
+              {result.finalRisk != null ? result.finalRisk.toFixed(1) : '—'}<span style={{fontSize:'0.4em',fontWeight:500,opacity:.7}}> / 10</span>
             </div>
             <div className="score-level" style={{color:rl?rl.text:'var(--text3)'}}>
               {rl ? rl.label : 'Pending'}
             </div>
             {result.baseRisk != null && result.tritonScore != null && !result.overridden && (
               <div className="score-breakdown" style={{color:rl?.text}}>
-                Base {result.baseRisk.toFixed(2)} × 0.40<br/>
-                TRITON {result.tritonScore.toFixed(2)} × 0.60<br/>
+                Base {result.baseRisk.toFixed(1)} × 0.40<br/>
+                TRITON {result.tritonScore.toFixed(1)} × 0.60<br/>
                 × {result.multiplier.toFixed(2)} multiplier
               </div>
             )}
@@ -508,15 +632,15 @@ function AssessView({ onSaved }) {
 
           {/* Formula */}
           <div className="formula-display">
-            <strong>Formula</strong><br/>
+            <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
             <code>(Base × 0.40 + TRITON × 0.60) × Multiplier</code><br/>
-            <span style={{fontSize:10}}>Override → Final Risk = 3.0</span>
+            <span style={{fontSize:10}}>Override → Final Risk = 10</span>
           </div>
 
           {/* Legend */}
           <div className="card">
             <div className="section-label">Risk levels</div>
-            {[{l:'Low',r:'1.0 – 1.5',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'1.6 – 2.2',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'2.3 – 3.0',c:'#712B13',bg:'#FAECE7'}].map(x=>(
+            {[{l:'Low',r:'0.0 – 5.0',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'5.1 – 7.3',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'7.4 – 10',c:'#712B13',bg:'#FAECE7'}].map(x=>(
               <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
                 <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
                 <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
@@ -626,13 +750,19 @@ function HistoryView({ refreshKey }) {
             <div key={proj} className="timeline-project">
               <div className="timeline-project-name">{proj}</div>
               <div className="timeline-points">
-                {recs.map(r=>{
-                  const rl = r.finalRisk != null ? riskLevel(r.finalRisk) : null;
+                {recs.map((r,i)=>{
+                  const rl = r.level ? levelByLabel(r.level) : (r.finalRisk != null ? riskLevel(r.finalRisk) : null);
+                  // Quarter-over-quarter trend vs the previous assessment (Rec #10).
+                  const prev = i>0 ? recs[i-1] : null;
+                  const delta = (prev && prev.finalRisk!=null && r.finalRisk!=null) ? r.finalRisk - prev.finalRisk : null;
+                  const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
+                  const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                   return (
                     <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.overrideActive?`Override: ${r.overrideJustification}`:r.notes||''}>
                       <div className="tp-date">{fmtDate(r.date)}</div>
-                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</div>
+                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</div>
                       <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
+                      {dtxt && <div style={{fontSize:10,fontWeight:600,color:dcol}}>{dtxt}</div>}
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
                   );
@@ -655,15 +785,15 @@ function HistoryView({ refreshKey }) {
             </thead>
             <tbody>
               {records.map(r=>{
-                const rl = r.finalRisk!=null?riskLevel(r.finalRisk):null;
+                const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
                 return (
                   <tr key={r.id}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
-                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(2):'—'}</td>
+                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</td>
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
-                    <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(2):'—'}</td>
-                    <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(2):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
+                    <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</td>
                     <td style={{color:r.overrideActive?'var(--red-text)':'var(--text3)'}}>{r.overrideActive?'⚑ Yes':'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.evaluator}</td>
@@ -679,24 +809,200 @@ function HistoryView({ refreshKey }) {
   );
 }
 
+// ── ConfigView — what the calculation is using right now, with plain meanings ──
+function ConfigView({ jiraMetrics, jiraHistory }) {
+  const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
+  const sev = jiraMetrics?.severityWeights || DEFAULT_SEV_WEIGHTS;
+  const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+  const cal = jiraMetrics?.calibration;
+  const win = jiraMetrics?.window;
+  const projData = jiraMetrics?.projects || {};
+  const pct = v => `${Math.round(v*100)}%`;
+  // Sensitivity (Rec #5): recompute each project's final at a given μ.
+  const simFinal = (proj, muV) => {
+    const w = projData[proj]?.escapedDefects?.weighted;
+    if (w == null || !PROJECT_DEFAULTS[proj]) return null;
+    const tri = tritonScore10(w, {...curve, mu: muV}, mp);
+    return compute({...PROJECT_DEFAULTS[proj], escapedDefects: tri}, false, mp).finalRisk;
+  };
+  const muVariants = [Math.max(1, curve.mu-2), curve.mu, curve.mu+2];
+  const fmtDay = s => { try { return new Date(s + (s && s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
+
+  const Row = ({k, v, meaning}) => (
+    <div style={{display:'grid',gridTemplateColumns:'150px 70px 1fr',gap:10,alignItems:'baseline',padding:'6px 0',borderBottom:'.5px solid var(--border)'}}>
+      <div style={{fontSize:12,fontWeight:600}}>{k}</div>
+      <div style={{fontSize:12,fontWeight:700,color:'var(--purple)'}}>{v}</div>
+      <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.45}}>{meaning}</div>
+    </div>
+  );
+  const Group = ({title, badge, children}) => (
+    <div className="card" style={{marginBottom:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+        <div style={{fontSize:13,fontWeight:700}}>{title}</div>
+        {badge && <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>{badge}</span>}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <div style={{maxWidth:760}}>
+      <div className="helper" style={{marginBottom:14}}>
+        These are the exact parameters the calculation is using right now. Scores are sourced from TRITON and computed with the model below; values marked as policy are team decisions, not auto-derived.
+      </div>
+
+      <Group title="Overview">
+        <Row k="Model version" v={jiraMetrics?.modelVersion || '—'} meaning="Identifies the formula version, so historical assessments stay comparable when the model changes." />
+        <Row k="Quarter" v={jiraMetrics?.quarter || '—'} meaning="Evaluation period." />
+        <Row k="TRITON data" v={win?`${win.elapsedPct}%`:'—'} meaning={win?`Pulled ${fmtDay(win.from)} – ${fmtDay(win.to)}. The quarter is ${win.elapsedPct}% elapsed — early readings count fewer days, so treat them as partial.`:'Extraction window.'} />
+        <Row k="Final scale" v="0–10" meaning="Final Risk runs 0 (none) to 10 (max). Levels: Low 0–5.0 · Medium 5.1–7.3 · High 7.4–10." />
+      </Group>
+
+      <Group title="Formula" badge="how the final is built">
+        <div style={{fontFamily:'monospace',fontSize:12,background:'var(--bg2)',borderRadius:6,padding:'8px 10px',marginBottom:8}}>
+          Final = (Base × 0.40 + TRITON × 0.60) × Multiplier
+        </div>
+        <div className="helper">Inherent product risk (Base, 40%) and objective production defects (TRITON, 60%), then scaled up/down by QA mitigation capacity. Manual Override forces Final = 10.</div>
+      </Group>
+
+      <Group title="Base Risk — inherent product risk" badge="40% of final">
+        <Row k="User impact" v={pct(BASE_WEIGHTS.userImpact)} meaning="Business criticality & size of user base." />
+        <Row k="Rate of change" v={pct(BASE_WEIGHTS.rateOfChange)} meaning="Release frequency / how fast the product moves." />
+        <Row k="Complexity" v={pct(BASE_WEIGHTS.complexity)} meaning="Integrations, dependencies, system logic." />
+        <div className="helper" style={{marginTop:6}}>Pre-loaded per project (1–3, mapped to 0–10); confirmed quarterly. Weights are within this group.</div>
+      </Group>
+
+      <Group title="TRITON Score — escaped defects curve" badge="60% of final">
+        <Row k="μ (mu)" v={curve.mu} meaning="POLICY: the number of severity-weighted escaped defects/quarter treated as MEDIUM risk (5/10). The target you measure against — set by the team. Lower μ = stricter; higher μ = more lenient." />
+        <Row k="σ (sigma)" v={curve.sigma} meaning="Spread: how quickly the score rises/falls around μ. Smaller = sharper separation between projects." />
+        <Row k="Scale" v={`0–${curve.scaleMax||10}`} meaning="Curve output range." />
+        <Row k="Curve type" v={mp.curveType||'gaussian'} meaning="Shape mapping weighted count → score. gaussian (bell) or logistic (S-curve). Score = scale × CDF((weightedCount − μ)/σ)." />
+        <div style={{marginTop:8,marginBottom:4,fontSize:11,fontWeight:600,color:'var(--text2)'}}>Severity weights (each defect counts as):</div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+          {Object.entries(sev).map(([p,w]) => (
+            <span key={p} className="pill" style={{background:'var(--bg2)',color:'var(--text2)',border:'.5px solid var(--border2)'}}>{p} ×{w}</span>
+          ))}
+        </div>
+        <div className="helper" style={{marginTop:6}}>Higher severity counts more (continuously) toward the weighted count that feeds the curve.</div>
+      </Group>
+
+      <Group title="Mitigation Multiplier — QA capacity" badge={`range ${mp.multiplierMin} – ${mp.multiplierMax}`}>
+        <Row k="Automation conf." v={pct(MIT_WEIGHTS.automationConfidence)} meaning="How reliably automation catches regressions in critical flows." />
+        <Row k="Test coverage" v={pct(MIT_WEIGHTS.testCoverage)} meaning="Combined automated + manual coverage of critical flows." />
+        <Row k="Testability" v={pct(MIT_WEIGHTS.testability)} meaning="How easy it is to write/maintain meaningful tests." />
+        <Row k="Base floor" v={mp.baseFloor} meaning="Minimum Base-Risk value (0–10) at the lowest qualitative level. 0 = a fully-low product scores 0; raise it so a core product is never 0 inherent risk." />
+        <div className="helper" style={{marginTop:6}}>Higher mitigation score → lower multiplier → lower final risk (strong = {mp.multiplierMin}, weak = {mp.multiplierMax}). “Avg. age of open issues” was removed from scoring in v2 (overlapped with escaped defects) — informational only.</div>
+      </Group>
+
+      {muVariants && Object.keys(projData).some(p=>PROJECT_DEFAULTS[p]) && (
+        <Group title="Sensitivity — how μ moves each project" badge="Rec #5">
+          <div className="helper" style={{marginBottom:8}}>Final Risk if μ were set lower (stricter) or higher (lenient). Helps the team pick the anchor with eyes open.</div>
+          <div style={{display:'grid',gridTemplateColumns:`1fr ${muVariants.map(()=>'70px').join(' ')}`,gap:6,fontSize:11.5}}>
+            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+            {muVariants.map((m,i)=><div key={i} style={{fontWeight:600,textAlign:'center',color:m===curve.mu?'var(--purple)':'var(--text2)'}}>μ={m}{m===curve.mu?' ★':''}</div>)}
+            {Object.keys(projData).filter(p=>PROJECT_DEFAULTS[p]).map(p=>(
+              <React.Fragment key={p}>
+                <div style={{padding:'3px 0'}}>{p}</div>
+                {muVariants.map((m,i)=>{const f=simFinal(p,m);const rl=f!=null?riskLevel(f):null;return (
+                  <div key={i} style={{textAlign:'center',padding:'3px 0',borderRadius:4,background:rl?rl.bg:'transparent',color:rl?rl.text:'var(--text3)',fontWeight:m===curve.mu?700:500}}>{f!=null?f.toFixed(1):'—'}</div>
+                );})}
+              </React.Fragment>
+            ))}
+          </div>
+        </Group>
+      )}
+
+      {jiraHistory?.projects && (
+        <Group title="TRITON history (backfilled)" badge="Rec #5/#8">
+          <div className="helper" style={{marginBottom:8}}>Escaped-defect TRITON score per quarter, reconstructed from Jira with this methodology. Used to validate the anchor and watch trends — informational, not the official score.</div>
+          <div style={{display:'grid',gridTemplateColumns:`1fr ${(jiraHistory.quarters||[]).map(()=>'66px').join(' ')}`,gap:6,fontSize:11.5}}>
+            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+            {(jiraHistory.quarters||[]).map(qq=><div key={qq} style={{fontWeight:600,textAlign:'center',color:'var(--text2)'}}>{qq.replace('-'," ")}</div>)}
+            {Object.entries(jiraHistory.projects).map(([p,qd])=>(
+              <React.Fragment key={p}>
+                <div style={{padding:'3px 0'}}>{p}</div>
+                {(jiraHistory.quarters||[]).map(qq=>{const c=qd[qq];const s=c?c.tritonScore:null;const rl=s!=null?riskLevel(s):null;return (
+                  <div key={qq} style={{textAlign:'center',padding:'3px 0',borderRadius:4,background:rl?rl.bg:'transparent',color:rl?rl.text:'var(--text3)'}}>{s!=null?s.toFixed(1):'—'}</div>
+                );})}
+              </React.Fragment>
+            ))}
+          </div>
+          {jiraHistory.calibrationStats && <div className="helper" style={{marginTop:8}}>Calibration check: across {jiraHistory.calibrationStats.n} real values, median {jiraHistory.calibrationStats.median} / mean {jiraHistory.calibrationStats.mean} → μ={curve.mu} sits near the center (anchor validated). Note the quarter-to-quarter volatility — read the trend, not a single point.</div>}
+        </Group>
+      )}
+
+      {jiraHistory?.projects && (
+        <Group title="Defect density (informational — NOT scored)" badge="Rec #1">
+          <div className="helper" style={{marginBottom:8}}>Weighted escaped defects per 100 delivered items (Done Story/Bug), per project vs its own history. Does <strong>not</strong> affect the score — cross-team density isn't comparable, so this is each project against itself, building toward the Q4 decision.</div>
+          <div style={{display:'grid',gridTemplateColumns:`1fr ${(jiraHistory.quarters||[]).map(()=>'66px').join(' ')}`,gap:6,fontSize:11.5}}>
+            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+            {(jiraHistory.quarters||[]).map(qq=><div key={qq} style={{fontWeight:600,textAlign:'center',color:'var(--text2)'}}>{qq.replace('-'," ")}</div>)}
+            {Object.entries(jiraHistory.projects).map(([p,qd])=>(
+              <React.Fragment key={p}>
+                <div style={{padding:'3px 0'}}>{p}</div>
+                {(jiraHistory.quarters||[]).map(qq=>{const c=qd[qq];const d=c?c.density:null;return (
+                  <div key={qq} style={{textAlign:'center',padding:'3px 0',color:'var(--text2)'}}>{d!=null?d:(c&&c.delivered===0?'n/a':'—')}</div>
+                );})}
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="helper" style={{marginTop:8}}>⚠ <strong>Mira</strong> shows <code>n/a</code> — its delivery isn't logged under MIRA Story/Bug (denominator ≈ 0), so density is undefined for it. That denominator must be fixed before density is usable for Mira. GenAI Lens, Mira Studio and Mobile have a usable per-project trend.</div>
+        </Group>
+      )}
+
+      <Group title="Calibration cadence" badge="Rec #5">
+        <Row k="Last reviewed" v={cal?.lastReviewed||'—'} meaning="When μ/σ were last set/validated." />
+        <Row k="Next review" v={cal?.nextReview||'—'} meaning="μ/σ are anchored and reviewed on a cadence (not per quarter) so scores stay comparable over time." />
+        <div className="helper" style={{marginTop:6}}>{cal?.basis ? `Basis: ${cal.basis}.` : ''} Recompute the basis from accumulated history once ≥4 quarters exist.</div>
+      </Group>
+
+      <Group title="Exposure normalization (defect density)" badge={jiraMetrics?.exposureEnabled ? 'ON' : 'OFF'}>
+        <div className="helper">
+          {jiraMetrics?.exposureEnabled
+            ? 'Active: escaped defects are normalized by delivery volume (defects per unit shipped).'
+            : 'Disabled. Cross-team density isn’t viable yet — delivered-volume counts vary too much by team (verified: 31× spread). The workable path is per-project trend (each project vs its own history) once enough quarters accrue. See scripts/jira-projects.json → exposure.'}
+        </div>
+      </Group>
+    </div>
+  );
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab] = useState('assess');
   const [historyRefresh, setHistoryRefresh] = useState(0);
+  const [jiraMetrics, setJiraMetrics] = useState(null);
+  const [jiraHistory, setJiraHistory] = useState(null);
+
+  // Load Jira metrics once; shared by the header period label and the assessment.
+  useEffect(() => {
+    fetch('./jira-history.json', {cache:'no-store'}).then(r=>r.ok?r.json():null).then(setJiraHistory).catch(()=>setJiraHistory(null));
+    fetch('./jira-metrics.json', {cache:'no-store'})
+      .then(r => r.ok ? r.json() : null)
+      .then(setJiraMetrics)
+      .catch(() => setJiraMetrics(null));
+  }, []);
+
+  const fmtDay = s => { try { return new Date(s + (s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
+  const w = jiraMetrics?.window;
+  const periodText = w ? `TRITON data: ${fmtDay(w.from)} – ${fmtDay(w.to)}` : 'shared via data.json';
+
   return (
     <div>
       <div className="header">
         <div className="header-left">
           <h1>QA Risk Baseline</h1>
-          <p>Mira &amp; GenAI QA Team · Q3 2026 model · shared via data.json</p>
+          <p>Mira &amp; GenAI QA Team · Q3 2026 model · {periodText}</p>
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
+          <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
-      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)}/>}
+      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
+      {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
     </div>
   );
 }
