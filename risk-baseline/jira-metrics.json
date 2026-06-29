@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T11:01:57.834Z",
+  "generatedAt": "2026-06-29T21:29:54.952Z",
   "modelVersion": "2026-Q3-v2",
   "quarter": "2026-Q2",
   "project": "TRITON",
@@ -11,7 +11,7 @@
     "from": "2026-04-01",
     "to": "2026-06-29",
     "quarterEnd": "2026-06-30",
-    "elapsedPct": 99
+    "elapsedPct": 100
   },
   "tritonCurve": {
     "comment": "0-10 TRITON score = scaleMax * CDF((weightedCount - mu)/sigma), CDF per modelParams.curveType. mu is the SLA ANCHOR: severity-weighted escapes/quarter treated as 'medium' (5/10) — a target, not the observed mean (Rec #2,#5). Team-confirmed mu=5 for Q3 2026.",
@@ -145,7 +145,7 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 53,
+        "avgDays": 54,
         "openCount": 3,
         "informational": true
       },
@@ -273,30 +273,6 @@
         "open": 1
       }
     },
-    "Engage (Legacy)": {
-      "escapedDefects": {
-        "score": 10.0,
-        "total": 12,
-        "critical": 4,
-        "weighted": 20,
-        "tickets": [
-          { "key": "TRITON-37104", "summary": "Conversations - IG Usernames displaying incorrectly", "priority": "Medium", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37104" },
-          { "key": "TRITON-37081", "summary": "Conversations - Creating Salesforce cases resulting in timeout errors", "priority": "Blocker", "weight": 3, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-37081" },
-          { "key": "TRITON-37045", "summary": "Conversations - marked as complete issue", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37045" },
-          { "key": "TRITON-37024", "summary": "MI Engage - Conversations - Missing X post", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37024" },
-          { "key": "TRITON-37018", "summary": "MI Engage - Owned Connections - Conversations - Facebook Comments not polling in since Yesterday (16th June)", "priority": "Blocker", "weight": 3, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-37018" },
-          { "key": "TRITON-36942", "summary": "107498714 TikTok posts published via cross-posting not visible in Conversations tab", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36942" },
-          { "key": "TRITON-36892", "summary": "Engage | Conversations - Missing Facebook Messages", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36892" },
-          { "key": "TRITON-36781", "summary": "RED Account - MI Engage - Conversations - Deleted LinkedIn comments show in conversations as hidden", "priority": "Blocker", "weight": 3, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-36781" },
-          { "key": "TRITON-36766", "summary": "#102356920 Delay in comments", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36766" },
-          { "key": "TRITON-36726", "summary": "(Enterprise) - MI Engage - Conversations - Missing LinkedIn posts", "priority": "Medium", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36726" },
-          { "key": "TRITON-36709", "summary": "Conversations - Export blank for disconnected accounts", "priority": "Medium", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36709" },
-          { "key": "TRITON-36445", "summary": "MI Engage - Conversations - Feed not loading", "priority": "Blocker", "weight": 3, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-36445" }
-        ]
-      },
-      "avgAgeOpenIssues": { "avgDays": 77, "openCount": 11, "informational": true },
-      "dataQuality": { "manualReview": { "escaped": 0, "open": 0 } }
-    },
     "Mobile": {
       "escapedDefects": {
         "score": 5,
@@ -349,6 +325,123 @@
       "avgAgeOpenIssues": {
         "avgDays": 14,
         "openCount": 4,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      }
+    },
+    "Engage (Legacy)": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 12,
+        "critical": 4,
+        "weighted": 20,
+        "tickets": [
+          {
+            "key": "TRITON-37104",
+            "summary": "Conversations - IG Usernames displaying incorrectly",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37104"
+          },
+          {
+            "key": "TRITON-37081",
+            "summary": "Conversations - Creating Salesforce cases resulting in timeout errors",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37081"
+          },
+          {
+            "key": "TRITON-37045",
+            "summary": "Conversations - marked as complete issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37045"
+          },
+          {
+            "key": "TRITON-37024",
+            "summary": "MI Engage - Conversations - Missing X post",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37024"
+          },
+          {
+            "key": "TRITON-37018",
+            "summary": "MI Engage - Owned Connections - Conversations - Facebook Comments not polling in since Yesterday (16th June)",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37018"
+          },
+          {
+            "key": "TRITON-36942",
+            "summary": "107498714 TikTok posts published via cross-posting not visible in Conversations tab",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36942"
+          },
+          {
+            "key": "TRITON-36892",
+            "summary": "Engage | Conversations - Missing Facebook Messages",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36892"
+          },
+          {
+            "key": "TRITON-36781",
+            "summary": "RED Account - MI Engage - Conversations - Deleted LinkedIn comments show in conversations as hidden",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36781"
+          },
+          {
+            "key": "TRITON-36766",
+            "summary": "#102356920 Delay in comments",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36766"
+          },
+          {
+            "key": "TRITON-36726",
+            "summary": "(Enterprise) - MI Engage - Conversations - Missing LinkedIn posts",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36726"
+          },
+          {
+            "key": "TRITON-36709",
+            "summary": "Conversations - Export blank for disconnected accounts",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36709"
+          },
+          {
+            "key": "TRITON-36445",
+            "summary": "MI Engage - Conversations - Feed not loading",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36445"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 78,
+        "openCount": 11,
         "informational": true
       },
       "dataQuality": {
