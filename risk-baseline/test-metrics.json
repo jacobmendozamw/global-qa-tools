@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-29T07:00:00.000Z",
+  "generatedAt": "2026-06-29T21:29:42.557Z",
   "projects": {
     "GenAI Lens": {
       "repo": "global-qa-test-suite",
       "branch": "develop",
       "directory": "src/tests/monitor/genai-lens",
       "specFiles": 21,
-      "activeTests": 232,
+      "activeTests": 244,
       "skipped": 3
     },
     "Mira Studio": {
@@ -14,7 +14,7 @@
       "branch": "develop",
       "directory": "src/tests/mira-studio",
       "specFiles": 10,
-      "activeTests": 85,
+      "activeTests": 88,
       "skipped": 11
     },
     "Mira": {
@@ -31,14 +31,14 @@
       "directory": "src/tests/engage",
       "specFiles": 1,
       "activeTests": 1,
-      "skipped": 0
+      "skipped": 1
     },
     "Mobile": {
       "repo": "global-qa-mobile-test-suite",
       "branch": "main",
       "directory": "(root)",
-      "specFiles": 3,
-      "activeTests": 3,
+      "specFiles": 5,
+      "activeTests": 5,
       "skipped": 0,
       "subflows": 2
     }
