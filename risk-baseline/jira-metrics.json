@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T20:22:26.337Z",
+  "generatedAt": "2026-06-29T11:01:57.834Z",
   "modelVersion": "2026-Q3-v2",
   "quarter": "2026-Q2",
   "project": "TRITON",
@@ -9,11 +9,12 @@
   ],
   "window": {
     "from": "2026-04-01",
-    "to": "2026-06-24",
+    "to": "2026-06-29",
     "quarterEnd": "2026-06-30",
-    "elapsedPct": 93
+    "elapsedPct": 99
   },
   "tritonCurve": {
+    "comment": "0-10 TRITON score = scaleMax * CDF((weightedCount - mu)/sigma), CDF per modelParams.curveType. mu is the SLA ANCHOR: severity-weighted escapes/quarter treated as 'medium' (5/10) — a target, not the observed mean (Rec #2,#5). Team-confirmed mu=5 for Q3 2026.",
     "mu": 5,
     "sigma": 4,
     "scaleMax": 10
@@ -39,7 +40,7 @@
     "basis": "Q2-2026 observed distribution + team SLA target"
   },
   "exposureEnabled": false,
-  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira). v2: severity-weighted count, SLA-anchored curve (mu=5), avg-age informational only.",
+  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
   "projects": {
     "GenAI Lens": {
       "escapedDefects": {
@@ -48,31 +49,116 @@
         "critical": 0,
         "weighted": 6.5,
         "tickets": [
-          { "key": "TRITON-36990", "summary": "[URGENT]Unable to add journalist to media list from GenAI Lens Sources tab", "priority": "Major", "weight": 1.5, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36990" },
-          { "key": "TRITON-36538", "summary": "#97495649 GenAI Lens Data | `AI Insights` summary is not associated to Benchmarking widgets", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36538" },
-          { "key": "TRITON-36507", "summary": "GenAI Lens - Irrelevant brand returning for prompt", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36507" },
-          { "key": "TRITON-36473", "summary": "Unable to View Brands Beyond First 50 in GenAI Lens Settings", "priority": "Medium", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36473" },
-          { "key": "TRITON-36297", "summary": "90558905, 89997612 - Gen AI Lens Pulling Non-Competitor Properties for Alila Ventana Big Sur", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36297" },
-          { "key": "TRITON-36260", "summary": "Enterprise - GenAI Lens - Client user cannot access GenAI Lens but others can", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36260" }
+          {
+            "key": "TRITON-36990",
+            "summary": "[URGENT]Unable to add journalist to media list from GenAI Lens Sources tab",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36990"
+          },
+          {
+            "key": "TRITON-36538",
+            "summary": "#97495649 GenAI Lens Data | `AI Insights` summary is not associated to Benchmarking widgets",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36538"
+          },
+          {
+            "key": "TRITON-36507",
+            "summary": "GenAI Lens - Irrelevant brand returning for prompt",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36507"
+          },
+          {
+            "key": "TRITON-36473",
+            "summary": "Unable to View Brands Beyond First 50 in GenAI Lens Settings",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36473"
+          },
+          {
+            "key": "TRITON-36297",
+            "summary": "90558905, 89997612 - Gen AI Lens Pulling Non-Competitor Properties for Alila Ventana Big Sur",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36297"
+          },
+          {
+            "key": "TRITON-36260",
+            "summary": "Enterprise - GenAI Lens - Client user cannot access GenAI Lens but others can",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36260"
+          }
         ]
       },
-      "avgAgeOpenIssues": { "avgDays": 80, "openCount": 4, "informational": true },
-      "dataQuality": { "manualReview": { "escaped": 0, "open": 0 } }
+      "avgAgeOpenIssues": {
+        "avgDays": 85,
+        "openCount": 4,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      }
     },
     "Mira Studio": {
       "escapedDefects": {
-        "score": 4.0,
+        "score": 4,
         "total": 3,
         "critical": 0,
-        "weighted": 4.0,
+        "weighted": 4,
         "tickets": [
-          { "key": "TRITON-36744", "summary": "100074406 - Premium | AI Search Assistant Generates Incorrect Boolean Using Region Operators Instead of Country Operators", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36744" },
-          { "key": "TRITON-36573", "summary": "99895534 - MIRA / AI Search Assistant cannot locate saved search by ID - \"could not find a saved search with that name or ID\"", "priority": "High", "weight": 1.5, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36573" },
-          { "key": "TRITON-36295", "summary": "Product focus throws an error message when trying to Optimize the keywords", "priority": "Major", "weight": 1.5, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36295" }
+          {
+            "key": "TRITON-36744",
+            "summary": "100074406 - Premium | AI Search Assistant Generates Incorrect Boolean Using Region Operators Instead of Country Operators",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36744"
+          },
+          {
+            "key": "TRITON-36573",
+            "summary": "99895534 - MIRA / AI Search Assistant cannot locate saved search by ID - \"could not find a saved search with that name or ID\"",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36573"
+          },
+          {
+            "key": "TRITON-36295",
+            "summary": "Product focus throws an error message when trying to Optimize the keywords",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36295"
+          }
         ]
       },
-      "avgAgeOpenIssues": { "avgDays": 48, "openCount": 3, "informational": true },
-      "dataQuality": { "manualReview": { "escaped": 0, "open": 0 } }
+      "avgAgeOpenIssues": {
+        "avgDays": 53,
+        "openCount": 3,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 1,
+          "open": 1
+        }
+      },
+      "needsManualReview": {
+        "escaped": 1,
+        "open": 1
+      }
     },
     "Mira": {
       "escapedDefects": {
@@ -81,38 +167,172 @@
         "critical": 2,
         "weighted": 14,
         "tickets": [
-          { "key": "TRITON-37059", "summary": "106222553 Transition URL is missing in Mira result", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37059" },
-          { "key": "TRITON-36997", "summary": "Broken Links in Aviation Prompt Report leading to placeholder website - Mira Studio", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36997" },
-          { "key": "TRITON-36952", "summary": "103771629 - Missing Articles by Stephen Lunn on Voluntary Assisted Dying in Search Results", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36952" },
-          { "key": "TRITON-36935", "summary": "MIRA - Invalid media links and incorrect source information returning after prompt", "priority": "Medium", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36935" },
-          { "key": "TRITON-36880", "summary": "102033483 Scheduled Mira Prompt Visible to Creator but Not Client", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36880" },
-          { "key": "TRITON-36836", "summary": "103814791 - Scheduled MIRA Prompt Email Not Sent", "priority": "Critical", "weight": 2, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-36836" },
-          { "key": "TRITON-36298", "summary": "88753779 - Mira Studio fails to summarize all linked search articles and date range filter inaccurate", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36298" },
-          { "key": "TRITON-36281", "summary": "Search Visibility - Searches hidden to a user can still be found in MIRA", "priority": "Blocker", "weight": 3, "critical": true, "url": "https://meltwater.atlassian.net/browse/TRITON-36281" },
-          { "key": "TRITON-36272", "summary": "MIRA - No data was available for the last 30 days", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36272" },
-          { "key": "TRITON-36197", "summary": "MIRA – Coverage Report Generation Failure", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36197" },
-          { "key": "TRITON-36159", "summary": "#86529274 MIRA – Coverage Report Generation Fails", "priority": "Minor", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36159" }
+          {
+            "key": "TRITON-37059",
+            "summary": "106222553 Transition URL is missing in Mira result",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37059"
+          },
+          {
+            "key": "TRITON-36997",
+            "summary": "Broken Links in Aviation Prompt Report leading to placeholder website - Mira Studio",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36997"
+          },
+          {
+            "key": "TRITON-36952",
+            "summary": "103771629 - Missing Articles by Stephen Lunn on Voluntary Assisted Dying in Search Results",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36952"
+          },
+          {
+            "key": "TRITON-36935",
+            "summary": "MIRA - Invalid media links and incorrect source information returning after prompt",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36935"
+          },
+          {
+            "key": "TRITON-36880",
+            "summary": "102033483 Scheduled Mira Prompt Visible to Creator but Not Client",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36880"
+          },
+          {
+            "key": "TRITON-36836",
+            "summary": "103814791 - Scheduled MIRA Prompt Email Not Sent",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36836"
+          },
+          {
+            "key": "TRITON-36298",
+            "summary": "88753779 - Mira Studio fails to summarize all linked search articles and date range filter inaccurate",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36298"
+          },
+          {
+            "key": "TRITON-36281",
+            "summary": "Search Visibility - Searches hidden to a user can still be found in MIRA",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36281"
+          },
+          {
+            "key": "TRITON-36272",
+            "summary": "MIRA - No data was available for the last 30 days",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36272"
+          },
+          {
+            "key": "TRITON-36197",
+            "summary": "MIRA – Coverage Report Generation Failure",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36197"
+          },
+          {
+            "key": "TRITON-36159",
+            "summary": "#86529274 MIRA – Coverage Report Generation Fails",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36159"
+          }
         ]
       },
-      "avgAgeOpenIssues": { "avgDays": 34, "openCount": 9, "informational": true },
-      "dataQuality": { "manualReview": { "escaped": 0, "open": 0 } }
+      "avgAgeOpenIssues": {
+        "avgDays": 27,
+        "openCount": 6,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 1,
+          "open": 1
+        }
+      },
+      "needsManualReview": {
+        "escaped": 1,
+        "open": 1
+      }
     },
     "Mobile": {
       "escapedDefects": {
-        "score": 5.0,
+        "score": 5,
         "total": 5,
         "critical": 0,
         "weighted": 5,
         "tickets": [
-          { "key": "TRITON-37058", "summary": "101056875 Meltwater Mobile App sharing with transition link", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37058" },
-          { "key": "TRITON-37028", "summary": "Unable to Enable 'Enter Password' Option on Meltwater Mobile App", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-37028" },
-          { "key": "TRITON-36984", "summary": "Translation Function Not Working in Meltwater Mobile App for iOS Users", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36984" },
-          { "key": "TRITON-36966", "summary": "Mobile App - Live Chat Access Error", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36966" },
-          { "key": "TRITON-36965", "summary": "103569464 Mobile Link Access Issues with Meltwater Newsletter Articles", "priority": "Low", "weight": 1, "critical": false, "url": "https://meltwater.atlassian.net/browse/TRITON-36965" }
+          {
+            "key": "TRITON-37058",
+            "summary": "101056875 Meltwater Mobile App sharing with transition link",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37058"
+          },
+          {
+            "key": "TRITON-37028",
+            "summary": "Unable to Enable 'Enter Password' Option on Meltwater Mobile App",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37028"
+          },
+          {
+            "key": "TRITON-36984",
+            "summary": "Translation Function Not Working in Meltwater Mobile App for iOS Users",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36984"
+          },
+          {
+            "key": "TRITON-36966",
+            "summary": "Mobile App - Live Chat Access Error ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36966"
+          },
+          {
+            "key": "TRITON-36965",
+            "summary": "103569464 Mobile Link Access Issues with Meltwater Newsletter Articles",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36965"
+          }
         ]
       },
-      "avgAgeOpenIssues": { "avgDays": 9, "openCount": 5, "informational": true },
-      "dataQuality": { "manualReview": { "escaped": 0, "open": 0 } }
+      "avgAgeOpenIssues": {
+        "avgDays": 14,
+        "openCount": 4,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      }
     }
   }
 }
