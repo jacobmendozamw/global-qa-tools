@@ -1,0 +1,98 @@
+{
+  "Q4-2025": {
+    "generatedAt": "2026-06-29T21:46:29.620Z",
+    "commitSha": "d0bfc7c0b96043d927a773a5010dc071ac0a5b73",
+    "projects": {
+      "GenAI Lens": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "e20a64c8e9956d653181ed7e7d84f446e1107917",
+        "directory": "src/tests/monitor/genai-lens",
+        "specFiles": 11,
+        "activeTests": 120,
+        "skipped": 0
+      },
+      "Mira Studio": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "e20a64c8e9956d653181ed7e7d84f446e1107917",
+        "directory": "src/tests/mira-studio",
+        "specFiles": 6,
+        "activeTests": 39,
+        "skipped": 8
+      },
+      "Mira": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "e20a64c8e9956d653181ed7e7d84f446e1107917",
+        "directory": "src/tests/mira",
+        "specFiles": 0,
+        "activeTests": 0,
+        "skipped": 0
+      },
+      "Engage (Legacy)": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "e20a64c8e9956d653181ed7e7d84f446e1107917",
+        "directory": "src/tests/engage",
+        "specFiles": 1,
+        "activeTests": 1,
+        "skipped": 1
+      },
+      "Mobile": {
+        "repo": "global-qa-mobile-test-suite",
+        "treeSha": "n/a (suite not yet created)",
+        "directory": "(root)",
+        "specFiles": 0,
+        "activeTests": 0,
+        "skipped": 0,
+        "subflows": 0,
+        "note": "Mobile test suite did not exist in this quarter"
+      }
+    }
+  },
+  "Q1-2026": {
+    "generatedAt": "2026-06-29T21:46:30.785Z",
+    "commitSha": "f08f4f50cba3572c9b1deaa9e3b6154a95fb3eaa",
+    "projects": {
+      "GenAI Lens": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "62b76f41f2493e4cd44aeadabc5b3de2ec9052bd",
+        "directory": "src/tests/monitor/genai-lens",
+        "specFiles": 16,
+        "activeTests": 163,
+        "skipped": 0
+      },
+      "Mira Studio": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "62b76f41f2493e4cd44aeadabc5b3de2ec9052bd",
+        "directory": "src/tests/mira-studio",
+        "specFiles": 6,
+        "activeTests": 41,
+        "skipped": 7
+      },
+      "Mira": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "62b76f41f2493e4cd44aeadabc5b3de2ec9052bd",
+        "directory": "src/tests/mira",
+        "specFiles": 0,
+        "activeTests": 0,
+        "skipped": 0
+      },
+      "Engage (Legacy)": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "62b76f41f2493e4cd44aeadabc5b3de2ec9052bd",
+        "directory": "src/tests/engage",
+        "specFiles": 1,
+        "activeTests": 1,
+        "skipped": 1
+      },
+      "Mobile": {
+        "repo": "global-qa-mobile-test-suite",
+        "treeSha": "n/a (suite not yet created)",
+        "directory": "(root)",
+        "specFiles": 0,
+        "activeTests": 0,
+        "skipped": 0,
+        "subflows": 0,
+        "note": "Mobile test suite did not exist in this quarter"
+      }
+    }
+  }
+}
