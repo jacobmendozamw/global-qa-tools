@@ -4,82 +4,106 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>QA Risk Baseline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#fff;--bg2:#f5f4f0;--bg3:#eeede8;
-  --text:#1a1a18;--text2:#6b6a64;--text3:#9c9a92;
-  --border:rgba(0,0,0,.12);--border2:rgba(0,0,0,.22);
-  --purple:#534AB7;--radius:8px;--radius-lg:12px;
+  --teal:#28bbbb;--teal-dim:#1f9898;--teal-light:#e8f8f8;
+  /* Design-system palette (shared with landing, roadmap, git-metrics) */
+  --bg:#fff;--bg2:#f9fafb;--bg3:#f3f4f6;
+  --text:#1a1a1a;--text2:#6b7280;--text3:#9ca3af;
+  --border:#e5e7eb;--border2:#d1d5db;
+  /* --purple kept as alias so existing JSX inline styles still resolve */
+  --purple:#28bbbb;
+  --radius:8px;--radius-lg:10px;
+  /* Semantic risk-level colors */
   --green-bg:#E1F5EE;--green-text:#085041;--green-border:#1D9E75;
   --amber-bg:#FAEEDA;--amber-text:#633806;--amber-border:#BA7517;
   --red-bg:#FAECE7;--red-text:#712B13;--red-border:#D85A30;
   --blue-bg:#E8F0FE;--blue-text:#1a3a6b;--blue-border:#4A6FA5;
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#1e1e1c;--bg2:#2a2a28;--bg3:#323230;--text:#e8e6de;--text2:#9c9a92;--text3:#6b6a64;--border:rgba(255,255,255,.12);--border2:rgba(255,255,255,.22)}
+  :root{--bg:#1c1c1c;--bg2:#242424;--bg3:#2c2c2c;--text:#e8e8e0;--text2:#9ca3af;--text3:#6b7280;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.18)}
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:2rem 1rem}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:16px 16px 48px}
 .container{max-width:1100px;margin:0 auto}
-.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap}
-.header-left h1{font-size:17px;font-weight:700}
-.header-left p{font-size:12px;color:var(--text2);margin-top:3px}
-.nav-tabs{display:flex;gap:6px;flex-shrink:0}
-.nav-tab{font-size:12px;padding:6px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
-.nav-tab.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;padding-top:8px}
+.header-logo{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--teal);text-transform:uppercase}
+.header-divider{color:var(--border2);font-size:13px}
+.header-left{display:flex;flex-direction:column;gap:2px}
+.header-left h1{font-size:17px;font-weight:700;margin-top:4px}
+.header-left p{font-size:12px;color:var(--text2)}
+/* ── Nav tabs ───────────────────────────────────────────────────────────────── */
+.nav-tabs{display:flex;gap:4px;flex-shrink:0;align-self:center}
+.nav-tab{font-size:11px;padding:5px 14px;height:30px;border-radius:5px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.nav-tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.nav-tab:hover:not(.active){border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+/* ── Form ───────────────────────────────────────────────────────────────────── */
 input,textarea,select{font-family:inherit;color:var(--text);background:transparent}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal)!important}
 button{font-family:inherit;cursor:pointer}
-input:focus,textarea:focus,select:focus{outline:none}
+/* ── Typography ─────────────────────────────────────────────────────────────── */
 .pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
-.helper{font-size:11px;color:var(--text2);line-height:1.45}
-.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px}
-.btn-primary{font-size:12px;padding:6px 16px;border-radius:6px;border:none;background:var(--purple);color:#fff;font-weight:600;cursor:pointer;transition:opacity .15s}
-.btn-primary:hover{opacity:.85}
+.helper{font-size:11px;color:var(--text2);line-height:1.5}
+.section-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;margin-top:4px}
+.dim-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;margin-top:18px}
+.dim-title{font-size:13px;font-weight:700;letter-spacing:.01em}
+.dim-badge{font-size:10px;font-weight:600;padding:2px 9px;border-radius:4px;border:1px solid}
+/* ── Cards ──────────────────────────────────────────────────────────────────── */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px}
+/* ── Buttons ────────────────────────────────────────────────────────────────── */
+.btn-primary{font-size:12px;padding:6px 16px;border-radius:5px;border:none;background:var(--teal);color:#fff;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-primary:hover{background:var(--teal-dim)}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed}
-.btn-secondary{font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
-.btn-secondary:hover{border-color:var(--purple);color:var(--purple)}
+.btn-secondary{font-size:12px;padding:5px 14px;height:30px;border-radius:5px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer}
+.btn-secondary:hover{border-color:var(--teal);background:var(--teal-light);color:var(--teal)}
+/* ── Toast ──────────────────────────────────────────────────────────────────── */
 .toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;animation:fadeIn .2s}
 .toast.success{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-border)}
 .toast.error{background:var(--red-bg);color:var(--red-text);border:1px solid var(--red-border)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:8px;margin-top:4px}
-.dim-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;margin-top:16px}
-.dim-title{font-size:14px;font-weight:700}
-.dim-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;border:1px solid}
-.criterion-card{border:.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
+/* ── Criteria cards ─────────────────────────────────────────────────────────── */
+.criterion-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
 .criterion-card.filled{background:var(--bg)}
 .criterion-card.empty{background:var(--bg2)}
-.criterion-card.auto-loaded{background:var(--bg);border-color:var(--purple);opacity:.85}
+.criterion-card.auto-loaded{background:var(--bg);border-color:var(--teal);opacity:.9}
 .criterion-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:2px}
 .criterion-name{font-size:13px;font-weight:600}
 .criterion-meta{display:flex;gap:8px;align-items:center}
-.criterion-desc{font-size:11px;color:var(--text2);margin-bottom:10px}
-.options-row{display:flex;gap:8px;flex-wrap:wrap}
-.opt-btn{font-size:12px;padding:5px 12px;border-radius:20px;transition:all .15s;font-family:inherit}
+.criterion-desc{font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.options-row{display:flex;gap:6px;flex-wrap:wrap}
+.opt-btn{font-size:11px;padding:4px 12px;border-radius:5px;transition:all .15s;font-family:inherit}
 .auto-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border)}
 .confirm-tag{font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;background:var(--amber-bg);color:var(--amber-text);border:1px solid var(--amber-border)}
-.override-card{border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;background:var(--bg2)}
+/* ── Override ───────────────────────────────────────────────────────────────── */
+.override-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:8px;background:var(--bg2)}
 .override-card.active{background:var(--red-bg);border-color:var(--red-border)}
 .override-toggle{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:0}
 .override-toggle input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#D85A30}
 .override-toggle-label{font-size:13px;font-weight:600}
 .override-justification{margin-top:10px}
+/* ── Score sidebar ──────────────────────────────────────────────────────────── */
 .score-display{border-radius:var(--radius-lg);padding:16px;text-align:center;transition:all .3s}
 .score-num{font-size:38px;font-weight:700;line-height:1}
 .score-level{font-size:16px;font-weight:600;margin-top:4px}
 .score-breakdown{font-size:11px;opacity:.8;margin-top:6px;line-height:1.5}
-.formula-display{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+/* ── Formula display (Model tab) ────────────────────────────────────────────── */
+.formula-display{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px}
 .formula-display code{font-family:monospace;font-size:10px;background:var(--bg3);padding:1px 4px;border-radius:3px}
+/* ── Tables ─────────────────────────────────────────────────────────────────── */
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-td{padding:8px 10px;border-bottom:.5px solid var(--border);vertical-align:middle}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
+/* ── History / timeline ─────────────────────────────────────────────────────── */
 .empty-state{text-align:center;padding:48px;color:var(--text3);font-size:13px}
 .timeline-wrap{display:flex;flex-direction:column;gap:10px}
-.timeline-project{background:var(--bg);border:.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
+.timeline-project{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
 .timeline-project-name{font-size:13px;font-weight:700;margin-bottom:10px}
 .timeline-points{display:flex;gap:8px;flex-wrap:wrap}
 .timeline-point{padding:8px 12px;border-radius:8px;font-size:11px;border:1px solid transparent;min-width:90px}
@@ -87,11 +111,12 @@ tr:last-child td{border-bottom:none}
 .tp-score{font-size:18px;font-weight:700;line-height:1}
 .tp-level{font-size:11px;font-weight:600;margin-top:2px}
 .tp-eval{font-size:10px;color:var(--text2);margin-top:4px}
-.toggle-wrap{display:flex;border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+/* ── Toggle / toolbar ───────────────────────────────────────────────────────── */
+.toggle-wrap{display:flex;border:1px solid var(--border2);border-radius:5px;overflow:hidden}
 .toggle-btn{font-size:11px;padding:4px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
-.toggle-btn.active{background:var(--purple);color:#fff}
+.toggle-btn.active{background:var(--teal);color:#fff}
 .history-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.history-toolbar select{font-size:12px;padding:5px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg);height:30px}
+.history-toolbar select{font-size:12px;padding:5px 10px;border-radius:5px;border:1px solid var(--border2);background:var(--bg);height:30px}
 </style>
 </head>
 <body>
@@ -145,14 +170,140 @@ function exportAssessments(records) {
 }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
-const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile'];
+const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile','Engage (Legacy)'];
 
-// Project defaults map
+// Project defaults map — synced to Confluence §4.8 (2026-Q3-v2)
 const PROJECT_DEFAULTS = {
-  'GenAI Lens': { userImpact:3, rateOfChange:3, complexity:1, testability:3, testCoverage:3, automationConfidence:3 },
-  'Mira Studio': { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
-  'Mira':        { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:3, automationConfidence:1 },
-  'Mobile':      { userImpact:2, rateOfChange:3, complexity:2, testability:3, testCoverage:3, automationConfidence:1 },
+  // testCoverage is on the 5-level scale (1=0–20%, 2=20–40%, 3=40–60%, 4=60–80%, 5=80–100%).
+  'GenAI Lens':    { userImpact:3, rateOfChange:3, complexity:3, testability:3, testCoverage:5, automationConfidence:3 },
+  'Mira Studio':   { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:3, automationConfidence:2 },
+  'Mira':          { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mobile':        { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Engage (Legacy)':{ userImpact:2, rateOfChange:1, complexity:1, testability:2, testCoverage:1, automationConfidence:1 },
+};
+
+// Evidence behind each pre-loaded default — mirrors Confluence §6 analysis.
+// Each entry is an array of [indicator, value] rows rendered as a 2-column table.
+const PROJECT_EVIDENCE = {
+  'GenAI Lens': {
+    automationConfidence: [
+      ['Spec files',           '21'],
+      ['Active tests',         '232 (3 skipped)'],
+      ['Critical flows covered','18 of 21 (~80%)'],
+      ['Covered',              'Overview, Trends, Benchmarking, Sentiment, Sources, AI Insights, Recommendations, Drill-downs, Prompt CRUD, Exports, Empty states'],
+      ['Gaps',                 'Error states, role-based permissions, Monitor/Dashboard integration'],
+      ['Assessment',           'Critical flows covered reliably — score 3'],
+    ],
+    testCoverage: [
+      ['Automated coverage',   '~80% of critical flows'],
+      ['Spec files / tests',   '21 files · 232 active · 3 skipped'],
+      ['Flows covered',        '18 of 21 identified critical flows'],
+      ['Not covered',          'Network error states, role-based permissions, Monitor/Dashboard integration'],
+      ['Assessment',           '80–100% covered — score 5'],
+    ],
+    testability: [
+      ['Code structure',  'Page Object Model with isolated fixtures (.isolated.spec.ts pattern)'],
+      ['Selectors',       'Stable, no brittle XPaths'],
+      ['Waits',           'Deterministic throughout'],
+      ['Assessment',      'Good structure, test hooks available — score 3'],
+    ],
+  },
+  'Mira Studio': {
+    automationConfidence: [
+      ['Spec files',             '10'],
+      ['Active tests',           '85 (11 skipped)'],
+      ['Critical flows covered', '10 of 16 (~55%)'],
+      ['Covered',                'Projects CRUD, prompts, search, history, landing page, Media Brief Agent'],
+      ['Most critical gap',      'AI response generation (the primary product flow) is not automated'],
+      ['Assessment',             'Partial coverage or some gaps — score 2'],
+    ],
+    testCoverage: [
+      ['Automated coverage',   '~55% of critical flows'],
+      ['Spec files / tests',   '10 files · 85 active · 11 skipped'],
+      ['Flows covered',        '10 of 16 identified critical flows'],
+      ['Not covered',          'AI response generation, export/share, file attachment, role-based permissions, error states, staging'],
+      ['Assessment',           '40–60% covered — score 3'],
+    ],
+    testability: [
+      ['Code structure',  'Good POM (projects/, prompt-library/, search-and-history/ directories)'],
+      ['Limitation',      'Entire suite skips on staging — only testable in production'],
+      ['Impact',          'Limits pre-production validation and isolation'],
+      ['Assessment',      'Some friction, partial test support — score 2'],
+    ],
+  },
+  'Mira': {
+    automationConfidence: [
+      ['Spec files',    '0'],
+      ['Active tests',  '0'],
+      ['Coverage',      'None — all flows depend on manual testing'],
+      ['Note',          'Score anchored at minimum; no evidence of automated coverage capacity'],
+      ['Assessment',    'Major flows rely on manual testing — score 1'],
+    ],
+    testCoverage: [
+      ['Automated coverage', '0%'],
+      ['Spec files',         '0 (verified 26 June 2026 in global-qa-test-suite src/tests/mira/)'],
+      ['Not covered',        'Prompt generation, scheduling, report generation, share visibility — all manual'],
+      ['Assessment',         '0–20% covered — score 1'],
+    ],
+    testability: [
+      ['Evidence',     'None — no tests exist to assess structural testability'],
+      ['Score basis',  'Baseline estimate only (score 2)'],
+      ['Next step',    'Reassess once an automated suite is introduced'],
+      ['Assessment',   'Estimate: some friction, partial test support — score 2'],
+    ],
+  },
+  'Mobile': {
+    automationConfidence: [
+      ['Suite',              'Maestro (global-qa-mobile-test-suite)'],
+      ['Flows automated',    '3 flows + 2 subflows'],
+      ['Covered',            'Login (happy path + invalid password), What\'s New onboarding, returning-user re-login'],
+      ['Not automated',      'Monitor, content browsing, sharing, alerts, translation, settings (~85% of flows)'],
+      ['Assessment',         'Major flows rely on manual testing — score 1'],
+    ],
+    testCoverage: [
+      ['Automated coverage', '~15% of critical flows'],
+      ['Flows automated',    '3 (auth + onboarding only)'],
+      ['Core flows not covered','Monitor, content browsing, sharing, alerts, translation, settings'],
+      ['Framework',          'Maestro YAML flows'],
+      ['Assessment',         '0–20% covered — score 1'],
+    ],
+    testability: [
+      ['Framework',    'Maestro — stable testIDs, reusable subflows, deterministic waits'],
+      ['Code quality', 'Good within existing scope'],
+      ['Limitation',   'Coverage scope is minimal (auth + onboarding only)'],
+      ['Assessment',   'Some friction, partial test support — score 2'],
+    ],
+  },
+  'Engage (Legacy)': {
+    automationConfidence: [
+      ['Spec files',              '1'],
+      ['Active tests',            '1 (page heading verification only)'],
+      ['Functional flows covered','0 of 8'],
+      ['Note',                    'Suite skips in production (test.skip(ENVIRONMENT === \'production\'))'],
+      ['Assessment',              'Major flows rely on manual testing — score 1'],
+    ],
+    testCoverage: [
+      ['Automated coverage',       '~5% (1 heading test)'],
+      ['Functional flows covered', '0 of 8'],
+      ['Not covered',              'Create/schedule post, drafts, calendar, publishing, approval, analytics, account connections'],
+      ['Production skip',          'No automated test runs against the live environment'],
+      ['Assessment',               '0–20% covered — score 1'],
+    ],
+    testability: [
+      ['Code structure',  'Page Object exists, structure is sound'],
+      ['Limitation',      'Production-skip flag limits real-environment validation'],
+      ['Assessment',      'Some friction, partial test support — score 2'],
+    ],
+  },
+};
+
+// GitHub repo that is the evidence source for each project's Mitigation scores.
+const PROJECT_MIT_SOURCE = {
+  'GenAI Lens':     { repo: 'global-qa-test-suite', branch: 'develop' },
+  'Mira Studio':    { repo: 'global-qa-test-suite', branch: 'develop' },
+  'Mira':           { repo: 'global-qa-test-suite', branch: 'develop' },
+  'Mobile':         { repo: 'global-qa-mobile-test-suite', branch: 'main' },
+  'Engage (Legacy)':{ repo: 'global-qa-test-suite', branch: 'develop' },
 };
 
 // Criteria definitions
@@ -183,9 +334,15 @@ const MITIGATION_CRITERIA = [
   { id:'automationConfidence', label:'Automation confidence', inputType:'confirm',
     description:'How reliably automated tests would catch a regression in critical user flows. Review each quarter.',
     options:[{score:1,label:'Low',detail:'Major flows rely on manual testing'},{score:2,label:'Medium',detail:'Partial coverage or some gaps'},{score:3,label:'High',detail:'Critical flows covered reliably'}] },
-  { id:'testCoverage', label:'Test coverage', inputType:'confirm',
+  { id:'testCoverage', label:'Test coverage', inputType:'confirm', scale:5,
     description:'Combined automated + manual coverage across critical flows. Review each quarter.',
-    options:[{score:1,label:'<40%',detail:'Low coverage'},{score:2,label:'40–70%',detail:'Medium coverage'},{score:3,label:'>70%',detail:'High coverage'}] },
+    options:[
+      {score:1,label:'0–20%', detail:'Very low coverage'},
+      {score:2,label:'20–40%',detail:'Low coverage'},
+      {score:3,label:'40–60%',detail:'Medium coverage'},
+      {score:4,label:'60–80%',detail:'Good coverage'},
+      {score:5,label:'80–100%',detail:'High coverage'},
+    ] },
   { id:'testability', label:'Testability', inputType:'confirm',
     description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
     options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
@@ -224,11 +381,17 @@ function tritonScore10(weighted, curve, mp) {
   return Math.round(scaleMax * cdf((weighted - mu) / sigma) * 10) / 10;
 }
 
+// Criteria with scale > 3 (e.g. testCoverage scale:5) are normalized to the 1–3
+// range before the weighted average so the formula stays unchanged for all callers.
 function wavg(criteria, weights, scores) {
   const filled = criteria.filter(c => scores[c.id] != null);
   if (!filled.length) return null;
   const tw = filled.reduce((s,c) => s + weights[c.id], 0);
-  return filled.reduce((s,c) => s + scores[c.id] * weights[c.id], 0) / tw;
+  return filled.reduce((s,c) => {
+    const scale = c.scale || 3;
+    const norm = scale === 3 ? scores[c.id] : 1 + (scores[c.id] - 1) / (scale - 1) * 2;
+    return s + norm * weights[c.id];
+  }, 0) / tw;
 }
 
 const SCALE_MAX = 10;
@@ -265,10 +428,13 @@ const levelByLabel = lbl => LEVELS.find(l => l.label === lbl);
 // Option colors by criterion type
 const RISK_COLORS   = {1:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'}};
 const MIT_COLORS    = {1:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'}};
+// 5-level color map for testCoverage (0–20 / 20–40 / 40–60 / 60–80 / 80–100%).
+const MIT_COLORS_5  = {1:{bg:'#FAECE7',border:'#D85A30',text:'#712B13'},2:{bg:'#FAEEDA',border:'#BA7517',text:'#633806'},3:{bg:'#FFF3CD',border:'#C9A227',text:'#5a4200'},4:{bg:'#D4EDDA',border:'#3D9970',text:'#1a5c3a'},5:{bg:'#E1F5EE',border:'#1D9E75',text:'#085041'}};
 const NEUTRAL_COLORS= {1:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},2:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'},3:{bg:'#E8F0FE',border:'#4A6FA5',text:'#1a3a6b'}};
 
 // ── CriterionCard ─────────────────────────────────────────────────────────────
-function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoaded, reverseOptions, locked, lockedNote }) {
+function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoaded, reverseOptions, locked, lockedNote, lockedLabel, evidence }) {
+  const [showEvidence, setShowEvidence] = useState(false);
   const inputTypeLabel = criterion.inputType === 'auto' ? 'Auto' : criterion.inputType === 'confirm' ? 'Confirm' : 'Jira';
   const inputTagClass  = criterion.inputType === 'auto' ? 'auto-tag' : criterion.inputType === 'confirm' ? 'confirm-tag' : 'auto-tag';
   // Display order only — score values stay attached to each option.
@@ -280,7 +446,7 @@ function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoa
         <div className="criterion-name">{criterion.label}</div>
         <div className="criterion-meta">
           {weightPct && <span style={{fontSize:11,color:'var(--text2)'}}>{weightPct}</span>}
-          <span className={inputTagClass}>{locked ? '🔒 Jira' : inputTypeLabel}</span>
+          <span className={inputTagClass}>{locked ? `🔒 ${lockedLabel || 'Jira'}` : inputTypeLabel}</span>
         </div>
       </div>
       <div className="criterion-desc">{criterion.description}</div>
@@ -300,12 +466,52 @@ function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoa
         })}
       </div>
       {locked && lockedNote && <div style={{fontSize:10.5,color:'var(--text3)',marginTop:6}}>{lockedNote}</div>}
+      {evidence && (
+        <div style={{marginTop:8,borderTop:'.5px solid var(--border)',paddingTop:6}}>
+          <button onClick={()=>setShowEvidence(v=>!v)}
+            style={{fontSize:11,fontWeight:600,color:'var(--blue-text)',background:'var(--blue-bg)',border:'1px solid var(--blue-border)',borderRadius:4,padding:'2px 10px',cursor:'pointer',fontFamily:'inherit',display:'inline-flex',alignItems:'center',gap:4}}>
+            {showEvidence ? '▾' : '▸'} Evidence
+          </button>
+          {showEvidence && (
+            <table style={{width:'100%',borderCollapse:'collapse',marginTop:6,fontSize:11}}>
+              <tbody>
+                {evidence.map(([label, value], i) => (
+                  <tr key={i} style={{borderBottom: i < evidence.length - 1 ? '.5px solid var(--border)' : 'none'}}>
+                    <td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600,width:'36%',verticalAlign:'top'}}>{label}</td>
+                    <td style={{padding:'4px 0',color:'var(--text2)',lineHeight:1.45}}>{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── AssessView ────────────────────────────────────────────────────────────────
-function AssessView({ onSaved, jiraMetrics }) {
+// Merges static PROJECT_EVIDENCE rows with live counts from test-metrics.json.
+// Only quantitative rows (Spec files, Active tests, Spec files / tests, Flows automated)
+// are replaced — qualitative analysis rows stay as-is.
+function buildEvidence(project, criterionId, testMetrics) {
+  const staticRows = PROJECT_EVIDENCE[project]?.[criterionId];
+  if (!staticRows) return null;
+  const tm = testMetrics?.projects?.[project];
+  if (!tm || tm.error) return staticRows;
+  const specStr = tm.subflows != null
+    ? `${tm.specFiles} main flows · ${tm.subflows} subflows`
+    : `${tm.specFiles} files · ${tm.activeTests} active · ${tm.skipped} skipped`;
+  return staticRows.map(([label, value]) => {
+    if (label === 'Spec files')         return [label, String(tm.specFiles)];
+    if (label === 'Active tests')       return [label, tm.subflows != null ? String(tm.activeTests) : `${tm.activeTests} (${tm.skipped} skipped)`];
+    if (label === 'Spec files / tests') return [label, specStr];
+    if (label === 'Flows automated')    return [label, String(tm.activeTests)];
+    return [label, value];
+  });
+}
+
+function AssessView({ onSaved, jiraMetrics, testMetrics }) {
   const [project, setProject] = useState('');
   const [customProject, setCustomProject] = useState('');
   const [evaluator, setEvaluator] = useState('');
@@ -326,7 +532,13 @@ function AssessView({ onSaved, jiraMetrics }) {
   const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
+
+  // Mitigation criteria are locked when the project has defaults sourced from GitHub.
+  const mitSrc = finalProject ? PROJECT_MIT_SOURCE[finalProject] : null;
+  const isMitLocked = !!mitSrc;
   const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
+  const tmDate = testMetrics?.generatedAt ? `updated ${fmtUpdated(testMetrics.generatedAt)}` : 'analyzed June 26, 2026';
+  const mitLockedNote = mitSrc ? `From ${mitSrc.repo} · branch: ${mitSrc.branch} · ${tmDate}` : null;
 
   // Escaped-defect tickets + manual exclusions → severity-weighted count and score.
   const escapedTickets = jiraProject?.escapedDefects?.tickets || [];
@@ -564,15 +776,25 @@ function AssessView({ onSaved, jiraMetrics }) {
           {/* Mitigation Multiplier */}
           <div className="dim-header">
             <div className="dim-title">Mitigation Multiplier</div>
-            <span className="dim-badge" style={{background:'#E1F5EE',color:'#085041',borderColor:'#1D9E75'}}>Range 0.70 – 1.10</span>
+            <span className="dim-badge" style={{background:'#E1F5EE',color:'#085041',borderColor:'#1D9E75'}}>
+              {isMitLocked ? '🔒 GitHub' : 'Range 0.80 – 1.20'}
+            </span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Higher scores = stronger mitigations = lower multiplier = lower final risk. Confirm each quarter.</div>
+          <div className="helper" style={{marginBottom:10}}>
+            {isMitLocked
+              ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). Higher score = stronger mitigation = lower multiplier = lower Final Risk.`
+              : 'Higher scores = stronger mitigations = lower multiplier = lower final risk. Confirm each quarter.'}
+          </div>
           {MITIGATION_CRITERIA.map(c => (
             <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
-              colorMap={MIT_COLORS} weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
-              autoLoaded={c.inputType==='confirm' && PROJECT_DEFAULTS[finalProject] != null}
+              colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
+              weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
+              autoLoaded={false}
               reverseOptions={true}
-              locked={isJiraLocked(c)} lockedNote={jiraNote(c.id)} />
+              locked={isMitLocked || isJiraLocked(c)}
+              lockedNote={isMitLocked ? mitLockedNote : jiraNote(c.id)}
+              lockedLabel="GitHub"
+              evidence={buildEvidence(finalProject, c.id, testMetrics)} />
           ))}
 
           {/* Manual Override */}
@@ -652,8 +874,8 @@ function AssessView({ onSaved, jiraMetrics }) {
           <div className="card">
             <div className="section-label">Mitigation multiplier</div>
             <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.6}}>
-              Strong mitigations → <strong>0.70</strong> (reduces risk by 30%)<br/>
-              Weak mitigations → <strong>1.10</strong> (increases risk by 10%)
+              Strong mitigations → <strong>0.80</strong> (reduces risk by 20%)<br/>
+              Weak mitigations → <strong>1.20</strong> (increases risk by 20%)
             </div>
           </div>
 
@@ -973,6 +1195,7 @@ function App() {
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const [jiraMetrics, setJiraMetrics] = useState(null);
   const [jiraHistory, setJiraHistory] = useState(null);
+  const [testMetrics, setTestMetrics] = useState(null);
 
   // Load Jira metrics once; shared by the header period label and the assessment.
   useEffect(() => {
@@ -981,6 +1204,10 @@ function App() {
       .then(r => r.ok ? r.json() : null)
       .then(setJiraMetrics)
       .catch(() => setJiraMetrics(null));
+    fetch('./test-metrics.json', {cache:'no-store'})
+      .then(r => r.ok ? r.json() : null)
+      .then(setTestMetrics)
+      .catch(() => setTestMetrics(null));
   }, []);
 
   const fmtDay = s => { try { return new Date(s + (s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
@@ -991,8 +1218,13 @@ function App() {
     <div>
       <div className="header">
         <div className="header-left">
+          <div style={{display:'flex',alignItems:'center',gap:7}}>
+            <span className="header-logo">Meltwater</span>
+            <span className="header-divider">/</span>
+            <span style={{fontSize:12,color:'var(--text2)'}}>Mira &amp; GenAI QA</span>
+          </div>
           <h1>QA Risk Baseline</h1>
-          <p>Mira &amp; GenAI QA Team · Q3 2026 model · {periodText}</p>
+          <p>Q3 2026 model · {periodText}</p>
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
@@ -1000,7 +1232,7 @@ function App() {
           <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
-      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics}/>}
+      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
       {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
     </div>
