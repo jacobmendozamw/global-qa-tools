@@ -679,7 +679,7 @@ function AssessView({ jiraMetrics, testMetrics }) {
               );
             }
             return (
-              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
                 colorMap={{2:RISK_COLORS[1],5:RISK_COLORS[2],9:RISK_COLORS[3]}} weightPct="60% effective" autoLoaded={false} />
             );
           })}
@@ -743,14 +743,14 @@ function AssessView({ jiraMetrics, testMetrics }) {
             const locked = isMitLocked;
             const lockedNote = isMitLocked ? mitLockedNote : null;
             return (
-              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
                 colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
                 autoLoaded={false}
                 reverseOptions={true}
                 locked={locked}
                 lockedNote={lockedNote}
                 lockedLabel={locked ? 'GitHub' : null}
-                evidence={buildEvidence(finalProject, c.id, testMetrics)} />
+                evidence={buildEvidence(project, c.id, testMetrics)} />
             );
           })}
 
