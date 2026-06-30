@@ -626,13 +626,23 @@ function AssessView({ jiraMetrics, testMetrics }) {
 
   return (
     <div>
-      {/* Project selector */}
+      {/* Project selector — radio pills */}
       <div className="card" style={{marginBottom:20}}>
-        <div className="section-label">Project</div>
-        <select value={project} onChange={e=>setProject(e.target.value)} style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}>
-          <option value="">Select a project...</option>
-          {PROJECTS.map(p=><option key={p} value={p}>{p}</option>)}
-        </select>
+        <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Proyecto:</span>
+          {PROJECTS.map(p => (
+            <button key={p} onClick={()=>setProject(prev=>prev===p?'':p)}
+              style={{fontSize:12, padding:'5px 14px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                fontWeight: project===p ? 600 : 400,
+                border: project===p ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
+                background: project===p ? 'var(--teal-light)' : 'transparent',
+                color: project===p ? 'var(--teal-dim)' : 'var(--text3)',
+                transition:'all .15s'}}>
+              {p}
+            </button>
+          ))}
+        </div>
+        {!project && <div style={{fontSize:11,color:'var(--text3)',marginTop:8}}>Selecciona un proyecto para ver su Risk Index.</div>}
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 280px',gap:16,alignItems:'start'}}>
@@ -1120,10 +1130,10 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
 
 // ── HistoryView ───────────────────────────────────────────────────────────────
 function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
-  const [records, setRecords] = useState([]);
   const [allRecords, setAllRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterProject, setFilterProject] = useState('');
+  const [visibleProjects, setVisibleProjects] = useState(new Set(PROJECTS));
+  const [filterQuarter, setFilterQuarter] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
   const [localRefresh, setLocalRefresh] = useState(0);
   const [detail, setDetail] = useState(null);
@@ -1141,13 +1151,11 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
     setLoading(true);
     loadAssessments().then(list=>{
       if (cancelled) return;
-      const all = list.sort((a,b)=>new Date(b.date)-new Date(a.date));
-      setAllRecords(all);
-      setRecords(filterProject ? all.filter(r=>r.project===filterProject) : all);
+      setAllRecords(list.sort((a,b)=>new Date(b.date)-new Date(a.date)));
       setLoading(false);
     });
     return ()=>{ cancelled = true; };
-  },[filterProject,refreshKey,localRefresh]);
+  },[refreshKey, localRefresh]);
 
   const handleImport = e => {
     const f = e.target.files[0];
@@ -1157,7 +1165,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
       try {
         const imported = JSON.parse(ev.target.result);
         if (!Array.isArray(imported)) throw new Error('not an array');
-        // Merge imported into local store by id (imported wins on conflict).
         const byId = new Map();
         loadLocalAssessments().forEach(r=>byId.set(r.id,r));
         imported.forEach(r=>byId.set(r.id,r));
@@ -1169,57 +1176,166 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
     e.target.value = '';
   };
 
-  const projects = [...new Set(records.map(r=>r.project))].sort();
-  const byProject = projects.reduce((acc,p)=>{ acc[p]=records.filter(r=>r.project===p).sort((a,b)=>new Date(a.date)-new Date(b.date)); return acc; },{});
+  const toggleProject = proj =>
+    setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
+
   const fmtDate = iso => new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  const quarterOf = iso => {
+    const d = new Date(iso);
+    return `Q${Math.floor(d.getUTCMonth()/3)+1}-${d.getUTCFullYear()}`;
+  };
+
+  const quarterInfo = qKey => {
+    const [qPart, year] = qKey.split('-');
+    const n = parseInt(qPart.slice(1));
+    const starts = ['Jan 1','Apr 1','Jul 1','Oct 1'];
+    const ends   = ['Mar 31','Jun 30','Sep 30','Dec 31'];
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const currentQ = `Q${Math.floor(today.getMonth()/3)+1}-${today.getFullYear()}`;
+    const isCurrent = qKey === currentQ;
+    return { label:`Q${n} ${year}`, start:`${starts[n-1]}, ${year}`, end: isCurrent ? todayStr : `${ends[n-1]}, ${year}`, isCurrent };
+  };
+
+  const allQuarters = [...new Set(allRecords.map(r=>quarterOf(r.date)))].sort().reverse();
+
+  const filteredRecords = allRecords
+    .filter(r => visibleProjects.has(r.project))
+    .filter(r => !filterQuarter || quarterOf(r.date) === filterQuarter);
+
+  const quarterGroups = allQuarters
+    .filter(q => !filterQuarter || q === filterQuarter)
+    .map(q => ({ qKey:q, qi:quarterInfo(q), cards:filteredRecords.filter(r=>quarterOf(r.date)===q) }))
+    .filter(g => g.cards.length > 0);
+
+  const getPrevRecord = (proj, qKey) => {
+    const qIdx = allQuarters.indexOf(qKey);
+    for (let i = qIdx+1; i < allQuarters.length; i++) {
+      const r = allRecords.find(r2 => r2.project===proj && quarterOf(r2.date)===allQuarters[i]);
+      if (r) return r;
+    }
+    return null;
+  };
 
   return (
     <div>
+      {/* Project filter pills */}
+      <div className="card" style={{marginBottom:12}}>
+        <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Proyectos:</span>
+          {PROJECTS.map(proj => {
+            const visible = visibleProjects.has(proj);
+            return (
+              <button key={proj} onClick={()=>toggleProject(proj)}
+                style={{fontSize:12, padding:'5px 14px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                  fontWeight: visible ? 600 : 400,
+                  border: visible ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
+                  background: visible ? 'var(--teal-light)' : 'transparent',
+                  color: visible ? 'var(--teal-dim)' : 'var(--text3)',
+                  transition:'all .15s'}}>
+                {proj}
+              </button>
+            );
+          })}
+          {visibleProjects.size < PROJECTS.length && (
+            <button onClick={()=>setVisibleProjects(new Set(PROJECTS))}
+              style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
+              Mostrar todos
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Toolbar: quarter filter + view toggle + export */}
       <div className="history-toolbar">
-        <select value={filterProject} onChange={e=>setFilterProject(e.target.value)}>
-          <option value="">All projects</option>
-          {[...new Set([...PROJECTS,...projects])].map(p=><option key={p} value={p}>{p}</option>)}
-        </select>
+        <div style={{display:'flex', gap:6, flexWrap:'wrap', alignItems:'center'}}>
+          <button onClick={()=>setFilterQuarter('')}
+            className={`toggle-btn${!filterQuarter?' active':''}`}
+            style={{borderRadius:20, border: !filterQuarter ? 'none' : '1px solid var(--border2)', padding:'5px 14px'}}>
+            All
+          </button>
+          {allQuarters.map(q => {
+            const qi = quarterInfo(q);
+            return (
+              <button key={q} onClick={()=>setFilterQuarter(f=>f===q?'':q)}
+                className={`toggle-btn${filterQuarter===q?' active':''}`}
+                style={{borderRadius:20, border: filterQuarter===q ? 'none' : '1px solid var(--border2)', padding:'5px 14px'}}>
+                {qi.label}{qi.isCurrent ? ' ●' : ''}
+              </button>
+            );
+          })}
+        </div>
+        <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{filteredRecords.length} snapshot{filteredRecords.length!==1?'s':''}</span>
         <div className="toggle-wrap">
-          <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Timeline</button>
+          <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Cards</button>
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
-        <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{records.length} assessment{records.length!==1?'s':''}</span>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
-        <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import data.json</button>
+        <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import</button>
         <button className="btn-primary" style={{fontSize:11,padding:'5px 12px'}} onClick={()=>exportAssessments(allRecords)} disabled={!allRecords.length}>Export data.json</button>
-      </div>
-      <div className="helper" style={{marginBottom:16}}>
-        To share your assessments with the team, click <strong>Export data.json</strong> and commit the downloaded file to <code>risk-baseline/data.json</code> in the repo. Everyone who opens this page then sees the committed assessments.
       </div>
 
       {loading && <div className="empty-state">Loading...</div>}
-      {!loading && records.length===0 && <div className="empty-state">No assessments yet. Run the first one from the Assessment tab.</div>}
+      {!loading && filteredRecords.length===0 && <div className="empty-state">No snapshots for this selection.</div>}
 
-      {!loading && records.length>0 && viewMode==='timeline' && (
-        <div className="timeline-wrap">
-          {Object.entries(byProject).map(([proj,recs])=>(
-            <div key={proj} className="timeline-project">
-              <div className="timeline-project-name">{proj}</div>
-              <div className="timeline-points">
-                {recs.map((r,i)=>{
-                  const rl = r.level ? levelByLabel(r.level) : (r.finalRisk != null ? riskLevel(r.finalRisk) : null);
-                  // Quarter-over-quarter trend vs the previous assessment (Rec #10).
-                  const prev = i>0 ? recs[i-1] : null;
-                  const delta = (prev && prev.finalRisk!=null && r.finalRisk!=null) ? r.finalRisk - prev.finalRisk : null;
-                  const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
+      {!loading && filteredRecords.length>0 && viewMode==='timeline' && (
+        <div>
+          {quarterGroups.map(({qKey, qi, cards}) => (
+            <div key={qKey} style={{marginBottom:32}}>
+              <div style={{display:'flex', alignItems:'baseline', gap:10, marginBottom:14}}>
+                <span style={{fontSize:18, fontWeight:700}}>{qi.label}</span>
+                <span style={{fontSize:12, color:'var(--text3)'}}>{qi.start} – {qi.end}</span>
+                {qi.isCurrent && <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)',marginLeft:4}}>in progress</span>}
+              </div>
+              <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(340px, 1fr))', gap:14}}>
+                {cards.map(r => {
+                  const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
+                  const prev = getPrevRecord(r.project, qKey);
+                  const delta = (prev&&prev.finalRisk!=null&&r.finalRisk!=null) ? r.finalRisk-prev.finalRisk : null;
+                  const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)} vs prev`:delta<0?`▼ ${delta.toFixed(1)} vs prev`:'± 0.0 vs prev');
                   const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                   return (
-                    <div key={r.id} className="timeline-point" style={{background:rl?rl.bg:'var(--bg2)',border:`1px solid ${rl?rl.border:'var(--border)'}`}} title={r.overrideActive?`Override: ${r.overrideJustification}`:r.notes||''}>
-                      <div className="tp-date">{fmtDate(r.date)}</div>
-                      <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</div>
-                      <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
-                      {dtxt && <div style={{fontSize:10,fontWeight:600,color:dcol}}>{dtxt}</div>}
-                      <div className="tp-divider"/>
-                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'base',record:r})}>Base</button><span>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span></div>
-                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'triton',record:r})}>TRITON</button><span>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span></div>
-                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'mit',record:r})}>QA Process</button><span style={{fontSize:10,color:'var(--text3)'}}>QAEI</span></div>
-                      <div className="tp-eval">by {r.evaluator}</div>
+                    <div key={r.id}
+                      style={{background:'var(--bg)', border:`1.5px solid ${rl?rl.border:'var(--border)'}`,
+                        borderRadius:12, padding:'16px 20px', cursor:'pointer', transition:'box-shadow .15s'}}
+                      onClick={()=>setDetail({type:'base',record:r})}
+                      onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
+                      onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
+                      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10}}>
+                        <span style={{fontSize:16, fontWeight:700}}>{r.project}</span>
+                        {r.evaluator==='auto' && <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)',fontSize:10}}>auto</span>}
+                      </div>
+                      <div style={{display:'flex', alignItems:'baseline', gap:8, marginBottom:6}}>
+                        <span style={{fontSize:34, fontWeight:700, lineHeight:1, color:rl?rl.text:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
+                        <span style={{fontSize:12, color:'var(--text3)'}}>/ 10</span>
+                        {rl && <span className="pill" style={{background:rl.bg,color:rl.text,fontSize:12,fontWeight:700,border:`1px solid ${rl.border}`}}>{rl.label}</span>}
+                      </div>
+                      {dtxt && <div style={{fontSize:12, fontWeight:600, color:dcol, marginBottom:10}}>{dtxt}</div>}
+                      <div style={{display:'flex', flexDirection:'column', gap:8, marginTop:12}}>
+                        <div>
+                          <div style={{display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--text2)', marginBottom:4}}>
+                            <span>Base Risk <span style={{color:'var(--text3)',fontSize:11}}>(40%)</span></span>
+                            <span style={{fontWeight:600}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span>
+                          </div>
+                          <div style={{height:6, background:'var(--bg3)', borderRadius:3}}>
+                            <div style={{height:6, width:`${r.baseRisk!=null?Math.min(100,(r.baseRisk/10)*100):0}%`, background:'#6366f1', borderRadius:3, transition:'width .4s'}}/>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--text2)', marginBottom:4}}>
+                            <span>TRITON <span style={{color:'var(--text3)',fontSize:11}}>(60%)</span></span>
+                            <span style={{fontWeight:600}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span>
+                          </div>
+                          <div style={{height:6, background:'var(--bg3)', borderRadius:3}}>
+                            <div style={{height:6, width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`, background:'var(--teal)', borderRadius:3, transition:'width .4s'}}/>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{fontSize:11, color:'var(--text3)', marginTop:10, borderTop:'1px solid var(--border)', paddingTop:8}}>
+                        {fmtDate(r.date)} · click para detalle
+                      </div>
                     </div>
                   );
                 })}
@@ -1229,29 +1345,27 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
         </div>
       )}
 
-      {!loading && records.length>0 && viewMode==='table' && (
+      {!loading && filteredRecords.length>0 && viewMode==='table' && (
         <div className="card" style={{padding:0,overflow:'hidden'}}>
           <table>
             <thead>
               <tr>
-                <th>Date</th><th>Project</th><th>Final Risk</th><th>Level</th>
-                <th>Base Risk</th><th>TRITON</th>
-                <th>Override</th><th>Evaluator</th><th>Notes</th>
+                <th>Date</th><th>Project</th><th>Quarter</th><th>Final Risk</th><th>Level</th>
+                <th>Base Risk</th><th>TRITON</th><th>Notes</th>
               </tr>
             </thead>
             <tbody>
-              {records.map(r=>{
+              {filteredRecords.map(r=>{
                 const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
                 return (
-                  <tr key={r.id}>
+                  <tr key={r.id} style={{cursor:'pointer'}} onClick={()=>setDetail({type:'base',record:r})}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
+                    <td style={{color:'var(--text3)'}}>{quarterOf(r.date)}</td>
                     <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</td>
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
                     <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
-                    <td style={{color:r.overrideActive?'var(--red-text)':'var(--text3)'}}>{r.overrideActive?'⚑ Yes':'—'}</td>
-                    <td style={{color:'var(--text2)'}}>{r.evaluator}</td>
                     <td style={{color:'var(--text2)',maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.notes||'—'}</td>
                   </tr>
                 );
@@ -1262,8 +1376,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
       )}
       <HistoryDetailModal detail={detail} onClose={()=>setDetail(null)}
         onSaveRecord={updatedRecord => {
-          // Persist to local store (already written inside TritonDetailBody; this
-          // just keeps the in-memory view in sync without a full reload).
           setDetail(prev => prev ? {...prev, record: updatedRecord} : null);
           setLocalRefresh(n => n + 1);
         }}
@@ -1686,7 +1798,7 @@ function App() {
         </div>
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Risk Index</button>
-          <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
+          <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>RI History</button>
           <button className={`nav-tab${tab==='qa'?' active':''}`} onClick={()=>setTab('qa')}>QA Effectiveness</button>
           <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
