@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T09:37:46.607Z",
+  "generatedAt": "2026-06-30T21:11:38.883Z",
   "modelVersion": "2026-Q3-v3",
   "quarter": "2026-Q2",
   "project": "TRITON",
@@ -153,7 +153,7 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 52,
+        "avgDays": 53,
         "openCount": 9,
         "informational": true
       },
@@ -193,8 +193,14 @@
         ]
       },
       "preProductionCaught": {
-        "total": 27,
+        "total": 28,
         "tickets": [
+          {
+            "key": "GAIL-1645",
+            "summary": "FE: Search Volume Over Time wrong hover state (remove total)",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1645"
+          },
           {
             "key": "GAIL-1611",
             "summary": "FE: Internal Server Error banner appearing",
@@ -361,10 +367,10 @@
       },
       "detectionEfficiency": {
         "score": 3,
-        "preProductionCaught": 27,
+        "preProductionCaught": 28,
         "internallyFound": 4,
         "customerFound": 12,
-        "rate": 72
+        "rate": 73
       }
     },
     "Mira Studio": {
@@ -401,7 +407,7 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 54,
+        "avgDays": 55,
         "openCount": 3,
         "informational": true
       },
@@ -429,8 +435,14 @@
         ]
       },
       "preProductionCaught": {
-        "total": 3,
+        "total": 4,
         "tickets": [
+          {
+            "key": "HZN-823",
+            "summary": "Bug: Citations Update",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/HZN-823"
+          },
           {
             "key": "HZN-814",
             "summary": "Bug: Add `Duplicate Project` option",
@@ -453,10 +465,10 @@
       },
       "detectionEfficiency": {
         "score": 3,
-        "preProductionCaught": 3,
+        "preProductionCaught": 4,
         "internallyFound": 2,
         "customerFound": 3,
-        "rate": 63
+        "rate": 67
       },
       "needsManualReview": {
         "escaped": 4,
@@ -466,10 +478,18 @@
     "Mira": {
       "escapedDefects": {
         "score": 10,
-        "total": 16,
+        "total": 17,
         "critical": 3,
-        "weighted": 20.5,
+        "weighted": 21.5,
         "tickets": [
+          {
+            "key": "TRITON-37155",
+            "summary": "Inconsistent Daily Delivery of 'Melody's Airport Digest' Scheduled Prompt",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37155"
+          },
           {
             "key": "TRITON-37129",
             "summary": "107584345 - Mira Studio shared link not updating and missing password",
@@ -601,8 +621,8 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 27,
-        "openCount": 9,
+        "avgDays": 25,
+        "openCount": 10,
         "informational": true
       },
       "dataQuality": {
@@ -708,8 +728,8 @@
         "score": 2,
         "preProductionCaught": 14,
         "internallyFound": 0,
-        "customerFound": 16,
-        "rate": 47
+        "customerFound": 17,
+        "rate": 45
       },
       "needsManualReview": {
         "escaped": 4,
@@ -822,10 +842,34 @@
     "Engage (Legacy)": {
       "escapedDefects": {
         "score": 10,
-        "total": 12,
-        "critical": 4,
-        "weighted": 20,
+        "total": 15,
+        "critical": 5,
+        "weighted": 25,
         "tickets": [
+          {
+            "key": "TRITON-37154",
+            "summary": "Conversations - Adding tags not always displaying after refreshing",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37154"
+          },
+          {
+            "key": "TRITON-37146",
+            "summary": "MI engage - Conversations - No new DM's since June 16th",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37146"
+          },
+          {
+            "key": "TRITON-37145",
+            "summary": "MI Engage - Conversations - Missing Facebook comments",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37145"
+          },
           {
             "key": "TRITON-37104",
             "summary": "Conversations - IG Usernames displaying incorrectly",
@@ -925,8 +969,8 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 163,
-        "openCount": 16,
+        "avgDays": 138,
+        "openCount": 19,
         "informational": true
       },
       "dataQuality": {
@@ -1003,8 +1047,2853 @@
         "score": 2,
         "preProductionCaught": 8,
         "internallyFound": 1,
-        "customerFound": 12,
-        "rate": 43
+        "customerFound": 15,
+        "rate": 38
+      }
+    },
+    "Klear": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 37,
+        "critical": 6,
+        "weighted": 46,
+        "tickets": [
+          {
+            "key": "TRITON-37113",
+            "summary": "Klear - Unable to Download Campaign Reports, One Pager, Media Kits, Any Campaign Export",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37113"
+          },
+          {
+            "key": "TRITON-36977",
+            "summary": "Klear - CORS Errors with Klear Pixel on Domains",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36977"
+          },
+          {
+            "key": "TRITON-36906",
+            "summary": "105617306 Issue with Bulk Invites and Influencer Responses in Campaign 706450",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36906"
+          },
+          {
+            "key": "TRITON-36874",
+            "summary": "Klear - Error Adding X Handle and Creating X Profile for Creator",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36874"
+          },
+          {
+            "key": "TRITON-36855",
+            "summary": "102810194 Sent message missing under Connect  | Klear",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36855"
+          },
+          {
+            "key": "TRITON-36807",
+            "summary": "Klear - Engage Owned Connections Removal from Inactive Account",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36807"
+          },
+          {
+            "key": "TRITON-36803",
+            "summary": "Unable to add TikTok Account",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36803"
+          },
+          {
+            "key": "TRITON-36783",
+            "summary": "Klear - Unauthenticated Instagram Stories Not Tracking for burson.finland Despite Correct Setup",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36783"
+          },
+          {
+            "key": "TRITON-36749",
+            "summary": "Klear - Broken images in recruit emails",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36749"
+          },
+          {
+            "key": "TRITON-36691",
+            "summary": "99097046 500 Internal Server Errors and 504 Timeout on Klear API Campaign Endpoints",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36691"
+          },
+          {
+            "key": "TRITON-36666",
+            "summary": "Klear - Failed Notification When Reps are Creating Klear Demo Environment",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36666"
+          },
+          {
+            "key": "TRITON-36646",
+            "summary": "Measure - Klear Data Not Pulling into Measure Dashboard",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36646"
+          },
+          {
+            "key": "TRITON-36551",
+            "summary": "Klear - API - Client experiencing major error gaps and data auditing issues",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36551"
+          },
+          {
+            "key": "TRITON-36537",
+            "summary": "Klear - Error Message on Recruit Page Inquiry Form Submission",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36537"
+          },
+          {
+            "key": "TRITON-36506",
+            "summary": "Klear - Influencers - Updating profile does not show latest posts for influencer",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36506"
+          },
+          {
+            "key": "TRITON-36504",
+            "summary": "Klear - Unable to Sync Active Shopify Coupon ",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36504"
+          },
+          {
+            "key": "TRITON-36503",
+            "summary": "Irrelevant posts fetching into the campaign  | Klear",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36503"
+          },
+          {
+            "key": "TRITON-36498",
+            "summary": "Klear – Redirecting Users to Creator Login (Incorrect Routing)",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36498"
+          },
+          {
+            "key": "TRITON-36471",
+            "summary": "Media Kit Download and Email Notification Issue for Collaborators",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36471"
+          },
+          {
+            "key": "TRITON-36381",
+            "summary": "Klear - Issues with Decimal Values in Reach Content Export",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36381"
+          },
+          {
+            "key": "TRITON-36380",
+            "summary": "Klear - EMV Earned Multiplier Not Saving Correctly in Account",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36380"
+          },
+          {
+            "key": "TRITON-36372",
+            "summary": "Klear - Issue with Aggregated PDF Report Export for Multi-Campaigns",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36372"
+          },
+          {
+            "key": "TRITON-36371",
+            "summary": "Klear - Campaign Invite Email Sign In button loop Bug",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36371"
+          },
+          {
+            "key": "TRITON-36369",
+            "summary": "Klear - Unable to connect additional Shopify account",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36369"
+          },
+          {
+            "key": "TRITON-36365",
+            "summary": "Klear - Influencer Skills Are Incorrect ",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36365"
+          },
+          {
+            "key": "TRITON-36294",
+            "summary": "Measure - Klear Campaign Data not Showing up ",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36294"
+          },
+          {
+            "key": "TRITON-36271",
+            "summary": "Klear - Centralized Connect Inbox – Message notification redirect broken for influencers with single-brand interaction",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36271"
+          },
+          {
+            "key": "TRITON-36262",
+            "summary": "Klear - Error exporting multiple campaigns ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36262"
+          },
+          {
+            "key": "TRITON-36255",
+            "summary": "#89665054 Emails Sent via Klear Not Received by Influencers",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36255"
+          },
+          {
+            "key": "TRITON-36254",
+            "summary": "#81848024 Influencers Unable to Sign Contracts",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36254"
+          },
+          {
+            "key": "TRITON-36199",
+            "summary": "#87404685 KLEAR | Unable to Add Posts to Campaign - Error Displayed",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36199"
+          },
+          {
+            "key": "TRITON-36198",
+            "summary": "Klear - Influencer Payment Solution not Syncing ",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36198"
+          },
+          {
+            "key": "TRITON-36185",
+            "summary": "Measure - Klear Campaign Data not Showing up ",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36185"
+          },
+          {
+            "key": "TRITON-36174",
+            "summary": "Klear - Not able to delete the story",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36174"
+          },
+          {
+            "key": "TRITON-36172",
+            "summary": "#85938209 Klear: Discrepancy in Audience Location Data",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36172"
+          },
+          {
+            "key": "TRITON-36169",
+            "summary": "Instagram Reel Reach Discrepancy vs Native",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36169"
+          },
+          {
+            "key": "TRITON-36168",
+            "summary": "#86522131 Klear – Instagram Reel Reach Discrepancy vs Native",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36168"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 369,
+        "openCount": 29,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 37,
+        "rate": 0
+      }
+    },
+    "Explore": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 29,
+        "critical": 4,
+        "weighted": 38,
+        "tickets": [
+          {
+            "key": "TRITON-37134",
+            "summary": "Explore - Share Exports are failing with all options",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37134"
+          },
+          {
+            "key": "TRITON-37131",
+            "summary": "Custom categories under 'US seasons' label not saving correctly",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37131"
+          },
+          {
+            "key": "TRITON-37025",
+            "summary": "Explore, dashboard not loading",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37025"
+          },
+          {
+            "key": "TRITON-37006",
+            "summary": "Question regarding content stream Share function",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37006"
+          },
+          {
+            "key": "TRITON-36999",
+            "summary": "Previous period Results Do Not Accurately Reflect Content Matches for the same time frame",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36999"
+          },
+          {
+            "key": "TRITON-36996",
+            "summary": "105274572 - Explore - AI Search Assistant Error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36996"
+          },
+          {
+            "key": "TRITON-36964",
+            "summary": "Ontario Teachers Pension Plan - Newsletters question",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36964"
+          },
+          {
+            "key": "TRITON-36963",
+            "summary": "FilterSet 500 Error 413 Content Too Large from POST",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36963"
+          },
+          {
+            "key": "TRITON-36950",
+            "summary": "Explore Analytics - \"News Sources by Reach\" widget Excel download returns blank file",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36950"
+          },
+          {
+            "key": "TRITON-36908",
+            "summary": "Explore | Bulk Sentiment Override Display Issue on Duplicated Articles",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36908"
+          },
+          {
+            "key": "TRITON-36863",
+            "summary": "More Actions not working",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36863"
+          },
+          {
+            "key": "TRITON-36840",
+            "summary": "Explore - X Source Filter Not Showing Manually Added Posts",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36840"
+          },
+          {
+            "key": "TRITON-36820",
+            "summary": "Explore - Facebook monitored page missing historical data",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36820"
+          },
+          {
+            "key": "TRITON-36717",
+            "summary": "95064800 Error Loading Sina Weibo Data for Client Search",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36717"
+          },
+          {
+            "key": "TRITON-36716",
+            "summary": "Explore - Owned Accounts filter is returning Monitored Connection content as well",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36716"
+          },
+          {
+            "key": "TRITON-36711",
+            "summary": "Article Not Automatically Included in ECU - online Boolean Search",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36711"
+          },
+          {
+            "key": "TRITON-36702",
+            "summary": "Explore - CSV Exports - Exports do not show all associated custom categories to search result",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36702"
+          },
+          {
+            "key": "TRITON-36571",
+            "summary": "Enterprise - Explore - Mentions Trend Widget - Previous Period dates show incorrect total numbers",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36571"
+          },
+          {
+            "key": "TRITON-36548",
+            "summary": "96378395 - Premium | Location Filter Not Persisting in Filter Set",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36548"
+          },
+          {
+            "key": "TRITON-36547",
+            "summary": "98883636 - Issue with Age Breakdown CSV Export",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36547"
+          },
+          {
+            "key": "TRITON-36491",
+            "summary": "96551032 - Explore - Facebook monitored page missing historical data",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36491"
+          },
+          {
+            "key": "TRITON-36478",
+            "summary": "Request for Export of All Searches Including Workspace Details",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36478"
+          },
+          {
+            "key": "TRITON-36451",
+            "summary": "95249989 - [MICROSOFT] - PDF Export Stuck on 'Your export is in progress' for Small Report",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36451"
+          },
+          {
+            "key": "TRITON-36450",
+            "summary": "Unilever - Export Request for Explore and Explore+ Searches on Unilever Home Care Workspace",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36450"
+          },
+          {
+            "key": "TRITON-36448",
+            "summary": "94767109 - Issue Title: Incorrect Language Classification for Indonesian Articles",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36448"
+          },
+          {
+            "key": "TRITON-36348",
+            "summary": "Issue with Hiding Content in Explore Not Working for a user",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36348"
+          },
+          {
+            "key": "TRITON-36283",
+            "summary": "Discrepancy Between Estimated Views on Platform and Exported CSV",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36283"
+          },
+          {
+            "key": "TRITON-36265",
+            "summary": "Request for Full List of Logos Monitored for HEINEKEN by Meltwater",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36265"
+          },
+          {
+            "key": "TRITON-36223",
+            "summary": "Enterprise - Sina Weibo - Missing posts/articles in MW app",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36223"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 157,
+        "openCount": 31,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 29,
+        "rate": 0
+      }
+    },
+    "Explore+": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 32,
+        "critical": 6,
+        "weighted": 44,
+        "tickets": [
+          {
+            "key": "TRITON-37112",
+            "summary": "[Explore+] Instagram/FB Pictures Not Loading Issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37112"
+          },
+          {
+            "key": "TRITON-37108",
+            "summary": "Unassigned Searches Appearing in Multiple Workspaces",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37108"
+          },
+          {
+            "key": "TRITON-36987",
+            "summary": "Unable to Create, Duplicate, or Move Optimized Searches Across Admin and Workspaces",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36987"
+          },
+          {
+            "key": "TRITON-36894",
+            "summary": "Explore+ Custom Field values page missing pagination buttons",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36894"
+          },
+          {
+            "key": "TRITON-36870",
+            "summary": "Custom fields - Unable to view all 36 values",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36870"
+          },
+          {
+            "key": "TRITON-36768",
+            "summary": "#103366186 Urgent Recovery Request for Deleted 'Campaign' Folder and Searches",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36768"
+          },
+          {
+            "key": "TRITON-36741",
+            "summary": "100035387 - [Explore +] Export not received when downloading posts with preset date ranges",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36741"
+          },
+          {
+            "key": "TRITON-36738",
+            "summary": "100209620 - Issue with Downloading content in Explore+ Analytics",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36738"
+          },
+          {
+            "key": "TRITON-36696",
+            "summary": "Activation and Approval for Blackbird entitlement",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36696"
+          },
+          {
+            "key": "TRITON-36692",
+            "summary": "Validation Error Preventing Edits on Explore+ optimized search - Nike",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36692"
+          },
+          {
+            "key": "TRITON-36684",
+            "summary": "Premium urgent | Unable to Save Edits on Duplicated Unified Dashboards",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36684"
+          },
+          {
+            "key": "TRITON-36602",
+            "summary": "Explore+ - Analytics - Most frequent keyphrases widget - Inaccurate identification of Chinese characers/keywords",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36602"
+          },
+          {
+            "key": "TRITON-36590",
+            "summary": "Digest Reports - Unable to choose optimised/Explore+ searches outside the admin workspace",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36590"
+          },
+          {
+            "key": "TRITON-36575",
+            "summary": "Microsoft - Explore+ - Insight Pages - Filtered mentions showing incorrect articles",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36575"
+          },
+          {
+            "key": "TRITON-36529",
+            "summary": "Explore+ - Assets/Analytics - Excel Export - Missing/inconsistent metrics for TikTok posts",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36529"
+          },
+          {
+            "key": "TRITON-36528",
+            "summary": "Explore+ - Assets - Search pages get stuck in refreshing loop",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36528"
+          },
+          {
+            "key": "TRITON-36527",
+            "summary": "Explore+ - Assets/Analytics - No data appearing for search for 7th March 2023 to 6th April 2023",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36527"
+          },
+          {
+            "key": "TRITON-36509",
+            "summary": "Microsoft - Premium Client - Explore+ - Insight Pages - Tabs disappear once page loads",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36509"
+          },
+          {
+            "key": "TRITON-36496",
+            "summary": "Barclays Questions",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36496"
+          },
+          {
+            "key": "TRITON-36494",
+            "summary": "Explore+ Plan Limit Exceeded Notification at 107.05%",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36494"
+          },
+          {
+            "key": "TRITON-36466",
+            "summary": "[Amazon Prime Video] Request for Export of Optimized Queries",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36466"
+          },
+          {
+            "key": "TRITON-36457",
+            "summary": "#92913208 Historical Retrieval Alert missing for 22 Searches on Explore+ for Manulife Singapore",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36457"
+          },
+          {
+            "key": "TRITON-36429",
+            "summary": "Barclays Request",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36429"
+          },
+          {
+            "key": "TRITON-36403",
+            "summary": "[Amazon Prime Video] Request for Export of Optimized Queries",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36403"
+          },
+          {
+            "key": "TRITON-36382",
+            "summary": "Explore+ Trial Workspace Access Issue for Heineken Test Account",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36382"
+          },
+          {
+            "key": "TRITON-36335",
+            "summary": "Explore - Search button greyed out",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36335"
+          },
+          {
+            "key": "TRITON-36317",
+            "summary": "Cancel Sync for Microsoft with Gaming Base V2",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36317"
+          },
+          {
+            "key": "TRITON-36310",
+            "summary": "Export Request for Explore+ Queries",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36310"
+          },
+          {
+            "key": "TRITON-36221",
+            "summary": "TRITON-36218 Country Filter Clarification in API calls",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36221"
+          },
+          {
+            "key": "TRITON-36220",
+            "summary": "Request for Original Versions of Explore+ Searches Before Edits",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36220"
+          },
+          {
+            "key": "TRITON-36217",
+            "summary": "Premium Client - Explore+ - Assets - Custom Fields - Display order set to 3 or lower hides custom fields when attempting to retag",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36217"
+          },
+          {
+            "key": "TRITON-36209",
+            "summary": "Export Request for Unilever Admin Workspace Assets",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36209"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 139,
+        "openCount": 26,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 32,
+        "rate": 0
+      }
+    },
+    "Analytics": {
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 0,
+        "openCount": 0,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    },
+    "UDS": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 56,
+        "critical": 11,
+        "weighted": 78,
+        "tickets": [
+          {
+            "key": "TRITON-37122",
+            "summary": "UDS -  author widget mentions issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37122"
+          },
+          {
+            "key": "TRITON-37118",
+            "summary": "UDS - Total AVE Widget Calculation Error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37118"
+          },
+          {
+            "key": "TRITON-37099",
+            "summary": "Wordclouds are not displaying correctly in Analyze dashboards.",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37099"
+          },
+          {
+            "key": "TRITON-37079",
+            "summary": "UDS - line chart widget issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37079"
+          },
+          {
+            "key": "TRITON-36976",
+            "summary": "Analyze Dashboards | Unable to update shareable link settings",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36976"
+          },
+          {
+            "key": "TRITON-36937",
+            "summary": "UDS - pdf export issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36937"
+          },
+          {
+            "key": "TRITON-36930",
+            "summary": "Analyze Dashboard | Sort by Reach issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36930"
+          },
+          {
+            "key": "TRITON-36890",
+            "summary": "Unable to Click Articles for Previous Period in Total Mentions Trend Widget",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36890"
+          },
+          {
+            "key": "TRITON-36883",
+            "summary": "UDS - unable to create Crisis Management dashboard",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36883"
+          },
+          {
+            "key": "TRITON-36848",
+            "summary": "Unable to Edit Dashboard Name with Specific New Name",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36848"
+          },
+          {
+            "key": "TRITON-36775",
+            "summary": "(RED Account) UDS/Measure 2.0 - Facebook Paid - Reach/Frequency discrepancy with native",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36775"
+          },
+          {
+            "key": "TRITON-36774",
+            "summary": "UDS - Text overlapping ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36774"
+          },
+          {
+            "key": "TRITON-36770",
+            "summary": "UDS - Social Analytics - TikTok Top Posts not showing data",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36770"
+          },
+          {
+            "key": "TRITON-36755",
+            "summary": "UDS - input color changes not saving ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36755"
+          },
+          {
+            "key": "TRITON-36752",
+            "summary": "UDS - Selection pop-up issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36752"
+          },
+          {
+            "key": "TRITON-36732",
+            "summary": "UDS - text alignment issues",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36732"
+          },
+          {
+            "key": "TRITON-36727",
+            "summary": "UDS - Query regarding filtered mentions pop up",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36727"
+          },
+          {
+            "key": "TRITON-36723",
+            "summary": "UDS - documents export issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36723"
+          },
+          {
+            "key": "TRITON-36712",
+            "summary": "UDS - no document found issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36712"
+          },
+          {
+            "key": "TRITON-36693",
+            "summary": "UDS - Social Analytics - Page Follows/Fan data not showing in UDS but appears fine in Measure 2.0",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36693"
+          },
+          {
+            "key": "TRITON-36690",
+            "summary": "UDS - FB Widgets displaying duplicate inputs",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36690"
+          },
+          {
+            "key": "TRITON-36683",
+            "summary": "UDS - Coverage Report Stuck at Creation ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36683"
+          },
+          {
+            "key": "TRITON-36662",
+            "summary": "UDS - Instagram - Page media views shows 0 in UDS but page impressions appear fine in Measure 2.0",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36662"
+          },
+          {
+            "key": "TRITON-36654",
+            "summary": "97493098 Unified Dashboard PPT Export Tiles Cut Off",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36654"
+          },
+          {
+            "key": "TRITON-36638",
+            "summary": "UDS - widgets displaying \"Cannot validate the user input\"",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36638"
+          },
+          {
+            "key": "TRITON-36618",
+            "summary": "UDS - Dashboard save error when adding widget with no inputs",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36618"
+          },
+          {
+            "key": "TRITON-36616",
+            "summary": "UDS - Facebook - 2025 data not appearing in UDS but appears in Measure 2.0",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36616"
+          },
+          {
+            "key": "TRITON-36604",
+            "summary": "UDS - Analyze Dashboard Figures Missing in PDF and PowerPoint Exports",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36604"
+          },
+          {
+            "key": "TRITON-36603",
+            "summary": "UDS - Social Analytics - LinkedIn - Engagement rate discrepancy compared to Measure 2.0",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36603"
+          },
+          {
+            "key": "TRITON-36596",
+            "summary": "UDS - YouTube - Data appears for 2025 in Meaure 2.0 but not UDS",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36596"
+          },
+          {
+            "key": "TRITON-36540",
+            "summary": "RED Account -UDS - Filtered mentions shows error when widget is able to show data just fine",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36540"
+          },
+          {
+            "key": "TRITON-36539",
+            "summary": "UDS - Facebook overview - Missing Page Video views ",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36539"
+          },
+          {
+            "key": "TRITON-36535",
+            "summary": "UDS - Clicking on datapoint in a widget shows a different total of mentions than what is in the graph",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36535"
+          },
+          {
+            "key": "TRITON-36533",
+            "summary": "UDS - PPT/GSlides options are greyed out for the client",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36533"
+          },
+          {
+            "key": "TRITON-36515",
+            "summary": "UDS - LinkedIn Page Impressions not displaying any data",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36515"
+          },
+          {
+            "key": "TRITON-36460",
+            "summary": "UDS | Unable to change the \"Displayed values\" as percentage for widget",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36460"
+          },
+          {
+            "key": "TRITON-36458",
+            "summary": "UDS - Social Analytics - Facebook Fan Count for February changed",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36458"
+          },
+          {
+            "key": "TRITON-36431",
+            "summary": "UDS - Total Mentions Trend display issue with Last 24 hours and Hourly display",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36431"
+          },
+          {
+            "key": "TRITON-36428",
+            "summary": "UDS - Widgets - Unable to add widget when editing in other workspaces that is not the admin workspace",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36428"
+          },
+          {
+            "key": "TRITON-36398",
+            "summary": "Instagram Page Fans with Elastic 400 error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36398"
+          },
+          {
+            "key": "TRITON-36394",
+            "summary": "X Follower Count showing 0 on Unified Dashboard ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36394"
+          },
+          {
+            "key": "TRITON-36385",
+            "summary": "UDS - Social Analytics - Facebook - Less post impressions for April compared to Measure 2.0",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36385"
+          },
+          {
+            "key": "TRITON-36349",
+            "summary": "UDS - Several Facebook and Instagram page fans widgets throwing an error",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36349"
+          },
+          {
+            "key": "TRITON-36332",
+            "summary": "UDS - Export results discrepancy  ",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36332"
+          },
+          {
+            "key": "TRITON-36325",
+            "summary": "Barclays - UDS - 'Cannot validate the user input'.",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36325"
+          },
+          {
+            "key": "TRITON-36312",
+            "summary": "UDS - Total Reach widget - Small discrepancy compared to previous period",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36312"
+          },
+          {
+            "key": "TRITON-36308",
+            "summary": "Unable to duplicate the UDS tab",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36308"
+          },
+          {
+            "key": "TRITON-36257",
+            "summary": "Source Type Filter Not Updating Content for client's UDS",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36257"
+          },
+          {
+            "key": "TRITON-36252",
+            "summary": "UDS - Unilever dashboard with several widgets failing to load with errors",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36252"
+          },
+          {
+            "key": "TRITON-36249",
+            "summary": "UDS - Social Media templates - Widgets throwing errors",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36249"
+          },
+          {
+            "key": "TRITON-36227",
+            "summary": "Enterprise - UDS - Incorrect dates showing on widgest when timeone is set to New Yotk",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36227"
+          },
+          {
+            "key": "TRITON-36225",
+            "summary": "#88287368 Age Chart Data Misalignment on Explore+",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36225"
+          },
+          {
+            "key": "TRITON-36222",
+            "summary": "Shareable dashboard | Error Exporting PowerPoint from Dashboard",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36222"
+          },
+          {
+            "key": "TRITON-36162",
+            "summary": "Unable to save the input added in EDIT mode",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36162"
+          },
+          {
+            "key": "TRITON-36161",
+            "summary": "UDS - Mentions widget showing 0 results after clicking on the donut chart",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36161"
+          },
+          {
+            "key": "TRITON-36160",
+            "summary": "Mentions performance widget does not show results for tags",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36160"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 80,
+        "openCount": 53,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 56,
+        "rate": 0
+      }
+    },
+    "Monitor": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 27,
+        "critical": 2,
+        "weighted": 31.5,
+        "tickets": [
+          {
+            "key": "TRITON-37120",
+            "summary": "111839375 Broadcast Clip Sharing Options Discrepancy in Monitor Vs Explore",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37120"
+          },
+          {
+            "key": "TRITON-37057",
+            "summary": "Monitor - Views - Auto refresh not working correctly",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37057"
+          },
+          {
+            "key": "TRITON-37039",
+            "summary": "Monitor view crashes ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37039"
+          },
+          {
+            "key": "TRITON-37036",
+            "summary": "Monitor - date filter not saving",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37036"
+          },
+          {
+            "key": "TRITON-36960",
+            "summary": "Monitor | Default mode cannot be saved on Artile Display",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36960"
+          },
+          {
+            "key": "TRITON-36925",
+            "summary": "Monitor Views showing 0 documents for existing saved views (Explore working, new views work)",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36925"
+          },
+          {
+            "key": "TRITON-36873",
+            "summary": "Tagging - popup notification issue ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36873"
+          },
+          {
+            "key": "TRITON-36845",
+            "summary": "Trends Center Not Loading for Chinese Language Users",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36845"
+          },
+          {
+            "key": "TRITON-36724",
+            "summary": "Monitor - X limit banner",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36724"
+          },
+          {
+            "key": "TRITON-36643",
+            "summary": "Monitor - pdf export",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36643"
+          },
+          {
+            "key": "TRITON-36640",
+            "summary": "98514665 Incorrect selection display in Added Content – shows all articles selected when only one is selected",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36640"
+          },
+          {
+            "key": "TRITON-36608",
+            "summary": "RED account - Monitor - Content Stream - Australian Print/CAL content shows Ingress twice",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36608"
+          },
+          {
+            "key": "TRITON-36607",
+            "summary": "Monitor View shows “No documents found” ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36607"
+          },
+          {
+            "key": "TRITON-36605",
+            "summary": "Digest Reports/Monitor - Tagging Functionality Issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36605"
+          },
+          {
+            "key": "TRITON-36600",
+            "summary": "Monitor View - scrolling issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36600"
+          },
+          {
+            "key": "TRITON-36598",
+            "summary": "Monitor View - Page crashes",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36598"
+          },
+          {
+            "key": "TRITON-36595",
+            "summary": "99985418 - Select All Button Limits Content Selection and Removes Tagging Option",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36595"
+          },
+          {
+            "key": "TRITON-36588",
+            "summary": "Monitor - Date Filter Issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36588"
+          },
+          {
+            "key": "TRITON-36582",
+            "summary": "#97675522 CSV exports doesn't include duplicate articles while exporting via Tagged folder",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36582"
+          },
+          {
+            "key": "TRITON-36565",
+            "summary": "#98838240 Unable to create Monitor view for Explore+ optimized search showing 0 documents",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36565"
+          },
+          {
+            "key": "TRITON-36525",
+            "summary": "#98365405 Tag documents from Monitor missing matched sentence/keyword since 23/April",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36525"
+          },
+          {
+            "key": "TRITON-36524",
+            "summary": "#95278439 Unable to export a particular tag folder",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36524"
+          },
+          {
+            "key": "TRITON-36495",
+            "summary": "97801109 Monitor - Threads image expired",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36495"
+          },
+          {
+            "key": "TRITON-36485",
+            "summary": "Monitor View Content Stream Not Loading Data Despite Available Results",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36485"
+          },
+          {
+            "key": "TRITON-36418",
+            "summary": "\"Save as\" a Monitor view overwrites the old one",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36418"
+          },
+          {
+            "key": "TRITON-36408",
+            "summary": "#94971737 Link Issues for Duplicated Content in Monitor",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36408"
+          },
+          {
+            "key": "TRITON-36211",
+            "summary": "Monitor Tool Views Not Saving until refreshed",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36211"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 61,
+        "openCount": 29,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 9,
+        "tickets": [
+          {
+            "key": "UCS-3436",
+            "summary": "\"Views\" are missing in content stream in Monitor",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3436"
+          },
+          {
+            "key": "UCS-3328",
+            "summary": "premium content is being displayed with 2 opening texts",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3328"
+          },
+          {
+            "key": "UCS-3316",
+            "summary": "citations on website showing 404s",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3316"
+          },
+          {
+            "key": "UCS-3312",
+            "summary": "Public page for mobile fix",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3312"
+          },
+          {
+            "key": "UCS-3305",
+            "summary": "Trends Center: Missing “Open in new tab” action on content cards in slideout",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3305"
+          },
+          {
+            "key": "UCS-3287",
+            "summary": "Add Reddit metrics back to content card",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3287"
+          },
+          {
+            "key": "UCS-3276",
+            "summary": "Card footer not visible on certain screen sizes/resolutions in Explore content stream",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3276"
+          },
+          {
+            "key": "UCS-3275",
+            "summary": "no link on compact card",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3275"
+          },
+          {
+            "key": "UCS-3149",
+            "summary": "User is unable to select date range option due to hover overlay",
+            "priority": "Highest",
+            "url": "https://meltwater.atlassian.net/browse/UCS-3149"
+          }
+        ]
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 2,
+        "preProductionCaught": 0,
+        "internallyFound": 9,
+        "customerFound": 27,
+        "rate": 25
+      }
+    },
+    "App Framework": {
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 0,
+        "openCount": 0,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    },
+    "Media Relations": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 33,
+        "critical": 3,
+        "weighted": 38.5,
+        "tickets": [
+          {
+            "key": "TRITON-37152",
+            "summary": "Unable to update placeholder font size in Outreach",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37152"
+          },
+          {
+            "key": "TRITON-37151",
+            "summary": "103188150 - PREMIUM- Media Relations | Outreach shows Zero Analytics",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37151"
+          },
+          {
+            "key": "TRITON-37144",
+            "summary": "111116012 Duplicate Outreach Sent for PrintRush Release",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37144"
+          },
+          {
+            "key": "TRITON-37121",
+            "summary": "111122857 Issue with  AI Journalist Saved Search Results",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37121"
+          },
+          {
+            "key": "TRITON-37046",
+            "summary": "110243016 Bad Request Error When Adding State-Specific Sources to Media List",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37046"
+          },
+          {
+            "key": "TRITON-37043",
+            "summary": "107566774 Intermittent partial failures when importing journalists from the CSV list into the Media list",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37043"
+          },
+          {
+            "key": "TRITON-37032",
+            "summary": "Media Relations search page not loading for any users",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37032"
+          },
+          {
+            "key": "TRITON-37002",
+            "summary": "106975977 Media Relations | Unusually High Number of Journalist Results for AI Journalist Searches",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37002"
+          },
+          {
+            "key": "TRITON-36990",
+            "summary": "[URGENT]Unable to add journalist to media list from GenAI Lens Sources tab",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36990"
+          },
+          {
+            "key": "TRITON-36958",
+            "summary": "Outreach - Preview format issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36958"
+          },
+          {
+            "key": "TRITON-36947",
+            "summary": "107239413 Migration of Media Lists and Outreach History Between University of Miami Accounts",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36947"
+          },
+          {
+            "key": "TRITON-36921",
+            "summary": "Media Relation | OutReach- Discrepancy in Outreach Analytics",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36921"
+          },
+          {
+            "key": "TRITON-36907",
+            "summary": "Media relations | Journalist | Incorrect Location Displayed",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36907"
+          },
+          {
+            "key": "TRITON-36898",
+            "summary": "Delay in Scheduled Press Release Distribution (Outreach)",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36898"
+          },
+          {
+            "key": "TRITON-36866",
+            "summary": "DNS Verification Issue Despite Correct Records Added",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36866"
+          },
+          {
+            "key": "TRITON-36832",
+            "summary": "Media Relations Issue - Relevant Articles Loading Blank",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36832"
+          },
+          {
+            "key": "TRITON-36824",
+            "summary": "Media Relations Outreach preview issues",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36824"
+          },
+          {
+            "key": "TRITON-36767",
+            "summary": "#100747188 Outreach Media Relations Contact Limit Error Blocking Press Release",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36767"
+          },
+          {
+            "key": "TRITON-36761",
+            "summary": "102826329 - Media Relations | Domain Verification Pending",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36761"
+          },
+          {
+            "key": "TRITON-36720",
+            "summary": "102045123 Journalist Contact - Emails tab not displaying email from media list",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36720"
+          },
+          {
+            "key": "TRITON-36674",
+            "summary": "Outreach emails marked as sent but not delivered; analytics showing zero activity",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36674"
+          },
+          {
+            "key": "TRITON-36577",
+            "summary": "put journalist to unsubscribe in bulk",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36577"
+          },
+          {
+            "key": "TRITON-36492",
+            "summary": "Media Relations - Outreach - AI Assistant - Recipient recommendations do not match the content of the Press Release",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36492"
+          },
+          {
+            "key": "TRITON-36426",
+            "summary": "#91982818 Outreach | Scheduled outreach doesn't deduct from recipients count",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36426"
+          },
+          {
+            "key": "TRITON-36379",
+            "summary": "92076315 - Persistent Formatting Gaps in Outreach Email in Outlook",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36379"
+          },
+          {
+            "key": "TRITON-36324",
+            "summary": "#90123853 PREMIUM - Media Relations | Outreach Formatting Issues",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36324"
+          },
+          {
+            "key": "TRITON-36306",
+            "summary": "Media Relations | Unable to Delete Approved Sender",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36306"
+          },
+          {
+            "key": "TRITON-36273",
+            "summary": "#89701949 Unexpected emoji in Outreach",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36273"
+          },
+          {
+            "key": "TRITON-36266",
+            "summary": "90263601 - Justify Text Alignment Issue in Dentsply Sirona Media Relations Template",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36266"
+          },
+          {
+            "key": "TRITON-36247",
+            "summary": "Enterprise - Media Relations - Outreach - Pasting content from word renders outside of intended target area",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36247"
+          },
+          {
+            "key": "TRITON-36241",
+            "summary": "Unable to add bullet points in Outreach template",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36241"
+          },
+          {
+            "key": "TRITON-36202",
+            "summary": "#87949520 Media Relations – Error when clicking on Media List (Review Contact Updates)",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36202"
+          },
+          {
+            "key": "TRITON-36191",
+            "summary": "#85578265 PR Assistant Contact Loading and AI Suggested Contact Error",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36191"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 127,
+        "openCount": 31,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 33,
+        "rate": 0
+      }
+    },
+    "Newsletters": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 73,
+        "critical": 5,
+        "weighted": 85,
+        "tickets": [
+          {
+            "key": "TRITON-37156",
+            "summary": "Secondary Field Formatting Options Hidden in Manual Newsletter Header",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37156"
+          },
+          {
+            "key": "TRITON-37136",
+            "summary": "108135826 - Source Icons Not Displaying in Client Newsletters",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37136"
+          },
+          {
+            "key": "TRITON-37132",
+            "summary": "110237037 - Logos Cut Off or Missing in Outlook Classic/Desktop on Windows 11",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37132"
+          },
+          {
+            "key": "TRITON-37116",
+            "summary": "Newsletter2.0 - missing Ai summary ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37116"
+          },
+          {
+            "key": "TRITON-37114",
+            "summary": "White lines appearing in newsletter navigation panel in Outlook test emails",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37114"
+          },
+          {
+            "key": "TRITON-37105",
+            "summary": "Automated Newsletter - Content Guidelines article limit not being enforced after re-save - Praetorian Public Relations",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37105"
+          },
+          {
+            "key": "TRITON-37089",
+            "summary": "Newsletter Recipient Lists Showing 0 Subscribers",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37089"
+          },
+          {
+            "key": "TRITON-37080",
+            "summary": "Newsletter Section Not Loading",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37080"
+          },
+          {
+            "key": "TRITON-37069",
+            "summary": "111129163 Export Newsletter Articles from 2025",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37069"
+          },
+          {
+            "key": "TRITON-37038",
+            "summary": "106170745 URGENT : Newsletter auto saving issue and failed to send newsletter error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37038"
+          },
+          {
+            "key": "TRITON-37020",
+            "summary": "Sendgrid Tracking",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37020"
+          },
+          {
+            "key": "TRITON-37019",
+            "summary": "Newsletter2.0 - Global style error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37019"
+          },
+          {
+            "key": "TRITON-37001",
+            "summary": "106420301 Headline not updating in new distribution of a Classic Newsletter",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37001"
+          },
+          {
+            "key": "TRITON-36998",
+            "summary": "107630782 - Newsletter 2.0 Displays Incorrect Formatting in Outlook Desktop for Microsoft 365 on Windows 11",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36998"
+          },
+          {
+            "key": "TRITON-36986",
+            "summary": "Newsletter - Text banner settings ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36986"
+          },
+          {
+            "key": "TRITON-36982",
+            "summary": "106420301 Headline not updating in new distribution of a Classic Newsletter",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36982"
+          },
+          {
+            "key": "TRITON-36981",
+            "summary": "107214476 Automated Newsletter 2.0 distribution failed due to DateTimeParseException in Search API date parameter",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36981"
+          },
+          {
+            "key": "TRITON-36969",
+            "summary": "Unable to duplicate NL distribution ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36969"
+          },
+          {
+            "key": "TRITON-36964",
+            "summary": "Ontario Teachers Pension Plan - Newsletters question",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36964"
+          },
+          {
+            "key": "TRITON-36949",
+            "summary": "Generated new verification document",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36949"
+          },
+          {
+            "key": "TRITON-36932",
+            "summary": "Automated Daily Newsletter Pulls 7-Day Content Instead of 24-Hour Content",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36932"
+          },
+          {
+            "key": "TRITON-36931",
+            "summary": "105126214 Discrepancy in Number of Sent Newsletters Displayed Across Accounts",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36931"
+          },
+          {
+            "key": "TRITON-36928",
+            "summary": "Approved Sender Issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36928"
+          },
+          {
+            "key": "TRITON-36924",
+            "summary": "Newsletter Issue Escalation for Client CSP",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36924"
+          },
+          {
+            "key": "TRITON-36917",
+            "summary": "105307409 - Newsletter 2.0 - Unable to delete the recipient lists",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36917"
+          },
+          {
+            "key": "TRITON-36905",
+            "summary": "Unable to Delete Approved Sender ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36905"
+          },
+          {
+            "key": "TRITON-36882",
+            "summary": "Newsletter - status not updated",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36882"
+          },
+          {
+            "key": "TRITON-36877",
+            "summary": "105840798 Newsletter getting stuck in Scheduled Status when clicked on Send Now",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36877"
+          },
+          {
+            "key": "TRITON-36876",
+            "summary": "Newsletter Distribution Preview Issue",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36876"
+          },
+          {
+            "key": "TRITON-36869",
+            "summary": "Newsletter - AU Premium content should show 255 opening text when hit sentence is unavailable",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36869"
+          },
+          {
+            "key": "TRITON-36867",
+            "summary": "105253408 Hit Sentence in NL not appearing for articles added via Monitor.",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36867"
+          },
+          {
+            "key": "TRITON-36866",
+            "summary": "DNS Verification Issue Despite Correct Records Added",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36866"
+          },
+          {
+            "key": "TRITON-36856",
+            "summary": "Newsletter 2.0 - Automated Newsletter - Scheduling newsletter causes them to send out immediately",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36856"
+          },
+          {
+            "key": "TRITON-36850",
+            "summary": "Newsletter 2.0 - Distribution fails to load with 502 Bad Gateway on nl-bff (City of Casey)",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36850"
+          },
+          {
+            "key": "TRITON-36843",
+            "summary": "Newsletter distribution failing with 502 Bad Gateway during HTML generation - \"Business Development\" newsletter",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36843"
+          },
+          {
+            "key": "TRITON-36797",
+            "summary": "Auto newsletter missing title text but URL only",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36797"
+          },
+          {
+            "key": "TRITON-36746",
+            "summary": "100457984 - Media Relation | Search- Data Mismatch Between Explore and Media Relations",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36746"
+          },
+          {
+            "key": "TRITON-36745",
+            "summary": "100204039 - Media Relations Contact List Glitch After Scrolling Past 80 Contacts",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36745"
+          },
+          {
+            "key": "TRITON-36737",
+            "summary": "Newsletter - Irresponsive exit icon",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36737"
+          },
+          {
+            "key": "TRITON-36733",
+            "summary": "Unable to Delete Approved Sender ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36733"
+          },
+          {
+            "key": "TRITON-36718",
+            "summary": "102363577 Full text of Swedish premium article | Newsletter",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36718"
+          },
+          {
+            "key": "TRITON-36713",
+            "summary": "Newsletters - Inconsistent stats",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36713"
+          },
+          {
+            "key": "TRITON-36678",
+            "summary": "Newsletter - sort by option issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36678"
+          },
+          {
+            "key": "TRITON-36656",
+            "summary": "Newsletters - Opening & Hit sentence issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36656"
+          },
+          {
+            "key": "TRITON-36637",
+            "summary": "100866418 Need to remove the approved sender emails.",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36637"
+          },
+          {
+            "key": "TRITON-36627",
+            "summary": "100489570 - Newsletter 2.0 | Discrepancy in Meltwater Post Link vs Original Source Link",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36627"
+          },
+          {
+            "key": "TRITON-36623",
+            "summary": "Newsletter - AI Overview Issues",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36623"
+          },
+          {
+            "key": "TRITON-36589",
+            "summary": "(Ticket Escalation - Recover deleted newsletters and deleted templates",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36589"
+          },
+          {
+            "key": "TRITON-36561",
+            "summary": "98562913 - Image resizing issue in Newsletter 2.0",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36561"
+          },
+          {
+            "key": "TRITON-36558",
+            "summary": "Inconsistent RTL/LTR Alignment of English Titles in Arabic Content (NL 2.0)",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36558"
+          },
+          {
+            "key": "TRITON-36544",
+            "summary": "97877411 - Newsletter section deletion causes logout and navigation issues",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36544"
+          },
+          {
+            "key": "TRITON-36468",
+            "summary": "Newsletters - YT posts displaying entire transcript",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36468"
+          },
+          {
+            "key": "TRITON-36442",
+            "summary": "#94374471 Newsletter 1.0 Incorrect article date",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36442"
+          },
+          {
+            "key": "TRITON-36391",
+            "summary": "91982771 - Font size rendering issue in Newsletter template 2.0",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36391"
+          },
+          {
+            "key": "TRITON-36389",
+            "summary": "Unable to Add Multiple Tweets from Monitor to Newsletter",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36389"
+          },
+          {
+            "key": "TRITON-36387",
+            "summary": "Newsletters - Inconsistent Sentiment Labels ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36387"
+          },
+          {
+            "key": "TRITON-36375",
+            "summary": "Error updating distribution ",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36375"
+          },
+          {
+            "key": "TRITON-36356",
+            "summary": "Newsletter - content stream failing to load",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36356"
+          },
+          {
+            "key": "TRITON-36321",
+            "summary": "scheduled distribution failed to send and remained in Draft status",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36321"
+          },
+          {
+            "key": "TRITON-36318",
+            "summary": "Newsletter - Images Not Displaying",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36318"
+          },
+          {
+            "key": "TRITON-36300",
+            "summary": "90828516 - Simple Text Element Color Change Issue for DailyPay Account",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36300"
+          },
+          {
+            "key": "TRITON-36286",
+            "summary": "#90615572 Newsletter Loading Failure with Error Message",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36286"
+          },
+          {
+            "key": "TRITON-36284",
+            "summary": "Newsletters - AI Summary Not Updating ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36284"
+          },
+          {
+            "key": "TRITON-36276",
+            "summary": "Newsleter 2.0 - Automated Newsletter - Unable to edit/remove AI overview section in saved newsletter",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36276"
+          },
+          {
+            "key": "TRITON-36264",
+            "summary": "Newsletter design issues",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36264"
+          },
+          {
+            "key": "TRITON-36253",
+            "summary": "90357709 - Unable to Delete Approved Sender Address",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36253"
+          },
+          {
+            "key": "TRITON-36240",
+            "summary": "Unable to save NL draft",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36240"
+          },
+          {
+            "key": "TRITON-36233",
+            "summary": "88473036 - PREMIUM - Media Relations | Source Name Not Displaying in Media List",
+            "priority": "High",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36233"
+          },
+          {
+            "key": "TRITON-36231",
+            "summary": "87780468 - Newsletter 'Last 24 Hours' Setting Reverts to 7 Days",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36231"
+          },
+          {
+            "key": "TRITON-36224",
+            "summary": "Newsletter Template Link Updates Not Saving",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36224"
+          },
+          {
+            "key": "TRITON-36210",
+            "summary": "Newsletter Date Automatically Changes from April 1st to March 1st",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36210"
+          },
+          {
+            "key": "TRITON-36193",
+            "summary": "#86553603 Missing 'Horatio Alger Association of Canada Round Up' Newsletter After Transition",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36193"
+          },
+          {
+            "key": "TRITON-36157",
+            "summary": "#86548618 Updated description in YouTube video not displayed in newsletter",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36157"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 93,
+        "openCount": 56,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 73,
+        "rate": 0
+      }
+    },
+    "Smart Alerts": {
+      "escapedDefects": {
+        "score": 10,
+        "total": 17,
+        "critical": 3,
+        "weighted": 23.5,
+        "tickets": [
+          {
+            "key": "TRITON-37139",
+            "summary": "111885846 Webhook Alerts to Zoom Failing with 400 Error",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37139"
+          },
+          {
+            "key": "TRITON-37082",
+            "summary": "Issues with Page Engagement Alert",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37082"
+          },
+          {
+            "key": "TRITON-37078",
+            "summary": "Spike Detection Alerts Not Triggering for Explore+ Search",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37078"
+          },
+          {
+            "key": "TRITON-37070",
+            "summary": "Spike Alert Missing Stories",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37070"
+          },
+          {
+            "key": "TRITON-37022",
+            "summary": "Unable to Save Changes to System Alerts Due to Infinite Loading",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37022"
+          },
+          {
+            "key": "TRITON-37010",
+            "summary": "Alert stuck in \"processing \" state",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37010"
+          },
+          {
+            "key": "TRITON-36983",
+            "summary": "Enterprise client - Alerts - External user removed from alerts",
+            "priority": "Medium",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36983"
+          },
+          {
+            "key": "TRITON-36796",
+            "summary": "MS Teams Alert workflow configuration has changed",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36796"
+          },
+          {
+            "key": "TRITON-36714",
+            "summary": "102667783 - Missing Searches - Spike Detection Alerts (BARCLAYS)",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36714"
+          },
+          {
+            "key": "TRITON-36642",
+            "summary": "98494671 Generic Webhook URL with Zoom Chat returns \"Invalid URL\" error in Alerts",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36642"
+          },
+          {
+            "key": "TRITON-36624",
+            "summary": "missing Dingtalk integration and config option",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36624"
+          },
+          {
+            "key": "TRITON-36591",
+            "summary": "#98600147 Alert sent to wrong teamIDs",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36591"
+          },
+          {
+            "key": "TRITON-36586",
+            "summary": "#100201926 Relevance Boost",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36586"
+          },
+          {
+            "key": "TRITON-36425",
+            "summary": "Spike Detection Alert Trigger",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36425"
+          },
+          {
+            "key": "TRITON-36383",
+            "summary": "Error when clicking 'Discover More Insights' from alert emails",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36383"
+          },
+          {
+            "key": "TRITON-36279",
+            "summary": "Search Visibility - Searches hidden to a user can still be found in alerts",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36279"
+          },
+          {
+            "key": "TRITON-36250",
+            "summary": "Spike Alerts Still Triggering for Churned Account ",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36250"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 75,
+        "openCount": 8,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 17,
+        "rate": 0
       }
     }
   }
