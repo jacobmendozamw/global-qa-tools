@@ -1200,7 +1200,20 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
 
   const allQuarters = [...new Set(allRecords.map(r=>quarterOf(r.date)))].sort().reverse();
 
-  const filteredRecords = allRecords
+  // Deduplicate: keep one record per project+quarter, preferring auto over manual backfill
+  const deduped = Object.values(
+    allRecords.reduce((acc, r) => {
+      const key = `${r.project}::${quarterOf(r.date)}`;
+      const ex = acc[key];
+      if (!ex) { acc[key] = r; return acc; }
+      if (r.evaluator === 'auto' && ex.evaluator !== 'auto') { acc[key] = r; return acc; }
+      if (ex.evaluator === 'auto' && r.evaluator !== 'auto') return acc;
+      if (new Date(r.date) > new Date(ex.date)) acc[key] = r;
+      return acc;
+    }, {})
+  ).sort((a,b) => new Date(b.date)-new Date(a.date));
+
+  const filteredRecords = deduped
     .filter(r => visibleProjects.has(r.project))
     .filter(r => !filterQuarter || quarterOf(r.date) === filterQuarter);
 
