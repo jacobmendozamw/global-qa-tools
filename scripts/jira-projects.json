@@ -1,10 +1,11 @@
 {
   "site": "meltwater.atlassian.net",
   "jiraProject": "TRITON",
-  "defectIssueType": "Defect",
+  "defectIssueTypes": ["Defect", "Ticket"],
+  "defectIssueTypesRationale": "Includes both 'Defect' (standard bug classification) and 'Ticket' (support agents sometimes create customer-reported bugs with this type instead of Defect). Both are captured to avoid undercounting. Reviewed 2026-06-29 against a secondary dashboard — 3 real GenAI Lens bugs were missed because they were created as Ticket type (TRITON-36645, TRITON-37086, TRITON-37110).",
   "modelVersion": "2026-Q3-v2",
   "criticalPriorities": ["Blocker", "Critical"],
-  "excludeKeywords": ["restore", "logo", "backfill", "grant", "admin panel"],
+  "excludeKeywords": ["restore", "update logo", "change logo", "upload logo", "logo change", "logo update", "backfill", "grant", "admin panel"],
   "severityWeights": {
     "comment": "Each escaped Defect contributes its priority weight to a severity-weighted count (Rec #3). Higher severity counts more, continuously — replaces the old crude floor. Unlisted priorities default to 1.",
     "Blocker": 3,
@@ -47,8 +48,8 @@
       "Mobile": { "devProject": "MOB", "q2_storyDone": 378, "q2_allDone": 893 }
     }
   },
-  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
-  "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
+  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects and Tickets by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira). Issue types: Defect + Ticket (see defectIssueTypesRationale). Classification field: TRITON 'component' (standard Jira field, reliably filled by support) — NOT 'dev feature[dropdown]' (custom field, inconsistently filled; verified 2026-06-29: 4 valid GenAI Lens Defects had component set but no dev feature value, and would be silently missed by the alternative filter).",
+  "comment": "Maps each Risk Baseline project to its TRITON component, per Confluence 'QA Risk Baseline 2026' §4.6. excludeKeywords filter out service requests by summary (reviewed start of each quarter — use specific phrases, not single words, to avoid false positives on real bugs). Mira and Mira Studio share the TRITON component 'Mira'; linkAttribution splits them by linked issue project key prefix. MIRALEGACY is counted as Mira (team decision, not in §4.6).",
   "linkAttribution": {
     "Mira Studio": ["HZN"],
     "Mira": ["MIRA", "MIRALEGACY"]
@@ -59,5 +60,12 @@
     "Mira": "Mira",
     "Mobile": "Mobile",
     "Engage (Legacy)": "Engage - Conversations"
+  },
+  "devProjects": {
+    "GenAI Lens":     { "project": "GAIL" },
+    "Mira Studio":    { "project": "HZN" },
+    "Mira":           { "project": "MIRA" },
+    "Mobile":         { "project": "MOB" },
+    "Engage (Legacy)":{ "project": "SMM", "component": "Conversations" }
   }
 }

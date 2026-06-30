@@ -106,11 +106,30 @@ tr:last-child td{border-bottom:none}
 .timeline-project{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px}
 .timeline-project-name{font-size:13px;font-weight:700;margin-bottom:10px}
 .timeline-points{display:flex;gap:8px;flex-wrap:wrap}
-.timeline-point{padding:8px 12px;border-radius:8px;font-size:11px;border:1px solid transparent;min-width:90px}
+.timeline-point{padding:8px 12px;border-radius:8px;font-size:11px;border:1px solid transparent;min-width:120px}
 .tp-date{color:var(--text2);margin-bottom:3px;font-size:10px}
 .tp-score{font-size:18px;font-weight:700;line-height:1}
 .tp-level{font-size:11px;font-weight:600;margin-top:2px}
-.tp-eval{font-size:10px;color:var(--text2);margin-top:4px}
+.tp-divider{border-top:1px solid rgba(0,0,0,0.10);margin:6px 0 4px}
+.tp-calc-row{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--text2);line-height:1.6}
+.tp-calc-row span:last-child{font-weight:600;font-variant-numeric:tabular-nums;color:inherit}
+.tp-eval{font-size:10px;color:var(--text2);margin-top:5px;border-top:1px solid rgba(0,0,0,0.07);padding-top:4px}
+.tp-detail-btn{background:none;border:none;padding:0;font:inherit;font-size:10px;color:var(--teal);cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-align:left;font-family:inherit}
+.tp-detail-btn:hover{color:var(--text)}
+/* ── History detail modal ───────────────────────────────────────────────────── */
+.hist-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.hist-modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.hist-modal-header{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+.hist-modal-close{background:none;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--text2);cursor:pointer;padding:2px 8px;font-family:inherit;flex-shrink:0}
+.hist-modal-close:hover{background:var(--bg2)}
+.hist-modal-body{padding:14px 16px 16px;overflow-y:auto;flex:1}
+.hist-detail-section{padding:10px 0;border-bottom:.5px solid var(--border)}
+.hist-detail-section:last-child{border-bottom:none;padding-bottom:0}
+.hist-detail-crit-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hist-detail-footer{font-size:12px;color:var(--text2);padding-top:12px;border-top:1px solid var(--border);margin-top:4px}
+.hist-triton-summary{display:flex;gap:16px;font-size:11px;color:var(--text2);background:var(--bg2);padding:8px 10px;border-radius:6px;border:1px solid var(--border);flex-wrap:wrap}
+.hist-triton-ticket{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--border);min-width:0}
+.hist-triton-ticket:last-child{border-bottom:none}
 /* ── Toggle / toolbar ───────────────────────────────────────────────────────── */
 .toggle-wrap{display:flex;border:1px solid var(--border2);border-radius:5px;overflow:hidden}
 .toggle-btn{font-size:11px;padding:4px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
@@ -346,13 +365,21 @@ const MITIGATION_CRITERIA = [
   { id:'testability', label:'Testability', inputType:'confirm',
     description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
     options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
+  { id:'detectionEfficiency', label:'Escape detection efficiency', inputType:'jira',
+    description:'Of all bugs that reached production this quarter, what fraction did the QA team detect internally (via dev board) before customers reported them? Sourced automatically from the dev project (labels = escaped). Score 1 = customers found everything; 2 = team found some (<50%); 3 = team found the majority (≥50%).',
+    options:[
+      {score:1,label:'Low',   detail:'Customers detected all or most production bugs'},
+      {score:2,label:'Partial',detail:'Team found some bugs before customers (<50%)'},
+      {score:3,label:'High',  detail:'Team found the majority of bugs first (≥50%)'},
+    ] },
   // v2 (Rec #4): "Avg. age of open issues" removed from the mitigation score — it
   // overlapped with escaped defects (double-counting). Still shown as informational.
 ];
 
 // Weights — mitigation re-normalized to 1.0 after dropping avg-age (was .35/.30/.20/.15).
+// detectionEfficiency added at 15%; remaining three re-weighted proportionally.
 const BASE_WEIGHTS  = { userImpact:0.40, rateOfChange:0.35, complexity:0.25 };
-const MIT_WEIGHTS   = { automationConfidence:0.41, testCoverage:0.35, testability:0.24 };
+const MIT_WEIGHTS   = { automationConfidence:0.35, testCoverage:0.30, testability:0.20, detectionEfficiency:0.15 };
 
 const DEFAULT_CURVE = { mu: 5, sigma: 4, scaleMax: 10 };
 const DEFAULT_SEV_WEIGHTS = { Blocker: 3, Critical: 2, Major: 1.5, High: 1.5, Medium: 1, Minor: 1, Low: 1 };
@@ -527,8 +554,8 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
 
   const finalProject = project === '__custom__' ? customProject.trim() : project;
 
-  // The only Jira-locked scoring criterion (v2). avg-age is informational only.
-  const JIRA_IDS = ['escapedDefects'];
+  // Jira-locked scoring criteria: escapedDefects (Triton) + detectionEfficiency (dev board).
+  const JIRA_IDS = ['escapedDefects', 'detectionEfficiency'];
   const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
@@ -563,6 +590,13 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
       const warn = mr?.open ? ` ⚠ ${mr.open} unlinked need manual review` : '';
       const core = d.openCount === 0 ? `From TRITON · no open defects${upd}` : `From TRITON · ${d.openCount} open · avg ${d.avgDays}d${upd}`;
       return core + warn;
+    }
+    if (id === 'detectionEfficiency') {
+      const de = jiraProject.detectionEfficiency;
+      if (!de) return null;
+      const hasData = (jiraProject.internalEscaped?.total ?? 0) > 0;
+      const src = hasData ? 'dev board (labels = escaped)' : 'dev board (no escaped tickets found)';
+      return `From ${src} · ${de.internallyFound} internal + ${de.customerFound} customer-reported = ${de.internallyFound + de.customerFound} total · team detection rate ${de.rate}%${upd}`;
     }
     return null;
   };
@@ -785,17 +819,45 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
               ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). Higher score = stronger mitigation = lower multiplier = lower Final Risk.`
               : 'Higher scores = stronger mitigations = lower multiplier = lower final risk. Confirm each quarter.'}
           </div>
-          {MITIGATION_CRITERIA.map(c => (
-            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
-              colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
-              weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
-              autoLoaded={false}
-              reverseOptions={true}
-              locked={isMitLocked || isJiraLocked(c)}
-              lockedNote={isMitLocked ? mitLockedNote : jiraNote(c.id)}
-              lockedLabel="GitHub"
-              evidence={buildEvidence(finalProject, c.id, testMetrics)} />
-          ))}
+          {MITIGATION_CRITERIA.map(c => {
+            const jiraLocked = isJiraLocked(c);
+            const locked = isMitLocked || jiraLocked;
+            const lockedLabel = jiraLocked ? 'Jira' : 'GitHub';
+            const lockedNote  = jiraLocked ? jiraNote(c.id) : (isMitLocked ? mitLockedNote : null);
+            return (
+              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+                colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
+                weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
+                autoLoaded={false}
+                reverseOptions={true}
+                locked={locked}
+                lockedNote={lockedNote}
+                lockedLabel={lockedLabel}
+                evidence={buildEvidence(finalProject, c.id, testMetrics)} />
+            );
+          })}
+
+          {/* Internally-escaped ticket viewer — informational breakdown for detectionEfficiency */}
+          {jiraProject?.internalEscaped?.tickets?.length > 0 && (() => {
+            const internalTickets = jiraProject.internalEscaped.tickets;
+            return (
+              <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+                  <span style={{fontSize:12,fontWeight:600}}>Internally detected ({internalTickets.length})</span>
+                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Production bugs found by QA before customer reports</span>
+                </div>
+                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
+                  {internalTickets.map(t => (
+                    <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
+                      <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--blue-bg)',color:'var(--blue-text)',border:'.5px solid var(--blue-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
+                      <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                      <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Manual Override */}
           <div className="dim-header">
@@ -896,15 +958,296 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
   );
 }
 
+// ── TritonDetailBody ──────────────────────────────────────────────────────────
+function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
+  const sevColor = p => {
+    if (p === 'Blocker' || p === 'Critical') return {bg:'#FAECE7',text:'#712B13',border:'#D85A30'};
+    if (p === 'Major'   || p === 'High')     return {bg:'#FAEEDA',text:'#633806',border:'#BA7517'};
+    if (p === 'Medium')                      return {bg:'#FFF3CD',text:'#5a4200',border:'#C9A227'};
+    return {bg:'var(--bg3)',text:'var(--text2)',border:'var(--border2)'};
+  };
+
+  // All tickets in the record (not pre-filtered).
+  const allStoredTix = r.jira?.escapedDefects?.tickets || [];
+
+  // Live / history fallbacks for when no tickets are stored in the record.
+  const jmQl  = jiraMetrics?.quarter ? jiraMetrics.quarter.split('-').reverse().join('-') : null;
+  const jmEsc = (jmQl === ql) ? (jiraMetrics?.projects?.[r.project]?.escapedDefects ?? null) : null;
+  const hist  = jiraHistory?.projects?.[r.project]?.[ql] ?? null;
+
+  // Full ticket list (with or without stored per-ticket data).
+  const allTickets = allStoredTix.length > 0 ? allStoredTix : (jmEsc?.tickets || hist?.tickets || []);
+  const hasTickets = allTickets.length > 0;
+
+  // Local exclusion state — initialised from the record's saved exclusions.
+  const [localExcluded, setLocalExcluded] = useState(() => new Set(r.jira?.excludedTickets || []));
+  const [saving, setSaving] = useState(false);
+
+  const originalExcluded = new Set(r.jira?.excludedTickets || []);
+  const isDirty = localExcluded.size !== originalExcluded.size ||
+    [...localExcluded].some(k => !originalExcluded.has(k));
+
+  const toggleTicket = key => setLocalExcluded(prev => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
+
+  // Active (non-excluded) tickets and derived stats.
+  const activeTickets = allTickets.filter(t => !localExcluded.has(t.key));
+  const activeWtd     = activeTickets.reduce((s, t) => s + (t.weight || 0), 0);
+  const activeCrit    = activeTickets.filter(t => t.priority === 'Blocker' || t.priority === 'Critical').length;
+
+  // Recalculate triton score and final risk in real-time.
+  const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
+  const mp    = jiraMetrics?.modelParams  || DEFAULT_MODEL_PARAMS;
+  const recalcTriton    = hasTickets ? tritonScore10(activeWtd, curve, mp) : (r.tritonScore ?? null);
+  const recalcCombined  = ((r.baseRisk || 0) * 0.40) + ((recalcTriton || 0) * 0.60);
+  const recalcFinalRisk = Math.min(10, Math.round(recalcCombined * (r.multiplier ?? 1.0) * 10) / 10);
+  const recalcLevel     = riskLevel(recalcFinalRisk);
+
+  const tritonChanged   = hasTickets && Math.abs(recalcTriton - (r.tritonScore ?? 0)) >= 0.05;
+  const finalChanged    = hasTickets && Math.abs(recalcFinalRisk - (r.finalRisk ?? 0)) >= 0.05;
+
+  const handleSave = () => {
+    setSaving(true);
+    const newTritonScore  = recalcTriton;
+    const newFinalRisk    = recalcFinalRisk;
+    const updatedRecord   = {
+      ...r,
+      tritonScore: newTritonScore,
+      scores: { ...r.scores, escapedDefects: newTritonScore },
+      finalRisk: newFinalRisk,
+      level: recalcLevel?.label ?? r.level,
+      jira: {
+        ...r.jira,
+        excludedTickets: [...localExcluded],
+        escapedEffective: {
+          total:    activeTickets.length,
+          critical: activeCrit,
+          weighted: activeWtd,
+        },
+      },
+    };
+    // Persist to localStorage (local wins over shared data.json on next load).
+    const locals = loadLocalAssessments();
+    const byId   = new Map(locals.map(rec => [rec.id, rec]));
+    byId.set(updatedRecord.id, updatedRecord);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...byId.values()]));
+    setSaving(false);
+    onSaveRecord(updatedRecord);
+  };
+
+  // ── No data case ──────────────────────────────────────────────────────────
+  if (r.tritonScore == null && allTickets.length === 0) {
+    return <div style={{color:'var(--text3)',fontSize:12,padding:'8px 0'}}>No escaped defects tracked this quarter.</div>;
+  }
+
+  // ── Summary bar ───────────────────────────────────────────────────────────
+  const SummaryBar = () => (
+    <div className="hist-triton-summary" style={{flexDirection:'column',gap:6}}>
+      <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+        <span>Active <strong>{hasTickets ? activeTickets.length : (r.jira?.escapedEffective?.total ?? jmEsc?.total ?? hist?.total ?? '—')}</strong></span>
+        <span>Critical <strong>{hasTickets ? activeCrit : (r.jia?.escapedEffective?.critical ?? jmEsc?.critical ?? hist?.critical ?? '—')}</strong></span>
+        <span>Weighted <strong>{hasTickets ? activeWtd.toFixed(1) : (jmEsc?.weighted ?? hist?.weighted ?? '—')}</strong></span>
+        <span style={{display:'flex',alignItems:'center',gap:6}}>
+          Score&nbsp;
+          <strong style={{color: tritonChanged ? (recalcTriton < (r.tritonScore??0) ? '#1D9E75' : '#D85A30') : 'inherit'}}>
+            {recalcTriton != null ? recalcTriton.toFixed(1) : '—'}
+          </strong>
+          {tritonChanged && <span style={{fontSize:10,color:'var(--text3)'}}>(was {r.tritonScore?.toFixed(1)})</span>}
+        </span>
+      </div>
+      {finalChanged && (
+        <div style={{fontSize:11,padding:'4px 8px',borderRadius:5,background: recalcLevel?.bg,color:recalcLevel?.text,border:`1px solid ${recalcLevel?.border}`,fontWeight:600,display:'inline-flex',alignItems:'center',gap:6,alignSelf:'flex-start'}}>
+          Final Risk → {recalcFinalRisk.toFixed(1)} {recalcLevel?.label}
+          <span style={{fontWeight:400,opacity:.8}}>(was {r.finalRisk?.toFixed(1)} {r.level})</span>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <SummaryBar/>
+      {hasTickets ? (
+        <div style={{marginTop:10}}>
+          <div style={{fontSize:10,color:'var(--text3)',marginBottom:6,lineHeight:1.5}}>
+            Toggle tickets to exclude non-bugs or out-of-scope items. The score recalculates instantly — save when done.
+          </div>
+          {allTickets.map(t => {
+            const sc      = sevColor(t.priority);
+            const disabled = localExcluded.has(t.key);
+            return (
+              <div key={t.key} className="hist-triton-ticket" style={{opacity: disabled ? 0.45 : 1, cursor:'pointer'}}
+                onClick={() => toggleTicket(t.key)}>
+                <input type="checkbox" checked={!disabled} readOnly
+                  style={{width:13,height:13,flexShrink:0,cursor:'pointer',accentColor:'var(--teal)'}}/>
+                <span className="pill" style={{background:sc.bg,color:sc.text,border:`1px solid ${sc.border}`,minWidth:58,textAlign:'center',flexShrink:0}}>
+                  {t.priority}
+                </span>
+                {t.url
+                  ? <a href={t.url} target="_blank" rel="noreferrer"
+                      style={{fontWeight:600,color:'var(--teal)',fontSize:11,whiteSpace:'nowrap',flexShrink:0,textDecoration: disabled ? 'line-through' : 'none'}}
+                      onClick={e => e.stopPropagation()}>{t.key}</a>
+                  : <span style={{fontWeight:600,color:'var(--teal)',fontSize:11,whiteSpace:'nowrap',flexShrink:0,textDecoration: disabled ? 'line-through' : 'none'}}>{t.key}</span>
+                }
+                <span style={{fontSize:11,color:'var(--text)',flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',textDecoration: disabled ? 'line-through' : 'none'}}>
+                  {t.summary}
+                </span>
+                <span style={{fontSize:10,color:'var(--text3)',whiteSpace:'nowrap',flexShrink:0}}>×{t.weight}</span>
+                {disabled && <span style={{fontSize:10,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',flexShrink:0}}>excluded</span>}
+              </div>
+            );
+          })}
+          {isDirty && (
+            <div style={{marginTop:12,display:'flex',alignItems:'center',gap:10}}>
+              <button className="btn-primary" onClick={handleSave} disabled={saving}
+                style={{fontSize:12,padding:'6px 16px'}}>
+                {saving ? 'Saving…' : 'Save adjustments'}
+              </button>
+              <span style={{fontSize:11,color:'var(--text3)'}}>
+                {localExcluded.size - originalExcluded.size > 0
+                  ? `${localExcluded.size - originalExcluded.size} ticket(s) newly excluded`
+                  : localExcluded.size < originalExcluded.size
+                  ? `${originalExcluded.size - localExcluded.size} ticket(s) re-included`
+                  : 'Changes pending'}
+              </span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          {hist?.note && <div style={{fontSize:11,color:'var(--text3)',marginTop:8,lineHeight:1.5}}>{hist.note}</div>}
+          <div style={{fontSize:11,color:'var(--text3)',marginTop:8}}>Ticket-level detail not available for this period.</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── HistoryDetailModal ────────────────────────────────────────────────────────
+function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMetrics, testMetrics }) {
+  if (!detail) return null;
+  const { type, record: r } = detail;
+  const d = new Date(r.date);
+  const ql = `Q${Math.floor(d.getUTCMonth()/3)+1}-${d.getUTCFullYear()}`;
+
+  const sevColor = p => {
+    if (p === 'Blocker' || p === 'Critical') return {bg:'#FAECE7',text:'#712B13',border:'#D85A30'};
+    if (p === 'Major'   || p === 'High')     return {bg:'#FAEEDA',text:'#633806',border:'#BA7517'};
+    if (p === 'Medium')                      return {bg:'#FFF3CD',text:'#5a4200',border:'#C9A227'};
+    return {bg:'var(--bg3)',text:'var(--text2)',border:'var(--border2)'};
+  };
+
+  let title, body;
+
+  if (type === 'base') {
+    title = 'Base Risk Breakdown';
+    body = (
+      <div>
+        {BASE_RISK_CRITERIA.map(c => {
+          const score = r.scores?.[c.id];
+          const opt   = c.options.find(o => o.score === score);
+          const col   = RISK_COLORS[score] || {};
+          return (
+            <div key={c.id} className="hist-detail-section">
+              <div className="hist-detail-crit-header">
+                <span style={{fontWeight:700,fontSize:13}}>{c.label}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{Math.round(BASE_WEIGHTS[c.id]*100)}% weight</span>
+                {opt && <span className="pill" style={{background:col.bg,color:col.text,border:`1px solid ${col.border}`}}>{opt.label} · {score}/3</span>}
+              </div>
+              <div style={{fontSize:11,color:'var(--text3)',marginTop:3}}>{c.description}</div>
+              {opt && <div style={{fontSize:11,color:'var(--text2)',marginTop:2}}>"{opt.detail}"</div>}
+            </div>
+          );
+        })}
+        <div className="hist-detail-footer">
+          Base Risk: <strong>{r.baseRisk != null ? r.baseRisk.toFixed(1) : '—'}</strong> / 10
+          &nbsp;·&nbsp; formula: (wavg − 1) / 2 × 10
+        </div>
+      </div>
+    );
+  } else if (type === 'triton') {
+    title = 'TRITON Escaped Defects';
+    body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} onSaveRecord={onSaveRecord}/>;
+  } else if (type === 'mit') {
+    title = 'Mitigation Evidence';
+    body = (
+      <div>
+        {MITIGATION_CRITERIA.map(c => {
+          const score   = r.scores?.[c.id];
+          const opt     = c.options.find(o => o.score === score);
+          const colorMap= c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS;
+          const col     = colorMap[score] || {};
+          const evidence= PROJECT_EVIDENCE[r.project]?.[c.id];
+          return (
+            <div key={c.id} className="hist-detail-section">
+              <div className="hist-detail-crit-header">
+                <span style={{fontWeight:700,fontSize:13}}>{c.label}</span>
+                <span style={{fontSize:11,color:'var(--text2)'}}>{Math.round(MIT_WEIGHTS[c.id]*100)}% weight</span>
+                {opt && <span className="pill" style={{background:col.bg,color:col.text,border:`1px solid ${col.border}`}}>{opt.label} · {score}/{c.scale||3}</span>}
+              </div>
+              {evidence ? (
+                <table style={{width:'100%',borderCollapse:'collapse',marginTop:6,fontSize:11}}>
+                  <tbody>
+                    {evidence.map(([label,value],i) => (
+                      <tr key={i} style={{borderBottom:i<evidence.length-1?'.5px solid var(--border)':'none'}}>
+                        <td style={{padding:'3px 8px 3px 0',color:'var(--text3)',fontWeight:600,width:'36%',verticalAlign:'top'}}>{label}</td>
+                        <td style={{padding:'3px 0',color:'var(--text2)',lineHeight:1.45}}>{value}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div style={{fontSize:11,color:'var(--text3)',marginTop:4}}>No evidence recorded for this project.</div>
+              )}
+            </div>
+          );
+        })}
+        <div className="hist-detail-footer">
+          Mit score: <strong>{r.mitScore != null ? r.mitScore.toFixed(2) : '—'}</strong>
+          &nbsp;·&nbsp;
+          Multiplier: <strong>{r.multiplier != null ? r.multiplier.toFixed(2) : '—'}</strong>
+          &nbsp;·&nbsp;range 0.70 (best) → 1.10 (no mitigation)
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="hist-modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="hist-modal">
+        <div className="hist-modal-header">
+          <div>
+            <div style={{fontWeight:700,fontSize:14}}>{title}</div>
+            <div style={{fontSize:11,color:'var(--text2)',marginTop:2}}>{r.project} · {ql}</div>
+          </div>
+          <button className="hist-modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="hist-modal-body">{body}</div>
+      </div>
+    </div>
+  );
+}
+
 // ── HistoryView ───────────────────────────────────────────────────────────────
-function HistoryView({ refreshKey }) {
+function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [records, setRecords] = useState([]);
   const [allRecords, setAllRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterProject, setFilterProject] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
   const [localRefresh, setLocalRefresh] = useState(0);
+  const [detail, setDetail] = useState(null);
   const fileRef = useRef(null);
+
+  useEffect(()=>{
+    if (!detail) return;
+    const onKey = e => { if (e.key === 'Escape') setDetail(null); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [detail]);
 
   useEffect(()=>{
     let cancelled = false;
@@ -985,6 +1328,10 @@ function HistoryView({ refreshKey }) {
                       <div className="tp-score" style={{color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</div>
                       <div className="tp-level" style={{color:rl?rl.text:'var(--text3)'}}>{rl?rl.label:'—'}{r.overrideActive?' ⚑':''}</div>
                       {dtxt && <div style={{fontSize:10,fontWeight:600,color:dcol}}>{dtxt}</div>}
+                      <div className="tp-divider"/>
+                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'base',record:r})}>Base</button><span>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span></div>
+                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'triton',record:r})}>TRITON</button><span>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span></div>
+                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'mit',record:r})}>× Mit</button><span>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</span></div>
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
                   );
@@ -1027,6 +1374,14 @@ function HistoryView({ refreshKey }) {
           </table>
         </div>
       )}
+      <HistoryDetailModal detail={detail} onClose={()=>setDetail(null)}
+        onSaveRecord={updatedRecord => {
+          // Persist to local store (already written inside TritonDetailBody; this
+          // just keeps the in-memory view in sync without a full reload).
+          setDetail(prev => prev ? {...prev, record: updatedRecord} : null);
+          setLocalRefresh(n => n + 1);
+        }}
+        jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>
     </div>
   );
 }
@@ -1233,7 +1588,7 @@ function App() {
         </div>
       </div>
       {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
-      {tab==='history' && <HistoryView refreshKey={historyRefresh}/>}
+      {tab==='history' && <HistoryView refreshKey={historyRefresh} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
     </div>
   );

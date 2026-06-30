@@ -25,7 +25,8 @@ if (!email || !token) {
 const cfg = JSON.parse(await readFile(new URL('./jira-projects.json', import.meta.url), 'utf8'));
 const SITE = cfg.site;
 const PROJECT = cfg.jiraProject;
-const DEFECT_TYPE = cfg.defectIssueType || 'Defect';
+const DEV_PROJECTS = cfg.devProjects || {};
+const DEFECT_TYPES = cfg.defectIssueTypes || (cfg.defectIssueType ? [cfg.defectIssueType] : ['Defect']);
 const CRITICAL = cfg.criticalPriorities || ['Blocker', 'Critical'];
 const EXCLUDE_KEYWORDS = cfg.excludeKeywords || [];
 const LINK_ATTRIBUTION = cfg.linkAttribution || {};
@@ -149,10 +150,71 @@ async function getExposure(name) {
   }
 }
 
-async function computeProject(name, component) {
+// Builds a single combined JQL query from the devProjects config — mirrors the
+// team's existing Jira filter. Projects without a component restriction are batched
+// into a single "project in (...)" clause; projects with a component (e.g. SMM +
+// Conversations) get their own clause. One API call covers all projects.
+function buildInternalEscapedJQL(devProjects, quarterStart) {
+  const regularProjects = [];
+  const componentClauses = [];
+  for (const conf of Object.values(devProjects)) {
+    if (!conf?.project) continue;
+    if (conf.component) {
+      componentClauses.push(
+        `(project = ${conf.project} AND component = ${q(conf.component)} AND labels = escaped AND created >= ${q(quarterStart)})`
+      );
+    } else {
+      regularProjects.push(conf.project);
+    }
+  }
+  const clauses = [];
+  if (regularProjects.length)
+    clauses.push(`(project in (${regularProjects.join(', ')}) AND labels = escaped AND created >= ${q(quarterStart)})`);
+  clauses.push(...componentClauses);
+  return clauses.join(' OR ');
+}
+
+// Fetch all internally-detected escaped tickets across every configured dev project
+// in a single JQL query, then return a Map<projectKey → ticket[]> for O(1) lookup.
+async function fetchAllInternalEscaped(devProjects, quarterStart) {
+  const jql = buildInternalEscapedJQL(devProjects, quarterStart);
+  if (!jql) return new Map();
+  try {
+    const issues = await searchAll(jql, ['summary', 'priority', 'project']);
+    const byProject = new Map();
+    for (const i of issues) {
+      const pk = i.fields?.project?.key;
+      if (!pk) continue;
+      if (!byProject.has(pk)) byProject.set(pk, []);
+      byProject.get(pk).push({
+        key: i.key,
+        summary: i.fields?.summary || '',
+        priority: i.fields?.priority?.name || '—',
+        url: `https://${SITE}/browse/${i.key}`,
+      });
+    }
+    return byProject;
+  } catch (e) {
+    console.error(`Internal escaped fetch failed: ${e.message}`);
+    return new Map();
+  }
+}
+
+function detectionEfficiencyScore(internalCount, customerCount) {
+  const total = internalCount + customerCount;
+  if (total === 0 || internalCount === 0) return 1;
+  const rate = internalCount / total;
+  if (rate >= 0.50) return 3;
+  return 2;
+}
+
+async function computeProject(name, component, internalEscapedMap) {
   const linkPrefixes = prefixesFor(name);
   const needLinks = linkPrefixes.length > 0;
-  const base = `project = ${PROJECT} AND issuetype = ${q(DEFECT_TYPE)} AND component = ${q(component)}`;
+  const issueTypeClause = DEFECT_TYPES.length === 1
+    ? `issuetype = ${q(DEFECT_TYPES[0])}`
+    : `issuetype in (${DEFECT_TYPES.map(q).join(', ')})`;
+  const base = `project = ${PROJECT} AND ${issueTypeClause} AND component = ${q(component)}`;
   const fields = base => needLinks ? base.concat('issuelinks') : base;
 
   // Escaped defects this calendar quarter (service requests excluded).
@@ -191,11 +253,24 @@ async function computeProject(name, component) {
   const openCount = ages.length;
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
+  const devConf = DEV_PROJECTS[name];
+  const internalTickets = devConf ? (internalEscapedMap.get(devConf.project) || []) : [];
+  const internalTotal = internalTickets.length;
+  const deScore = detectionEfficiencyScore(internalTotal, total);
+  const deRate = (internalTotal + total) > 0 ? Math.round((internalTotal / (internalTotal + total)) * 100) : 0;
+
   const result = {
     escapedDefects: { score: tritonScore10(tritonInput), total, critical, weighted, tickets,
       ...(exposure != null ? { exposure } : {}) },
     avgAgeOpenIssues: { avgDays, openCount, informational: true },
     dataQuality: { manualReview: needLinks ? { escaped: escMR, open: openMR } : { escaped: 0, open: 0 } },
+    internalEscaped: { total: internalTotal, tickets: internalTickets },
+    detectionEfficiency: {
+      score: deScore,
+      internallyFound: internalTotal,
+      customerFound: total,
+      rate: deRate,
+    },
   };
   if (needLinks) result.needsManualReview = { escaped: escMR, open: openMR };
   return result;
@@ -206,14 +281,22 @@ function quarterLabel(d) {
 }
 
 async function main() {
+  // Fetch all internally-detected escaped tickets across dev boards in one query,
+  // then distribute to each project's computeProject call via the Map.
+  const internalEscapedMap = await fetchAllInternalEscaped(DEV_PROJECTS, QUARTER_START);
+  const internalTotal = [...internalEscapedMap.values()].reduce((s, t) => s + t.length, 0);
+  console.log(`Internal escaped (all projects): ${internalTotal} tickets across ${internalEscapedMap.size} dev project(s)`);
+
   const projects = {};
   for (const [name, component] of Object.entries(cfg.projects)) {
     try {
-      projects[name] = await computeProject(name, component);
+      projects[name] = await computeProject(name, component, internalEscapedMap);
       const e = projects[name].escapedDefects;
+      const de = projects[name].detectionEfficiency;
       const mr = projects[name].needsManualReview ? ` [manual review: ${projects[name].needsManualReview.escaped} esc / ${projects[name].needsManualReview.open} open]` : '';
       const exp = e.exposure != null ? ` /exp ${e.exposure}` : '';
-      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${mr}`);
+      const deStr = de ? ` | internal=${de.internallyFound} DE=${de.rate}% score=${de.score}` : '';
+      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${deStr}${mr}`);
     } catch (err) {
       console.error(`Failed for ${name} (${component}): ${err.message}`);
       projects[name] = { error: err.message };

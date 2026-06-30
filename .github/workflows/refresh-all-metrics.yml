@@ -1,0 +1,21 @@
+name: Refresh All Metrics
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  actions: write  # required to trigger workflow_dispatch on sibling workflows
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger all refresh workflows in parallel
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run refresh-jira-metrics.yml   --repo "$GITHUB_REPOSITORY"
+          gh workflow run refresh-github-metrics.yml --repo "$GITHUB_REPOSITORY"
+          gh workflow run refresh-test-metrics.yml   --repo "$GITHUB_REPOSITORY"
+          echo "All three refresh workflows dispatched."
+          echo "Track progress at: https://github.com/$GITHUB_REPOSITORY/actions"
