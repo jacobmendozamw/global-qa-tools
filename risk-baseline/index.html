@@ -1098,7 +1098,7 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
         </div>
       </div>
     ) : (
-      <div className="helper">No DCE data recorded for this snapshot. DCE data is available from Q2-2026 onward (when the GitHub Action started running).</div>
+      <div className="helper">No DCE data recorded for this snapshot. DCE tracking is available from Q2-2026 onward, when the <code>escaped</code> and <code>known</code> Jira labels were implemented.</div>
     );
   } else if (type === 'mit') {
     title = 'QA Process Evidence';
