@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-30T05:18:22.675Z",
-  "modelVersion": "2026-Q3-v2",
+  "generatedAt": "2026-06-30T06:46:52.073Z",
+  "modelVersion": "2026-Q3-v3",
   "quarter": "2026-Q2",
   "project": "TRITON",
   "criticalPriorities": [
@@ -41,6 +41,11 @@
   },
   "exposureEnabled": false,
   "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects and Tickets by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira). Issue types: Defect + Ticket (see defectIssueTypesRationale). Classification field: TRITON 'component' (standard Jira field, reliably filled by support) — NOT 'dev feature[dropdown]' (custom field, inconsistently filled; verified 2026-06-29: 4 valid GenAI Lens Defects had component set but no dev feature value, and would be silently missed by the alternative filter).",
+  "docs": {
+    "qaeiMethodology": "",
+    "dceReference": "",
+    "riskBaselineConfluence": ""
+  },
   "projects": {
     "GenAI Lens": {
       "escapedDefects": {
@@ -769,8 +774,8 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 94,
-        "openCount": 5,
+        "avgDays": 113,
+        "openCount": 4,
         "informational": true
       },
       "dataQuality": {
