@@ -1070,6 +1070,36 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
   } else if (type === 'triton') {
     title = 'TRITON Escaped Defects';
     body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} onSaveRecord={onSaveRecord}/>;
+  } else if (type === 'dce') {
+    title = 'Detection Coverage Efficiency (DCE)';
+    const de = r.jira?.detectionEfficiency;
+    body = de ? (
+      <div>
+        <div className="helper" style={{marginBottom:10}}>
+          DCE measures what fraction of known bugs were caught by QA before or during production, vs. reported by customers.
+          Formula: (pre-production + internally found) / (pre-production + internally found + customer-reported) × 100
+        </div>
+        <div className="hist-detail-section">
+          <div className="hist-detail-crit-header">
+            <span style={{fontWeight:700,fontSize:13}}>DCE Rate</span>
+            <span className="pill" style={{background:'var(--blue-bg)',color:'var(--blue-text)',border:'1px solid var(--blue-border)'}}>{de.rate}%</span>
+          </div>
+          <table style={{width:'100%',borderCollapse:'collapse',marginTop:8,fontSize:11}}>
+            <tbody>
+              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600,width:'55%'}}>Pre-production catches (staging)</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.preProductionCaught ?? 0}</td></tr>
+              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600}}>Internally found (post-prod)</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.internallyFound ?? 0}</td></tr>
+              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600}}>Customer-reported</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.customerFound ?? 0}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="hist-detail-footer">
+          DCE Score: <strong>{de ? Math.round(de.rate / 10 * 10) / 10 : '—'}</strong> / 10
+          &nbsp;·&nbsp; formula: rate% ÷ 10
+        </div>
+      </div>
+    ) : (
+      <div className="helper">No DCE data recorded for this snapshot. DCE data is available from Q2-2026 onward (when the GitHub Action started running).</div>
+    );
   } else if (type === 'mit') {
     title = 'QA Process Evidence';
     body = (
@@ -1374,7 +1404,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                             <div style={{display:'flex', flexDirection:'column', gap:4}}>
                               <div>
                                 <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>DCE ↗</button>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'dce',record:r})}}>DCE ↗</button>
                                   <span style={{fontWeight:600}}>{hasDCE?qaeiResult.dceScore.toFixed(1):'NA'}</span>
                                 </div>
                                 <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
