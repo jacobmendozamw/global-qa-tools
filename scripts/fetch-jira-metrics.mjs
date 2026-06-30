@@ -34,6 +34,7 @@ const TRITON_CURVE = cfg.tritonCurve || { mu: 5, sigma: 4, scaleMax: 10 };
 const SEVERITY_WEIGHTS = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
 const EXPOSURE = cfg.exposure || { enabled: false };
 const PRE_PRODUCTION_REPORTERS = cfg.qaPreProductionReporters || [];
+const RISK_BASELINE_DEFAULTS = cfg.riskBaselineDefaults || {};
 const MODEL_VERSION = cfg.modelVersion || 'unversioned';
 const stripComment = o => { if (!o) return o; const { comment, ...rest } = o; return rest; };
 const MODEL_PARAMS = stripComment(cfg.modelParams) || { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
@@ -412,6 +413,66 @@ async function main() {
   };
   await writeFile(new URL('../risk-baseline/jira-metrics.json', import.meta.url), JSON.stringify(out, null, 2) + '\n');
   console.log(`Wrote risk-baseline/jira-metrics.json — ${Object.keys(projects).length} projects, quarter ${out.quarter}`);
+
+  // ── Quarterly snapshot → data.json ──────────────────────────────────────────
+  // Write one auto-generated record per project so the History tab always has
+  // a current-quarter entry that matches the Risk Index score.
+  const BASE_WEIGHTS = { userImpact: 0.40, rateOfChange: 0.35, complexity: 0.25 };
+  function wavgBase(scores) {
+    const entries = Object.entries(BASE_WEIGHTS).filter(([k]) => scores[k] != null);
+    const totalW = entries.reduce((s, [, w]) => s + w, 0);
+    return totalW === 0 ? null : entries.reduce((s, [k, w]) => s + w * scores[k], 0) / totalW;
+  }
+  function to10snap(v) {
+    const baseFloor = MODEL_PARAMS.baseFloor ?? 0;
+    return v == null ? null : Math.round((((v - 1) / 2) * (10 - baseFloor) + baseFloor) * 10) / 10;
+  }
+
+  const dataPath = new URL('../risk-baseline/data.json', import.meta.url);
+  let existing = [];
+  try { existing = JSON.parse(await readFile(dataPath, 'utf8')); } catch { existing = []; }
+  if (!Array.isArray(existing)) existing = [];
+
+  const quarterKey = out.quarter; // e.g. "Q3-2026"
+  const snapDate = nowD.toISOString();
+
+  for (const [proj, jp] of Object.entries(projects)) {
+    const rbd = RISK_BASELINE_DEFAULTS[proj];
+    const triton = jp.escapedDefects?.score ?? null;
+    const baseScores = rbd ? { ...rbd } : {};
+    const baseWavg = rbd ? wavgBase(baseScores) : null;
+    const baseRisk = to10snap(baseWavg);
+    const finalRisk = baseRisk != null && triton != null
+      ? Math.min(10, Math.round((baseRisk * 0.40 + triton * 0.60) * 10) / 10)
+      : triton != null ? Math.min(10, Math.round(triton * 0.60 * 10) / 10)
+      : null;
+    const lvl = finalRisk == null ? '' : finalRisk >= 7.4 ? 'High' : finalRisk >= 5.1 ? 'Medium' : 'Low';
+    const id = `auto-${quarterKey}-${proj.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+    const record = {
+      id,
+      date: snapDate,
+      modelVersion: MODEL_VERSION,
+      project: proj,
+      evaluator: 'auto',
+      scores: { ...(rbd || {}), escapedDefects: triton },
+      baseRisk,
+      tritonScore: triton,
+      finalRisk,
+      level: lvl,
+      scaleMax: 10,
+      notes: `Auto-generated snapshot — ${quarterKey}`,
+      jira: {
+        source: 'TRITON', quarter: out.quarter, window: out.window, generatedAt: snapDate,
+        ...jp,
+      },
+    };
+    const idx = existing.findIndex(r => r.id === id);
+    if (idx >= 0) existing[idx] = record; else existing.push(record);
+  }
+
+  existing.sort((a, b) => new Date(a.date) - new Date(b.date));
+  await writeFile(dataPath, JSON.stringify(existing, null, 2) + '\n');
+  console.log(`Wrote risk-baseline/data.json — ${Object.keys(projects).length} auto snapshots for ${quarterKey}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

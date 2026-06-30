@@ -34,7 +34,9 @@ jobs:
       - name: Open or update PR with refreshed data
         uses: peter-evans/create-pull-request@v8
         with:
-          add-paths: risk-baseline/jira-metrics.json
+          add-paths: |
+            risk-baseline/jira-metrics.json
+            risk-baseline/data.json
           branch: automated/jira-metrics-refresh
           base: main
           commit-message: "chore: refresh Jira metrics data (TRITON + escaped + pre-production)"

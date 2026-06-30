@@ -75,6 +75,13 @@
     "557058:f58131cb-b67d-43c7-b30d-6b58d40bd077"
   ],
   "qaPreProductionReportersRationale": "Bugs labeled 'known' and reported by QA team members on dev boards — found in staging before reaching production. Strongest positive signal for QA effectiveness (3-tier quality hierarchy: customer-reported < QA-found-in-production < QA-found-in-staging). Reporter list reviewed 2026-06-29. Account ID (557058:...) included alongside emails for Jira compatibility.",
+  "riskBaselineDefaults": {
+    "GenAI Lens":     { "userImpact": 3, "rateOfChange": 3, "complexity": 3 },
+    "Mira Studio":    { "userImpact": 3, "rateOfChange": 3, "complexity": 3 },
+    "Mira":           { "userImpact": 3, "rateOfChange": 3, "complexity": 2 },
+    "Mobile":         { "userImpact": 2, "rateOfChange": 2, "complexity": 2 },
+    "Engage (Legacy)":{ "userImpact": 2, "rateOfChange": 1, "complexity": 1 }
+  },
   "devProjects": {
     "GenAI Lens":     { "project": "GAIL" },
     "Mira Studio":    { "project": "HZN" },
