@@ -407,6 +407,7 @@ async function main() {
     ...(CALIBRATION ? { calibration: CALIBRATION } : {}),
     exposureEnabled: !!EXPOSURE.enabled,
     ...(cfg.methodology ? { methodology: cfg.methodology } : {}),
+    ...(cfg.docs ? { docs: cfg.docs } : {}),
     projects,
   };
   await writeFile(new URL('../risk-baseline/jira-metrics.json', import.meta.url), JSON.stringify(out, null, 2) + '\n');

@@ -1,9 +1,14 @@
 {
   "site": "meltwater.atlassian.net",
   "jiraProject": "TRITON",
+  "docs": {
+    "qaeiMethodology": "",
+    "dceReference": "",
+    "riskBaselineConfluence": ""
+  },
   "defectIssueTypes": ["Defect", "Ticket"],
   "defectIssueTypesRationale": "Includes both 'Defect' (standard bug classification) and 'Ticket' (support agents sometimes create customer-reported bugs with this type instead of Defect). Both are captured to avoid undercounting. Reviewed 2026-06-29 against a secondary dashboard — 3 real GenAI Lens bugs were missed because they were created as Ticket type (TRITON-36645, TRITON-37086, TRITON-37110).",
-  "modelVersion": "2026-Q3-v2",
+  "modelVersion": "2026-Q3-v3",
   "criticalPriorities": ["Blocker", "Critical"],
   "excludeKeywords": ["restore", "update logo", "change logo", "upload logo", "logo change", "logo update", "backfill", "grant", "admin panel"],
   "severityWeights": {

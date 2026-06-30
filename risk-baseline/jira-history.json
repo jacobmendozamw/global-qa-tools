@@ -7,8 +7,6 @@
     "scaleMax": 10
   },
   "quarters": [
-    "Q3-2025",
-    "Q4-2025",
     "Q1-2026",
     "Q2-2026"
   ],
@@ -26,23 +24,6 @@
   },
   "projects": {
     "GenAI Lens": {
-      "Q3-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 0,
-        "density": null,
-        "note": "product not yet tracked"
-      },
-      "Q4-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 72,
-        "density": 0
-      },
       "Q1-2026": {
         "total": 12,
         "critical": 2,
@@ -159,22 +140,6 @@
       }
     },
     "Mira Studio": {
-      "Q3-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 79,
-        "density": 0
-      },
-      "Q4-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 80,
-        "density": 0
-      },
       "Q1-2026": {
         "total": 1,
         "critical": 0,
@@ -203,22 +168,6 @@
       }
     },
     "Mira": {
-      "Q3-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 0,
-        "density": null
-      },
-      "Q4-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 0,
-        "density": null
-      },
       "Q1-2026": {
         "total": 2,
         "critical": 0,
@@ -257,22 +206,6 @@
       }
     },
     "Mobile": {
-      "Q3-2025": {
-        "total": 2,
-        "critical": 1,
-        "weighted": 4,
-        "tritonScore": 4,
-        "delivered": 81,
-        "density": 4.9
-      },
-      "Q4-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 51,
-        "density": 0
-      },
       "Q1-2026": {
         "total": 1,
         "critical": 0,
@@ -301,24 +234,6 @@
       }
     },
     "Engage (Legacy)": {
-      "Q3-2025": {
-        "total": 0,
-        "critical": 0,
-        "weighted": 0,
-        "tritonScore": null,
-        "delivered": 0,
-        "density": null,
-        "note": "TRITON tracking not yet in place for Engage (Legacy)"
-      },
-      "Q4-2025": {
-        "total": 1,
-        "critical": 1,
-        "weighted": 3,
-        "tritonScore": 3.1,
-        "delivered": 0,
-        "density": null,
-        "note": "1 Blocker (TRITON-33268). Delivered denominator not available."
-      },
       "Q1-2026": {
         "total": 10,
         "critical": 3,

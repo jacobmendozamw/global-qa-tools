@@ -365,31 +365,18 @@ const MITIGATION_CRITERIA = [
   { id:'testability', label:'Testability', inputType:'confirm',
     description:'How easy it is to write and maintain meaningful tests. Structural — confirm quarterly.',
     options:[{score:1,label:'Hard',detail:'Poor structure, hard to isolate'},{score:2,label:'Moderate',detail:'Some friction, partial test support'},{score:3,label:'Easy',detail:'Good structure, test hooks available'}] },
-  { id:'detectionEfficiency', label:'Escape detection efficiency', inputType:'jira',
-    description:'Of all bugs that reached production this quarter, what fraction did the QA team detect internally (via dev board) before customers reported them? Sourced automatically from the dev project (labels = escaped). Score 1 = customers found everything; 2 = team found some (<50%); 3 = team found the majority (≥50%).',
-    options:[
-      {score:1,label:'Low',   detail:'Customers detected all or most production bugs'},
-      {score:2,label:'Partial',detail:'Team found some bugs before customers (<50%)'},
-      {score:3,label:'High',  detail:'Team found the majority of bugs first (≥50%)'},
-    ] },
-  // v2 (Rec #4): "Avg. age of open issues" removed from the mitigation score — it
-  // overlapped with escaped defects (double-counting). Still shown as informational.
+  // v3: "Avg. age of open issues" removed in v2. "detectionEfficiency" removed in v3
+  // — it now lives exclusively in the QAEI tab as the DCE driver.
 ];
 
-// Weights — mitigation re-normalized to 1.0 after dropping avg-age (was .35/.30/.20/.15).
-// detectionEfficiency added at 15%; remaining three re-weighted proportionally.
+// v3: MIT_WEIGHTS removed — QA process criteria no longer affect the Risk Index.
+// They feed the QA Effectiveness Index only (PM_WEIGHTS_QAEI below).
 const BASE_WEIGHTS  = { userImpact:0.40, rateOfChange:0.35, complexity:0.25 };
-const MIT_WEIGHTS   = { automationConfidence:0.35, testCoverage:0.30, testability:0.20, detectionEfficiency:0.15 };
 
 const DEFAULT_CURVE = { mu: 5, sigma: 4, scaleMax: 10 };
 const DEFAULT_SEV_WEIGHTS = { Blocker: 3, Critical: 2, Major: 1.5, High: 1.5, Medium: 1, Minor: 1, Low: 1 };
 const DEFAULT_MODEL_PARAMS = { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
 
-// Mitigation multiplier: strong (all 3) → min, weak (all 1) → max (Rec #7 configurable).
-function mitigationMultiplier(mitScore, mp) {
-  const { multiplierMin = 0.70, multiplierMax = 1.10 } = mp || DEFAULT_MODEL_PARAMS;
-  return multiplierMax - ((mitScore - 1) / 2) * (multiplierMax - multiplierMin);
-}
 
 // TRITON escaped-defect score on a 0–10 scale via an anchored curve (Gaussian or
 // logistic, Rec #5). Mirrors scripts/fetch-jira-metrics.mjs. Params from jira-metrics.json.
@@ -432,15 +419,12 @@ const to10 = (v, mp) => {
 
 function compute(scores, overrideActive, mp) {
   mp = mp || DEFAULT_MODEL_PARAMS;
-  if (overrideActive) return { baseRisk:null, tritonScore:(scores.escapedDefects ?? null), mitScore:null, multiplier:null, finalRisk:SCALE_MAX, overridden:true };
-  const base10     = to10(wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores), mp);
+  if (overrideActive) return { baseRisk:null, tritonScore:(scores.escapedDefects ?? null), finalRisk:SCALE_MAX, overridden:true };
+  const base10      = to10(wavg(BASE_RISK_CRITERIA, BASE_WEIGHTS, scores), mp);
   const tritonScore = scores.escapedDefects ?? null; // already on the 0–10 scale
-  const mitScore   = wavg(MITIGATION_CRITERIA, MIT_WEIGHTS, scores);
-  if (base10 == null && tritonScore == null) return { baseRisk:null, tritonScore:null, mitScore:null, multiplier:null, finalRisk:null, overridden:false };
-  const combined = ((base10||0) * 0.40) + ((tritonScore||0) * 0.60);
-  const multiplier = mitScore ? mitigationMultiplier(mitScore, mp) : 1.0;
-  const finalRisk = Math.min(SCALE_MAX, combined * multiplier);
-  return { baseRisk:base10, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
+  if (base10 == null && tritonScore == null) return { baseRisk:null, tritonScore:null, finalRisk:null, overridden:false };
+  const finalRisk = Math.min(SCALE_MAX, ((base10||0) * 0.40) + ((tritonScore||0) * 0.60));
+  return { baseRisk:base10, tritonScore, finalRisk, overridden:false };
 }
 
 // ── QA Effectiveness Index model ──────────────────────────────────────────────
@@ -571,42 +555,26 @@ function buildEvidence(project, criterionId, testMetrics) {
   });
 }
 
-function AssessView({ onSaved, jiraMetrics, testMetrics }) {
+function AssessView({ jiraMetrics, testMetrics }) {
   const [project, setProject] = useState('');
-  const [customProject, setCustomProject] = useState('');
-  const [evaluator, setEvaluator] = useState('');
-  const [notes, setNotes] = useState('');
   const [scores, setScores] = useState({});
-  const [overrideActive, setOverrideActive] = useState(false);
-  const [overrideJustification, setOverrideJustification] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [excludedKeys, setExcludedKeys] = useState({}); // manually excluded escaped-defect tickets
   const [showTickets, setShowTickets] = useState(false);
-  const [expertLevel, setExpertLevel] = useState(''); // #8 validation: evaluator's independent gut call
 
-  const finalProject = project === '__custom__' ? customProject.trim() : project;
-
-  // Jira-locked scoring criteria: escapedDefects (Triton) + detectionEfficiency (dev board).
-  const JIRA_IDS = ['escapedDefects', 'detectionEfficiency'];
-  const jiraProject = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
+  const JIRA_IDS = ['escapedDefects'];
+  const jiraProject = (jiraMetrics && project) ? jiraMetrics.projects?.[project] : null;
   const jiraScore = id => jiraProject?.[id]?.score;
   const isJiraLocked = c => c.inputType === 'jira' && jiraScore(c.id) != null;
 
-  // Mitigation criteria are locked when the project has defaults sourced from GitHub.
-  const mitSrc = finalProject ? PROJECT_MIT_SOURCE[finalProject] : null;
+  const mitSrc = project ? PROJECT_MIT_SOURCE[project] : null;
   const isMitLocked = !!mitSrc;
   const fmtUpdated = iso => { try { return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'}); } catch { return ''; } };
   const tmDate = testMetrics?.generatedAt ? `updated ${fmtUpdated(testMetrics.generatedAt)}` : 'analyzed June 26, 2026';
   const mitLockedNote = mitSrc ? `From ${mitSrc.repo} · branch: ${mitSrc.branch} · ${tmDate}` : null;
 
-  // Escaped-defect tickets + manual exclusions → severity-weighted count and score.
   const escapedTickets = jiraProject?.escapedDefects?.tickets || [];
-  const activeEscaped = escapedTickets.filter(t => !excludedKeys[t.key]);
-  const excludedCount = escapedTickets.length - activeEscaped.length;
-  const escTotalEff = activeEscaped.length;
-  const escCritEff = activeEscaped.filter(t => t.critical).length;
-  const escWeightedEff = weightedCount(activeEscaped, jiraMetrics?.severityWeights);
+  const escTotalEff = escapedTickets.length;
+  const escCritEff = escapedTickets.filter(t => t.critical).length;
+  const escWeightedEff = weightedCount(escapedTickets, jiraMetrics?.severityWeights);
   const escScoreEff = escapedTickets.length ? tritonScore10(escWeightedEff, jiraMetrics?.tritonCurve, jiraMetrics?.modelParams) : jiraScore('escapedDefects');
 
   const jiraNote = id => {
@@ -614,9 +582,8 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
     const upd = jiraMetrics.generatedAt ? ` · updated ${fmtUpdated(jiraMetrics.generatedAt)}` : '';
     const mr = jiraProject.needsManualReview;
     if (id === 'escapedDefects') {
-      const exc = excludedCount ? ` · ${excludedCount} excluded` : '';
       const warn = mr?.escaped ? ` ⚠ ${mr.escaped} unlinked need manual review` : '';
-      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical, weighted ${escWeightedEff})${exc}${upd}${warn}`;
+      return `From TRITON · ${escTotalEff} escaped defect${escTotalEff!==1?'s':''} (${escCritEff} critical, weighted ${escWeightedEff})${upd}${warn}`;
     }
     if (id === 'avgAgeOpenIssues') {
       const d = jiraProject.avgAgeOpenIssues;
@@ -637,129 +604,49 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
     return null;
   };
 
-  // Load defaults + overlay Jira scores when project (or Jira data) changes.
   useEffect(() => {
-    const base = (finalProject && PROJECT_DEFAULTS[finalProject]) ? {...PROJECT_DEFAULTS[finalProject]} : {};
-    const jp = (jiraMetrics && finalProject) ? jiraMetrics.projects?.[finalProject] : null;
+    const base = (project && PROJECT_DEFAULTS[project]) ? {...PROJECT_DEFAULTS[project]} : {};
+    const jp = (jiraMetrics && project) ? jiraMetrics.projects?.[project] : null;
     if (jp) {
       for (const id of JIRA_IDS) {
         if (jp[id]?.score != null) base[id] = jp[id].score;
       }
     }
     setScores(base);
-    setExcludedKeys({});
     setShowTickets(false);
-    setOverrideActive(false);
-    setOverrideJustification('');
-  }, [finalProject, jiraMetrics]);
+  }, [project, jiraMetrics]);
 
-  // Keep the escaped-defects score in sync with manual ticket exclusions.
   useEffect(() => {
     if (!escapedTickets.length) return;
     setScores(s => s.escapedDefects === escScoreEff ? s : ({...s, escapedDefects: escScoreEff}));
   }, [escScoreEff, escapedTickets.length]);
 
-  const setScore = (id, val) => setScores(s => ({...s, [id]: val}));
-  const toggleExclude = key => setExcludedKeys(m => ({...m, [key]: !m[key]}));
-
-  const allCriteria = [...BASE_RISK_CRITERIA, ...TRITON_CRITERIA, ...MITIGATION_CRITERIA];
-  const filledCount = allCriteria.filter(c => scores[c.id] != null).length;
-  const pct = Math.round(filledCount / allCriteria.length * 100);
-
-  const result = compute(scores, overrideActive, jiraMetrics?.modelParams);
+  const result = compute(scores, false, jiraMetrics?.modelParams);
   const rl = result.finalRisk != null ? riskLevel(result.finalRisk) : null;
-
-  const canSave = filledCount === allCriteria.length && evaluator.trim() && finalProject &&
-    (!overrideActive || overrideJustification.trim().length > 0);
-
-  const showToast = (msg, type='success') => { setToast({msg,type}); setTimeout(()=>setToast(null),3000); };
-
-  const handleSave = () => {
-    if (!canSave) return;
-    setSaving(true);
-    try {
-      const record = {
-        id: `${Date.now()}`,
-        date: new Date().toISOString(),
-        modelVersion: jiraMetrics?.modelVersion || 'manual',
-        project: finalProject,
-        evaluator: evaluator.trim(),
-        scores,
-        overrideActive,
-        overrideJustification: overrideJustification.trim(),
-        baseRisk: result.baseRisk,
-        tritonScore: result.tritonScore,
-        mitScore: result.mitScore,
-        multiplier: result.multiplier,
-        finalRisk: result.finalRisk,
-        level: rl?.label || '',
-        scaleMax: 10,
-        notes: notes.trim(),
-        // Snapshot of the Jira-sourced inputs for transparency / auditability,
-        // including any tickets the engineer manually excluded.
-        jira: jiraProject ? {
-          source: 'TRITON', quarter: jiraMetrics?.quarter, window: jiraMetrics?.window, generatedAt: jiraMetrics?.generatedAt,
-          ...jiraProject,
-          excludedTickets: escapedTickets.filter(t => excludedKeys[t.key]).map(t => t.key),
-          escapedEffective: escapedTickets.length ? { total: escTotalEff, critical: escCritEff, score: escScoreEff } : null,
-        } : null,
-      };
-      saveAssessment(record);
-      showToast('Assessment saved');
-      setScores({});
-      setExcludedKeys({});
-      setOverrideActive(false);
-      setOverrideJustification('');
-      setNotes('');
-      onSaved();
-    } catch(e) { showToast(e.message,'error'); }
-    finally { setSaving(false); }
-  };
 
   return (
     <div>
-      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
-
-      {/* Meta */}
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}}>
-        <div className="card">
-          <div className="section-label">Project</div>
-          <select value={project} onChange={e=>setProject(e.target.value)} style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}>
-            <option value="">Select a project...</option>
-            {PROJECTS.map(p=><option key={p} value={p}>{p}</option>)}
-            <option value="__custom__">Other...</option>
-          </select>
-          {project==='__custom__' && <input value={customProject} onChange={e=>setCustomProject(e.target.value)} placeholder="Project name" style={{width:'100%',fontSize:13,marginTop:8,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>}
-        </div>
-        <div className="card">
-          <div className="section-label">Evaluator</div>
-          <input value={evaluator} onChange={e=>setEvaluator(e.target.value)} placeholder="Your name" style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}/>
-        </div>
-      </div>
-
-      {/* Progress */}
-      <div style={{marginBottom:20}}>
-        <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--text2)',marginBottom:5}}>
-          <span>{filledCount} of {allCriteria.length} criteria scored</span>
-          <span>{pct}%</span>
-        </div>
-        <div style={{height:4,background:'var(--border)',borderRadius:2}}>
-          <div style={{height:4,width:pct+'%',background:'var(--purple)',borderRadius:2,transition:'width .3s'}}/>
-        </div>
+      {/* Project selector */}
+      <div className="card" style={{marginBottom:20}}>
+        <div className="section-label">Project</div>
+        <select value={project} onChange={e=>setProject(e.target.value)} style={{width:'100%',fontSize:13,padding:'4px 0',border:'none',borderBottom:'.5px solid var(--border2)'}}>
+          <option value="">Select a project...</option>
+          {PROJECTS.map(p=><option key={p} value={p}>{p}</option>)}
+        </select>
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 280px',gap:16,alignItems:'start'}}>
         <div>
           {/* Base Risk */}
           <div className="dim-header">
-            <div className="dim-title">Base Risk Manual</div>
+            <div className="dim-title">Base Risk</div>
             <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>40% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Inherent product risk. Pre-loaded from known project characteristics — review and adjust if something has changed.</div>
+          <div className="helper" style={{marginBottom:10}}>Inherent product risk. Sourced from project configuration.</div>
           {BASE_RISK_CRITERIA.map(c => (
-            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
+            <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
               colorMap={RISK_COLORS} weightPct={`${Math.round(BASE_WEIGHTS[c.id]*100)}% of group`}
-              autoLoaded={PROJECT_DEFAULTS[finalProject] != null} />
+              locked={true} lockedLabel="Config" />
           ))}
 
           {/* TRITON Score */}
@@ -801,26 +688,23 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
               and manually exclude any service request the keyword filter missed. */}
           {escapedTickets.length > 0 && (
             <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTickets(v=>!v)}>
-                <span style={{fontSize:12,fontWeight:600}}>{showTickets?'▾':'▸'} Defects considered ({escTotalEff}{excludedCount?` of ${escapedTickets.length}`:''})</span>
-                <span style={{fontSize:10.5,color:'var(--text3)'}}>Exclude a ticket if it's a service request the keyword filter missed</span>
+              <div style={{display:'flex',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTickets(v=>!v)}>
+                <span style={{fontSize:12,fontWeight:600}}>{showTickets?'▾':'▸'} Defects considered ({escTotalEff})</span>
               </div>
               {showTickets && (
                 <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
                   {escapedTickets.map(t => {
-                    const ex = !!excludedKeys[t.key];
                     const pc = t.critical ? {bg:'#FAECE7',bd:'#D85A30',tx:'#712B13'} : {bg:'var(--bg2)',bd:'var(--border2)',tx:'var(--text2)'};
                     return (
-                      <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5,background:ex?'var(--bg2)':'transparent',opacity:ex?0.5:1}}>
+                      <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
                         <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:pc.bg,color:pc.tx,border:`.5px solid ${pc.bd}`,whiteSpace:'nowrap'}}>{t.priority}</span>
                         <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
-                        <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1,textDecoration:ex?'line-through':'none'}} title={t.summary}>{t.summary}</span>
-                        <button className="opt-btn" onClick={()=>toggleExclude(t.key)} style={{fontSize:10,padding:'2px 8px',flexShrink:0,cursor:'pointer'}}>{ex?'Restore':'Exclude'}</button>
+                        <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
                       </div>
                     );
                   })}
                   <div style={{fontSize:10.5,color:'var(--text3)',marginTop:5,borderTop:'.5px solid var(--border)',paddingTop:5}}>
-                    Effective: {escTotalEff} escaped ({escCritEff} critical) → score {escScoreEff}.{excludedCount?` ${excludedCount} excluded — recorded with the assessment.`:''}
+                    {escTotalEff} escaped ({escCritEff} critical) · weighted {escWeightedEff} · score {escScoreEff}
                   </div>
                 </div>
               )}
@@ -843,32 +727,29 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             );
           })()}
 
-          {/* Mitigation Multiplier */}
+          {/* QA Process Metrics — informational, feeds the QAEI tab, not scored in Risk Index */}
           <div className="dim-header">
-            <div className="dim-title">Mitigation Multiplier</div>
-            <span className="dim-badge" style={{background:'#E1F5EE',color:'#085041',borderColor:'#1D9E75'}}>
-              {isMitLocked ? '🔒 GitHub' : 'Range 0.80 – 1.20'}
+            <div className="dim-title">QA Process Metrics</div>
+            <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)'}}>
+              QAEI tab · not scored in Risk Index
             </span>
           </div>
           <div className="helper" style={{marginBottom:10}}>
             {isMitLocked
-              ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). Higher score = stronger mitigation = lower multiplier = lower Final Risk.`
-              : 'Higher scores = stronger mitigations = lower multiplier = lower final risk. Confirm each quarter.'}
+              ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). These values drive the Process Maturity component of the QA Effectiveness Index.`
+              : 'These values drive the Process Maturity component in the QA Effectiveness Index. They do not affect the Risk score.'}
           </div>
           {MITIGATION_CRITERIA.map(c => {
-            const jiraLocked = isJiraLocked(c);
-            const locked = isMitLocked || jiraLocked;
-            const lockedLabel = jiraLocked ? 'Jira' : 'GitHub';
-            const lockedNote  = jiraLocked ? jiraNote(c.id) : (isMitLocked ? mitLockedNote : null);
+            const locked = isMitLocked;
+            const lockedNote = isMitLocked ? mitLockedNote : null;
             return (
               <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={setScore}
                 colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
-                weightPct={`${Math.round(MIT_WEIGHTS[c.id]*100)}% of group`}
                 autoLoaded={false}
                 reverseOptions={true}
                 locked={locked}
                 lockedNote={lockedNote}
-                lockedLabel={lockedLabel}
+                lockedLabel={locked ? 'GitHub' : null}
                 evidence={buildEvidence(finalProject, c.id, testMetrics)} />
             );
           })}
@@ -917,34 +798,6 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             );
           })()}
 
-          {/* Manual Override */}
-          <div className="dim-header">
-            <div className="dim-title">Manual Override</div>
-            <span className="dim-badge" style={{background:'var(--red-bg)',color:'var(--red-text)',borderColor:'var(--red-border)'}}>Sets Final Risk = 10</span>
-          </div>
-          <div className="helper" style={{marginBottom:10}}>Activate only if forward-looking signals indicate risk not yet reflected in data. Written justification is required.</div>
-          <div className={`override-card ${overrideActive ? 'active' : ''}`}>
-            <label className="override-toggle">
-              <input type="checkbox" checked={overrideActive} onChange={e=>setOverrideActive(e.target.checked)}/>
-              <span className="override-toggle-label" style={{color: overrideActive ? 'var(--red-text)' : 'var(--text)'}}>
-                Activate override — set Final Risk to 10 (High)
-              </span>
-            </label>
-            {overrideActive && (
-              <div className="override-justification">
-                <div style={{fontSize:11,color:'var(--red-text)',fontWeight:600,marginBottom:6}}>Justification required</div>
-                <textarea value={overrideJustification} onChange={e=>setOverrideJustification(e.target.value)}
-                  placeholder="Describe the forward-looking risk signal that justifies this override (e.g. major architectural change upcoming, critical feature entering production without adequate coverage)..."
-                  rows={3} style={{width:'100%',fontSize:12,border:'.5px solid var(--red-border)',borderRadius:6,padding:'8px 10px',resize:'vertical',color:'var(--text)',background:'var(--bg)'}}/>
-              </div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div className="card" style={{marginTop:8}}>
-            <div className="section-label">Notes (optional)</div>
-            <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Context, observations, blockers..." rows={3} style={{width:'100%',fontSize:12,border:'none',resize:'vertical',color:'var(--text)',background:'transparent'}}/>
-          </div>
         </div>
 
         {/* Sidebar */}
@@ -955,7 +808,7 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             background: rl ? rl.bg : 'var(--bg2)'
           }}>
             <div style={{fontSize:11,fontWeight:600,color:rl?rl.text:'var(--text2)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:6}}>
-              {result.overridden ? 'Override active' : 'Final Risk'}
+              Final Risk
             </div>
             <div className="score-num" style={{color:rl?rl.text:'var(--text3)'}}>
               {result.finalRisk != null ? result.finalRisk.toFixed(1) : '—'}<span style={{fontSize:'0.4em',fontWeight:500,opacity:.7}}> / 10</span>
@@ -966,8 +819,7 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             {result.baseRisk != null && result.tritonScore != null && !result.overridden && (
               <div className="score-breakdown" style={{color:rl?.text}}>
                 Base {result.baseRisk.toFixed(1)} × 0.40<br/>
-                TRITON {result.tritonScore.toFixed(1)} × 0.60<br/>
-                × {result.multiplier.toFixed(2)} multiplier
+                TRITON {result.tritonScore.toFixed(1)} × 0.60
               </div>
             )}
           </div>
@@ -975,8 +827,7 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
           {/* Formula */}
           <div className="formula-display">
             <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
-            <code>(Base × 0.40 + TRITON × 0.60) × Multiplier</code><br/>
-            <span style={{fontSize:10}}>Override → Final Risk = 10</span>
+            <code>Base × 0.40 + TRITON × 0.60</code>
           </div>
 
           {/* Legend */}
@@ -990,26 +841,6 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             ))}
           </div>
 
-          {/* Multiplier legend */}
-          <div className="card">
-            <div className="section-label">Mitigation multiplier</div>
-            <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.6}}>
-              Strong mitigations → <strong>0.80</strong> (reduces risk by 20%)<br/>
-              Weak mitigations → <strong>1.20</strong> (increases risk by 20%)
-            </div>
-          </div>
-
-          <button className="btn-primary" onClick={handleSave} disabled={!canSave||saving} style={{width:'100%',padding:'10px',fontSize:13}}>
-            {saving ? 'Saving...' : 'Save Assessment'}
-          </button>
-          {!canSave && (
-            <div style={{fontSize:11,color:'var(--text3)',textAlign:'center'}}>
-              {!finalProject ? 'Select a project' :
-               !evaluator.trim() ? 'Enter your name' :
-               filledCount < allCriteria.length ? `Score all ${allCriteria.length} criteria` :
-               overrideActive && !overrideJustification.trim() ? 'Add override justification' : ''}
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -1061,7 +892,7 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
   const mp    = jiraMetrics?.modelParams  || DEFAULT_MODEL_PARAMS;
   const recalcTriton    = hasTickets ? tritonScore10(activeWtd, curve, mp) : (r.tritonScore ?? null);
   const recalcCombined  = ((r.baseRisk || 0) * 0.40) + ((recalcTriton || 0) * 0.60);
-  const recalcFinalRisk = Math.min(10, Math.round(recalcCombined * (r.multiplier ?? 1.0) * 10) / 10);
+  const recalcFinalRisk = Math.min(10, Math.round(recalcCombined * 10) / 10);
   const recalcLevel     = riskLevel(recalcFinalRisk);
 
   const tritonChanged   = hasTickets && Math.abs(recalcTriton - (r.tritonScore ?? 0)) >= 0.05;
@@ -1230,9 +1061,10 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
     title = 'TRITON Escaped Defects';
     body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} onSaveRecord={onSaveRecord}/>;
   } else if (type === 'mit') {
-    title = 'Mitigation Evidence';
+    title = 'QA Process Evidence';
     body = (
       <div>
+        <div className="helper" style={{marginBottom:10}}>These criteria drive the Process Maturity component of the QA Effectiveness Index. They are recorded here for reference but do not affect the Risk score.</div>
         {MITIGATION_CRITERIA.map(c => {
           const score   = r.scores?.[c.id];
           const opt     = c.options.find(o => o.score === score);
@@ -1243,7 +1075,6 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
             <div key={c.id} className="hist-detail-section">
               <div className="hist-detail-crit-header">
                 <span style={{fontWeight:700,fontSize:13}}>{c.label}</span>
-                <span style={{fontSize:11,color:'var(--text2)'}}>{Math.round(MIT_WEIGHTS[c.id]*100)}% weight</span>
                 {opt && <span className="pill" style={{background:col.bg,color:col.text,border:`1px solid ${col.border}`}}>{opt.label} · {score}/{c.scale||3}</span>}
               </div>
               {evidence ? (
@@ -1264,10 +1095,8 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
           );
         })}
         <div className="hist-detail-footer">
-          Mit score: <strong>{r.mitScore != null ? r.mitScore.toFixed(2) : '—'}</strong>
-          &nbsp;·&nbsp;
-          Multiplier: <strong>{r.multiplier != null ? r.multiplier.toFixed(2) : '—'}</strong>
-          &nbsp;·&nbsp;range 0.70 (best) → 1.10 (no mitigation)
+          These scores are recorded for reference only — they feed the QA Effectiveness Index and do not affect the Risk score (v3 model).
+          {r.multiplier != null && <span style={{opacity:.5}}>&nbsp;·&nbsp;v2 multiplier: {r.multiplier.toFixed(2)}</span>}
         </div>
       </div>
     );
@@ -1389,7 +1218,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                       <div className="tp-divider"/>
                       <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'base',record:r})}>Base</button><span>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span></div>
                       <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'triton',record:r})}>TRITON</button><span>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span></div>
-                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'mit',record:r})}>× Mit</button><span>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</span></div>
+                      <div className="tp-calc-row"><button className="tp-detail-btn" onClick={()=>setDetail({type:'mit',record:r})}>QA Process</button><span style={{fontSize:10,color:'var(--text3)'}}>QAEI</span></div>
                       <div className="tp-eval">by {r.evaluator}</div>
                     </div>
                   );
@@ -1406,7 +1235,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
             <thead>
               <tr>
                 <th>Date</th><th>Project</th><th>Final Risk</th><th>Level</th>
-                <th>Base Risk</th><th>TRITON</th><th>Multiplier</th>
+                <th>Base Risk</th><th>TRITON</th>
                 <th>Override</th><th>Evaluator</th><th>Notes</th>
               </tr>
             </thead>
@@ -1421,7 +1250,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
                     <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
-                    <td style={{color:'var(--text2)'}}>{r.multiplier!=null?r.multiplier.toFixed(2):'—'}</td>
                     <td style={{color:r.overrideActive?'var(--red-text)':'var(--text3)'}}>{r.overrideActive?'⚑ Yes':'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.evaluator}</td>
                     <td style={{color:'var(--text2)',maxWidth:180,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.notes||'—'}</td>
@@ -1495,9 +1323,9 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
 
       <Group title="Formula" badge="how the final is built">
         <div style={{fontFamily:'monospace',fontSize:12,background:'var(--bg2)',borderRadius:6,padding:'8px 10px',marginBottom:8}}>
-          Final = (Base × 0.40 + TRITON × 0.60) × Multiplier
+          Final = Base × 0.40 + TRITON × 0.60
         </div>
-        <div className="helper">Inherent product risk (Base, 40%) and objective production defects (TRITON, 60%), then scaled up/down by QA mitigation capacity. Manual Override forces Final = 10.</div>
+        <div className="helper">Inherent product risk (Base, 40%) and objective production defects (TRITON, 60%). QA process quality is measured separately in the QA Effectiveness Index tab — it no longer modifies the Risk score. Manual Override forces Final = 10.</div>
       </Group>
 
       <Group title="Base Risk — inherent product risk" badge="40% of final">
@@ -1521,13 +1349,6 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
         <div className="helper" style={{marginTop:6}}>Higher severity counts more (continuously) toward the weighted count that feeds the curve.</div>
       </Group>
 
-      <Group title="Mitigation Multiplier — QA capacity" badge={`range ${mp.multiplierMin} – ${mp.multiplierMax}`}>
-        <Row k="Automation conf." v={pct(MIT_WEIGHTS.automationConfidence)} meaning="How reliably automation catches regressions in critical flows." />
-        <Row k="Test coverage" v={pct(MIT_WEIGHTS.testCoverage)} meaning="Combined automated + manual coverage of critical flows." />
-        <Row k="Testability" v={pct(MIT_WEIGHTS.testability)} meaning="How easy it is to write/maintain meaningful tests." />
-        <Row k="Base floor" v={mp.baseFloor} meaning="Minimum Base-Risk value (0–10) at the lowest qualitative level. 0 = a fully-low product scores 0; raise it so a core product is never 0 inherent risk." />
-        <div className="helper" style={{marginTop:6}}>Higher mitigation score → lower multiplier → lower final risk (strong = {mp.multiplierMin}, weak = {mp.multiplierMax}). “Avg. age of open issues” was removed from scoring in v2 (overlapped with escaped defects) — informational only.</div>
-      </Group>
 
       {muVariants && Object.keys(projData).some(p=>PROJECT_DEFAULTS[p]) && (
         <Group title="Sensitivity — how μ moves each project" badge="Rec #5">
@@ -1605,6 +1426,10 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
 // ── QAEffectivenessView ───────────────────────────────────────────────────────
 function QAEffectivenessView({ jiraMetrics }) {
   const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+  const [visibleProjects, setVisibleProjects] = useState(new Set(PROJECTS));
+
+  const toggleProject = proj =>
+    setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
 
   const projectData = PROJECTS.map(proj => {
     const de       = jiraMetrics?.projects?.[proj]?.detectionEfficiency;
@@ -1615,10 +1440,12 @@ function QAEffectivenessView({ jiraMetrics }) {
   });
 
   const ScoreBar = ({ value, max = 10, color, dim }) => (
-    <div style={{height:5, background:'var(--bg3)', borderRadius:3, opacity: dim ? 0.5 : 1}}>
-      <div style={{height:5, width:`${Math.min(100, (value / max) * 100)}%`, background:color||'var(--teal)', borderRadius:3, transition:'width .4s'}}/>
+    <div style={{height:8, background:'var(--bg3)', borderRadius:4, opacity: dim ? 0.5 : 1}}>
+      <div style={{height:8, width:`${Math.min(100, (value / max) * 100)}%`, background:color||'var(--teal)', borderRadius:4, transition:'width .4s'}}/>
     </div>
   );
+
+  const docs = jiraMetrics?.docs || {};
 
   return (
     <div>
@@ -1634,13 +1461,18 @@ function QAEffectivenessView({ jiraMetrics }) {
         </div>
         <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:10}}>
           <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
-            <div style={{fontWeight:700, marginBottom:4}}>Formula — Q3 2026</div>
+            <div style={{fontWeight:700, marginBottom:4}}>
+              Formula — Q3 2026
+              {docs.qaeiMethodology && <a href={docs.qaeiMethodology} target="_blank" rel="noreferrer" style={{fontSize:10, color:'var(--purple)', marginLeft:8, fontWeight:400}}>Metodología ↗</a>}
+            </div>
             <code style={{fontSize:10, display:'block', lineHeight:1.6, color:'var(--text2)'}}>
               QAEI = DCE × 0.65 + Process Maturity × 0.35
             </code>
             <div style={{fontSize:10, color:'var(--text3)', marginTop:4}}>
               <strong>DCE</strong> — bugs caught by QA (staging + production) as % of all known bugs<br/>
               <strong>Process Maturity</strong> — automation, coverage, testability
+              {docs.dceReference && <><br/><a href={docs.dceReference} target="_blank" rel="noreferrer" style={{color:'var(--purple)'}}>Referencia DCE ↗</a></>}
+              {docs.riskBaselineConfluence && <><br/><a href={docs.riskBaselineConfluence} target="_blank" rel="noreferrer" style={{color:'var(--purple)'}}>QA Risk Baseline Confluence ↗</a></>}
             </div>
           </div>
           <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
@@ -1655,36 +1487,66 @@ function QAEffectivenessView({ jiraMetrics }) {
         </div>
       </div>
 
+      {/* Project filter */}
+      <div className="card" style={{marginBottom:16}}>
+        <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Mostrar proyectos:</span>
+          {PROJECTS.map(proj => {
+            const visible = visibleProjects.has(proj);
+            const pd = projectData.find(p => p.proj === proj);
+            const ql = pd?.ql;
+            return (
+              <button key={proj} onClick={() => toggleProject(proj)}
+                style={{fontSize:12, padding:'5px 14px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                  fontWeight: visible ? 600 : 400,
+                  border: visible ? `1.5px solid ${ql?.border||'var(--purple)'}` : '.5px solid var(--border)',
+                  background: visible ? (ql?.bg||'var(--bg2)') : 'transparent',
+                  color: visible ? (ql?.text||'var(--purple)') : 'var(--text3)',
+                  transition:'all .15s'}}>
+                {proj}
+              </button>
+            );
+          })}
+          {visibleProjects.size < PROJECTS.length && (
+            <button onClick={() => setVisibleProjects(new Set(PROJECTS))}
+              style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
+              Mostrar todos
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Project cards */}
-      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(330px, 1fr))', gap:12, marginBottom:16}}>
-        {projectData.map(({ proj, de, defaults, result, ql }) => (
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(480px, 1fr))', gap:16, marginBottom:16}}>
+        {projectData.filter(p => visibleProjects.has(p.proj)).map(({ proj, de, defaults, result, ql }) => (
           <div key={proj} className="card" style={{
             border: ql ? `1.5px solid ${ql.border}` : '1px solid var(--border)',
             background: ql ? `${ql.bg}cc` : 'var(--bg2)',
           }}>
             {/* Card header */}
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12}}>
-              <div style={{fontWeight:700, fontSize:13}}>{proj}</div>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14}}>
+              <div style={{fontWeight:700, fontSize:16}}>{proj}</div>
               {ql
-                ? <span className="pill" style={{background:ql.bg, color:ql.text, border:`1px solid ${ql.border}`, fontWeight:600}}>{ql.label}</span>
-                : <span className="pill" style={{background:'var(--bg3)', color:'var(--text3)', border:'.5px solid var(--border)'}}>No data</span>}
+                ? <span className="pill" style={{background:ql.bg, color:ql.text, border:`1px solid ${ql.border}`, fontWeight:600, fontSize:12}}>{ql.label}</span>
+                : <span className="pill" style={{background:'var(--bg3)', color:'var(--text3)', border:'.5px solid var(--border)', fontSize:12}}>No data</span>}
             </div>
 
             {/* Score + breakdown */}
-            <div style={{display:'flex', alignItems:'flex-start', gap:14, marginBottom:12}}>
+            <div style={{display:'flex', alignItems:'flex-start', gap:16, marginBottom:14}}>
               {/* Big number */}
-              <div style={{textAlign:'center', flexShrink:0, minWidth:56}}>
-                <div style={{fontSize:34, fontWeight:700, lineHeight:1, color:ql?.text||'var(--text3)'}}>
+              <div style={{textAlign:'center', flexShrink:0, minWidth:64}}>
+                <div style={{fontSize:38, fontWeight:700, lineHeight:1, color:ql?.text||'var(--text3)'}}>
                   {result ? result.qaei.toFixed(1) : '—'}
                 </div>
-                <div style={{fontSize:9, color:ql?.text||'var(--text3)', fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', marginTop:2}}>/ 10</div>
+                <div style={{fontSize:11, color:ql?.text||'var(--text3)', fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', marginTop:2}}>/ 10</div>
               </div>
 
               {/* Bars */}
               <div style={{flex:1}}>
                 {/* DCE */}
-                <div style={{marginBottom:8}}>
-                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                <div style={{marginBottom:12}}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
                     <span style={{color:'var(--text2)'}}>Defect Containment <span style={{fontWeight:700, color:'var(--text)'}}>65%</span></span>
                     <span style={{fontWeight:700, color: de ? ql?.text||'var(--text)' : 'var(--text3)'}}>
                       {de ? `${de.rate}%` : '—'}
@@ -1692,7 +1554,7 @@ function QAEffectivenessView({ jiraMetrics }) {
                   </div>
                   <ScoreBar value={de?.rate||0} max={100} color={ql?.border||'var(--border2)'}/>
                   {de && (
-                    <div style={{fontSize:9.5, color:'var(--text3)', marginTop:2}}>
+                    <div style={{fontSize:11, color:'var(--text3)', marginTop:4}}>
                       {(() => {
                         const preP = de.preProductionCaught ?? 0;
                         const parts = [];
@@ -1706,24 +1568,24 @@ function QAEffectivenessView({ jiraMetrics }) {
                 </div>
 
                 {/* Process Maturity */}
-                <div style={{marginBottom:8}}>
-                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                <div style={{marginBottom:12}}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
                     <span style={{color:'var(--text2)'}}>Process Maturity <span style={{fontWeight:700, color:'var(--text)'}}>35%</span></span>
                     <span style={{fontWeight:700, color:'var(--text)'}}>
                       {result?.pmScore != null ? `${result.pmScore.toFixed(1)}/10` : '—'}
                     </span>
                   </div>
                   <ScoreBar value={result?.pmScore||0} max={10} color='var(--teal)' dim={true}/>
-                  <div style={{fontSize:9.5, color:'var(--text3)', marginTop:2}}>
+                  <div style={{fontSize:11, color:'var(--text3)', marginTop:4}}>
                     Auto {defaults.automationConfidence||'—'}/3 · Coverage {defaults.testCoverage||'—'}/5 · Testability {defaults.testability||'—'}/3
                   </div>
                 </div>
 
                 {/* Trend */}
                 <div>
-                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
                     <span style={{color:'var(--text3)'}}>Trend (Q4+) <span style={{fontWeight:700}}>—</span></span>
-                    <span style={{color:'var(--text3)', fontStyle:'italic', fontSize:9.5}}>Available Q4 2026</span>
+                    <span style={{color:'var(--text3)', fontStyle:'italic', fontSize:11}}>Available Q4 2026</span>
                   </div>
                   <ScoreBar value={0} max={10} color='var(--border2)' dim={true}/>
                 </div>
@@ -1732,7 +1594,7 @@ function QAEffectivenessView({ jiraMetrics }) {
 
             {/* DCE interpretation */}
             {de && (
-              <div style={{borderTop:'.5px solid var(--border)', paddingTop:8, fontSize:10.5, color:'var(--text2)', lineHeight:1.5}}>
+              <div style={{borderTop:'.5px solid var(--border)', paddingTop:10, fontSize:12, color:'var(--text2)', lineHeight:1.6}}>
                 {de.rate >= 80
                   ? '✓ World-class containment — QA catches most bugs before customers, in staging and production.'
                   : de.rate >= 50
@@ -1749,7 +1611,7 @@ function QAEffectivenessView({ jiraMetrics }) {
       {/* Industry benchmarks + methodology */}
       <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
         <div className="card">
-          <div style={{fontSize:12, fontWeight:700, marginBottom:8}}>DCE Industry Benchmarks</div>
+          <div style={{fontSize:12, fontWeight:700, marginBottom:4}}>DCE Industry Benchmarks</div>
           <div style={{fontSize:11, color:'var(--text3)', marginBottom:8}}>Defect Containment Effectiveness — Capers Jones / IEEE / Atlassian</div>
           {[
             { range:'≥ 80%', label:'World-class', ...QA_LEVELS[3] },
@@ -1823,13 +1685,13 @@ function App() {
           <p>Q3 2026 model · {periodText}</p>
         </div>
         <div className="nav-tabs">
-          <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
+          <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Risk Index</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
           <button className={`nav-tab${tab==='qa'?' active':''}`} onClick={()=>setTab('qa')}>QA Effectiveness</button>
           <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
-      {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
+      {tab==='assess' && <AssessView jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='qa' && <QAEffectivenessView jiraMetrics={jiraMetrics}/>}
       {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
