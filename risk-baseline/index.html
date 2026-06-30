@@ -1343,12 +1343,12 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                     const qaBarColor = v => v==null ? 'var(--border2)' : v>=7.5 ? '#1D9E75' : v>=5.0 ? '#BA7517' : '#D85A30';
                     return (
                       <div key={r.id}
-                        style={{border:`1.5px solid ${rl?rl.border:'var(--border)'}`, borderRadius:12, overflow:'hidden', transition:'box-shadow .15s'}}
+                        style={{border:`1.5px solid ${ql?ql.border:rl?rl.border:'var(--border)'}`, borderRadius:12, overflow:'hidden', transition:'box-shadow .15s'}}
                         onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
                         onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
 
                         {/* Quarter header — neutral */}
-                        <div style={{padding:'8px 14px', background:'var(--bg)', borderBottom:'1px solid rgba(0,0,0,0.06)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                        <div style={{padding:'8px 14px', background:ql?ql.bg:'var(--bg)', borderBottom:`1px solid ${ql?ql.border:'rgba(0,0,0,0.06)'}`, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                           <span style={{fontSize:11, fontWeight:700, color:'var(--text2)'}}>{qi.label}</span>
                           <div style={{display:'flex', gap:4}}>
                             {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--blue-bg)', color:'var(--blue-text)', fontWeight:600}}>live</span>}
