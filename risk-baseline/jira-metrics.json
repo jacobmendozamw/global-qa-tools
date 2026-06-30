@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-29T21:29:54.952Z",
+  "generatedAt": "2026-06-30T04:31:39.108Z",
   "modelVersion": "2026-Q3-v2",
   "quarter": "2026-Q2",
   "project": "TRITON",
@@ -9,7 +9,7 @@
   ],
   "window": {
     "from": "2026-04-01",
-    "to": "2026-06-29",
+    "to": "2026-06-30",
     "quarterEnd": "2026-06-30",
     "elapsedPct": 100
   },
@@ -40,15 +40,47 @@
     "basis": "Q2-2026 observed distribution + team SLA target"
   },
   "exposureEnabled": false,
-  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira).",
+  "methodology": "Confluence QA Risk Baseline 2026 §4.6 — Defects and Tickets by component, service requests excluded by summary keyword, Mira/Mira Studio split by linked issue (HZN-* -> Mira Studio; MIRA-*/MIRALEGACY-* -> Mira). Issue types: Defect + Ticket (see defectIssueTypesRationale). Classification field: TRITON 'component' (standard Jira field, reliably filled by support) — NOT 'dev feature[dropdown]' (custom field, inconsistently filled; verified 2026-06-29: 4 valid GenAI Lens Defects had component set but no dev feature value, and would be silently missed by the alternative filter).",
   "projects": {
     "GenAI Lens": {
       "escapedDefects": {
-        "score": 6.5,
-        "total": 6,
+        "score": 9.7,
+        "total": 12,
         "critical": 0,
-        "weighted": 6.5,
+        "weighted": 12.5,
         "tickets": [
+          {
+            "key": "TRITON-37137",
+            "summary": "109051124 - GenAI Lens - Products registered once rendering as duplicate entries in Trends by Products view (vivo SEA)",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37137"
+          },
+          {
+            "key": "TRITON-37110",
+            "summary": "GenAI Lens Processing Delays and Citation Discrepancies for UPS",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37110"
+          },
+          {
+            "key": "TRITON-37086",
+            "summary": "Premium | Need to delete the scheduled prompt",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37086"
+          },
+          {
+            "key": "TRITON-37012",
+            "summary": "Incorrect Prudential Logo Displayed on Benchmarking Page",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37012"
+          },
           {
             "key": "TRITON-36990",
             "summary": "[URGENT]Unable to add journalist to media list from GenAI Lens Sources tab",
@@ -56,6 +88,14 @@
             "weight": 1.5,
             "critical": false,
             "url": "https://meltwater.atlassian.net/browse/TRITON-36990"
+          },
+          {
+            "key": "TRITON-36645",
+            "summary": "Mismatch of logos in Benchmarking tab vs Brand section in client's GAIL view",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36645"
           },
           {
             "key": "TRITON-36538",
@@ -82,6 +122,14 @@
             "url": "https://meltwater.atlassian.net/browse/TRITON-36473"
           },
           {
+            "key": "TRITON-36420",
+            "summary": "94719764 - Unable to Add New Competitor in GenAI Module",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36420"
+          },
+          {
             "key": "TRITON-36297",
             "summary": "90558905, 89997612 - Gen AI Lens Pulling Non-Competitor Properties for Alila Ventana Big Sur",
             "priority": "Low",
@@ -100,8 +148,8 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 85,
-        "openCount": 4,
+        "avgDays": 52,
+        "openCount": 9,
         "informational": true
       },
       "dataQuality": {
@@ -109,6 +157,41 @@
           "escaped": 0,
           "open": 0
         }
+      },
+      "internalEscaped": {
+        "total": 4,
+        "tickets": [
+          {
+            "key": "GAIL-1588",
+            "summary": "FE: Competitor Toggle on Trends issues toggling on/off",
+            "priority": "Critical",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1588"
+          },
+          {
+            "key": "GAIL-1338",
+            "summary": "Onboarding Flow Not Saving Products & People",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1338"
+          },
+          {
+            "key": "GAIL-1271",
+            "summary": "FE: [Merged] Last 7 Days being passed incorrectly",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1271"
+          },
+          {
+            "key": "GAIL-1226",
+            "summary": "*bug live on prod* Overview Table Exports of Excel & Json broken",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1226"
+          }
+        ]
+      },
+      "detectionEfficiency": {
+        "score": 2,
+        "internallyFound": 4,
+        "customerFound": 12,
+        "rate": 25
       }
     },
     "Mira Studio": {
@@ -151,22 +234,61 @@
       },
       "dataQuality": {
         "manualReview": {
-          "escaped": 1,
-          "open": 1
+          "escaped": 4,
+          "open": 2
         }
       },
+      "internalEscaped": {
+        "total": 2,
+        "tickets": [
+          {
+            "key": "HZN-747",
+            "summary": "code in creation of prompt and empty prompt",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/HZN-747"
+          },
+          {
+            "key": "HZN-746",
+            "summary": "Sending prompts with advanced search in PROD ",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/HZN-746"
+          }
+        ]
+      },
+      "detectionEfficiency": {
+        "score": 2,
+        "internallyFound": 2,
+        "customerFound": 3,
+        "rate": 40
+      },
       "needsManualReview": {
-        "escaped": 1,
-        "open": 1
+        "escaped": 4,
+        "open": 2
       }
     },
     "Mira": {
       "escapedDefects": {
-        "score": 9.9,
-        "total": 11,
-        "critical": 2,
-        "weighted": 14,
+        "score": 10,
+        "total": 16,
+        "critical": 3,
+        "weighted": 20.5,
         "tickets": [
+          {
+            "key": "TRITON-37129",
+            "summary": "107584345 - Mira Studio shared link not updating and missing password",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37129"
+          },
+          {
+            "key": "TRITON-37065",
+            "summary": "102861952 - Spike Alerts Emails via Investigate in Mira Issue",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37065"
+          },
           {
             "key": "TRITON-37059",
             "summary": "106222553 Transition URL is missing in Mira result",
@@ -216,6 +338,22 @@
             "url": "https://meltwater.atlassian.net/browse/TRITON-36836"
           },
           {
+            "key": "TRITON-36367",
+            "summary": "#92401890 Discrepancies in Mention Counts Between Mira Studio and Dashboard",
+            "priority": "Major",
+            "weight": 1.5,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36367"
+          },
+          {
+            "key": "TRITON-36338",
+            "summary": "#92876011 MIRA Prompt Failure",
+            "priority": "Critical",
+            "weight": 2,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36338"
+          },
+          {
             "key": "TRITON-36298",
             "summary": "88753779 - Mira Studio fails to summarize all linked search articles and date range filter inaccurate",
             "priority": "Low",
@@ -248,6 +386,14 @@
             "url": "https://meltwater.atlassian.net/browse/TRITON-36197"
           },
           {
+            "key": "TRITON-36184",
+            "summary": "#85914087 ENTERPRISE | MIRA | Enterprise | Broadcast being classified as news",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36184"
+          },
+          {
             "key": "TRITON-36159",
             "summary": "#86529274 MIRA – Coverage Report Generation Fails",
             "priority": "Minor",
@@ -259,26 +405,36 @@
       },
       "avgAgeOpenIssues": {
         "avgDays": 27,
-        "openCount": 6,
+        "openCount": 9,
         "informational": true
       },
       "dataQuality": {
         "manualReview": {
-          "escaped": 1,
-          "open": 1
+          "escaped": 4,
+          "open": 2
         }
       },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "internallyFound": 0,
+        "customerFound": 16,
+        "rate": 0
+      },
       "needsManualReview": {
-        "escaped": 1,
-        "open": 1
+        "escaped": 4,
+        "open": 2
       }
     },
     "Mobile": {
       "escapedDefects": {
-        "score": 5,
-        "total": 5,
+        "score": 6,
+        "total": 6,
         "critical": 0,
-        "weighted": 5,
+        "weighted": 6,
         "tickets": [
           {
             "key": "TRITON-37058",
@@ -319,12 +475,20 @@
             "weight": 1,
             "critical": false,
             "url": "https://meltwater.atlassian.net/browse/TRITON-36965"
+          },
+          {
+            "key": "TRITON-36823",
+            "summary": "RED - Premium | User Unable to Log In to Meltwater Mobile App Despite Valid Web Credentials",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-36823"
           }
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 14,
-        "openCount": 4,
+        "avgDays": 94,
+        "openCount": 5,
         "informational": true
       },
       "dataQuality": {
@@ -332,6 +496,35 @@
           "escaped": 0,
           "open": 0
         }
+      },
+      "internalEscaped": {
+        "total": 3,
+        "tickets": [
+          {
+            "key": "MOB-21058",
+            "summary": "MI | WN | No searches available after reading the search ",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MOB-21058"
+          },
+          {
+            "key": "MOB-21057",
+            "summary": "MI - MN - Old twitter logo is displayed ",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MOB-21057"
+          },
+          {
+            "key": "MOB-21008",
+            "summary": "MI | Live Chat | Issues",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MOB-21008"
+          }
+        ]
+      },
+      "detectionEfficiency": {
+        "score": 2,
+        "internallyFound": 3,
+        "customerFound": 6,
+        "rate": 33
       }
     },
     "Engage (Legacy)": {
@@ -440,8 +633,8 @@
         ]
       },
       "avgAgeOpenIssues": {
-        "avgDays": 78,
-        "openCount": 11,
+        "avgDays": 163,
+        "openCount": 16,
         "informational": true
       },
       "dataQuality": {
@@ -449,6 +642,23 @@
           "escaped": 0,
           "open": 0
         }
+      },
+      "internalEscaped": {
+        "total": 1,
+        "tickets": [
+          {
+            "key": "SMM-9061",
+            "summary": "FE: Send a DM via X Public > Explore Results issue",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9061"
+          }
+        ]
+      },
+      "detectionEfficiency": {
+        "score": 2,
+        "internallyFound": 1,
+        "customerFound": 12,
+        "rate": 8
       }
     }
   }
