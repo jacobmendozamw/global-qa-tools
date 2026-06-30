@@ -1206,6 +1206,12 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
 
   const barColor = v => v==null ? 'var(--border2)' : v>=7.4 ? '#D85A30' : v>=5.1 ? '#BA7517' : '#1D9E75';
 
+  const latestByProject = PROJECTS.reduce((acc, p) => {
+    const r = allRecords.find(rec => rec.project === p); // allRecords sorted newest first
+    if (r) acc[p] = r.level ? levelByLabel(r.level) : (r.finalRisk!=null ? riskLevel(r.finalRisk) : null);
+    return acc;
+  }, {});
+
   return (
     <div>
       {/* Project filter pills */}
@@ -1214,13 +1220,14 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Proyectos:</span>
           {PROJECTS.map(proj => {
             const visible = visibleProjects.has(proj);
+            const rl = latestByProject[proj];
             return (
               <button key={proj} onClick={()=>toggleProject(proj)}
                 style={{fontSize:12, padding:'5px 14px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
                   fontWeight: visible ? 600 : 400,
-                  border: visible ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
-                  background: visible ? 'var(--teal-light)' : 'transparent',
-                  color: visible ? 'var(--teal-dim)' : 'var(--text3)',
+                  border: visible ? `1.5px solid ${rl?.border||'var(--teal)'}` : '.5px solid var(--border)',
+                  background: visible ? (rl?.bg||'var(--teal-light)') : 'transparent',
+                  color: visible ? (rl?.text||'var(--teal-dim)') : 'var(--text3)',
                   transition:'all .15s'}}>
                 {proj}
               </button>
