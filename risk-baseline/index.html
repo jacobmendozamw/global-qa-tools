@@ -1204,19 +1204,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
     .filter(r => visibleProjects.has(r.project))
     .filter(r => !filterQuarter || quarterOf(r.date) === filterQuarter);
 
-  const quarterGroups = allQuarters
-    .filter(q => !filterQuarter || q === filterQuarter)
-    .map(q => ({ qKey:q, qi:quarterInfo(q), cards:filteredRecords.filter(r=>quarterOf(r.date)===q) }))
-    .filter(g => g.cards.length > 0);
-
-  const getPrevRecord = (proj, qKey) => {
-    const qIdx = allQuarters.indexOf(qKey);
-    for (let i = qIdx+1; i < allQuarters.length; i++) {
-      const r = allRecords.find(r2 => r2.project===proj && quarterOf(r2.date)===allQuarters[i]);
-      if (r) return r;
-    }
-    return null;
-  };
+  const barColor = v => v==null ? 'var(--border2)' : v>=7.4 ? '#D85A30' : v>=5.1 ? '#BA7517' : '#1D9E75';
 
   return (
     <div>
@@ -1282,66 +1270,69 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
 
       {!loading && filteredRecords.length>0 && viewMode==='timeline' && (
         <div>
-          {quarterGroups.map(({qKey, qi, cards}) => (
-            <div key={qKey} style={{marginBottom:32}}>
-              <div style={{display:'flex', alignItems:'baseline', gap:10, marginBottom:14}}>
-                <span style={{fontSize:18, fontWeight:700}}>{qi.label}</span>
-                <span style={{fontSize:12, color:'var(--text3)'}}>{qi.start} – {qi.end}</span>
-                {qi.isCurrent && <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)',marginLeft:4}}>in progress</span>}
-              </div>
-              <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(340px, 1fr))', gap:14}}>
-                {cards.map(r => {
-                  const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
-                  const prev = getPrevRecord(r.project, qKey);
-                  const delta = (prev&&prev.finalRisk!=null&&r.finalRisk!=null) ? r.finalRisk-prev.finalRisk : null;
-                  const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)} vs prev`:delta<0?`▼ ${delta.toFixed(1)} vs prev`:'± 0.0 vs prev');
-                  const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
-                  return (
-                    <div key={r.id}
-                      style={{background:'var(--bg)', border:`1.5px solid ${rl?rl.border:'var(--border)'}`,
-                        borderRadius:12, padding:'16px 20px', cursor:'pointer', transition:'box-shadow .15s'}}
-                      onClick={()=>setDetail({type:'base',record:r})}
-                      onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
-                      onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
-                      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:10}}>
-                        <span style={{fontSize:16, fontWeight:700}}>{r.project}</span>
-                        {r.evaluator==='auto' && <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)',fontSize:10}}>auto</span>}
-                      </div>
-                      <div style={{display:'flex', alignItems:'baseline', gap:8, marginBottom:6}}>
-                        <span style={{fontSize:34, fontWeight:700, lineHeight:1, color:rl?rl.text:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
-                        <span style={{fontSize:12, color:'var(--text3)'}}>/ 10</span>
-                        {rl && <span className="pill" style={{background:rl.bg,color:rl.text,fontSize:12,fontWeight:700,border:`1px solid ${rl.border}`}}>{rl.label}</span>}
-                      </div>
-                      {dtxt && <div style={{fontSize:12, fontWeight:600, color:dcol, marginBottom:10}}>{dtxt}</div>}
-                      <div style={{display:'flex', flexDirection:'column', gap:8, marginTop:12}}>
-                        <div>
-                          <div style={{display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--text2)', marginBottom:4}}>
-                            <span>Base Risk <span style={{color:'var(--text3)',fontSize:11}}>(40%)</span></span>
-                            <span style={{fontWeight:600}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span>
+          {PROJECTS.filter(p => visibleProjects.has(p)).map(proj => {
+            const projCards = filteredRecords.filter(r => r.project === proj)
+              .sort((a,b) => new Date(a.date)-new Date(b.date));
+            if (!projCards.length) return null;
+            return (
+              <div key={proj} style={{marginBottom:28}}>
+                <div style={{fontSize:15, fontWeight:700, marginBottom:10, paddingBottom:8, borderBottom:'1px solid var(--border)'}}>{proj}</div>
+                <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(200px, 1fr))', gap:12}}>
+                  {projCards.map((r, i) => {
+                    const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
+                    const prev = i > 0 ? projCards[i-1] : null;
+                    const delta = (prev&&prev.finalRisk!=null&&r.finalRisk!=null) ? r.finalRisk-prev.finalRisk : null;
+                    const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
+                    const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
+                    const qi = quarterInfo(quarterOf(r.date));
+                    return (
+                      <div key={r.id}
+                        style={{background:rl?rl.bg:'var(--bg2)', border:`1.5px solid ${rl?rl.border:'var(--border)'}`,
+                          borderRadius:12, padding:'14px 16px', cursor:'pointer', transition:'box-shadow .15s'}}
+                        onClick={()=>setDetail({type:'base',record:r})}
+                        onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
+                        onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
+                          <span style={{fontSize:11, fontWeight:700, color:rl?rl.text:'var(--text3)'}}>{qi.label}</span>
+                          {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'rgba(255,255,255,0.45)', color:rl?rl.text:'var(--text3)', fontWeight:600}}>live</span>}
+                          {r.evaluator==='auto' && !qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'rgba(255,255,255,0.45)', color:rl?rl.text:'var(--text3)', fontWeight:600}}>auto</span>}
+                        </div>
+                        <div style={{display:'flex', alignItems:'baseline', gap:5, marginBottom:2}}>
+                          <span style={{fontSize:30, fontWeight:700, lineHeight:1, color:rl?rl.text:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
+                          <span style={{fontSize:11, color:rl?rl.text:'var(--text3)', opacity:0.6}}>/ 10</span>
+                        </div>
+                        <div style={{fontSize:12, fontWeight:700, color:rl?rl.text:'var(--text3)', marginBottom:6}}>{rl?rl.label:'—'}</div>
+                        {dtxt && <div style={{fontSize:11, fontWeight:600, color:dcol, marginBottom:8}}>{dtxt}</div>}
+                        <div style={{display:'flex', flexDirection:'column', gap:5, marginTop:8}}>
+                          <div>
+                            <div style={{display:'flex', justifyContent:'space-between', fontSize:11, color:rl?rl.text:'var(--text2)', marginBottom:3, opacity:0.8}}>
+                              <button className="tp-detail-btn" style={{color:rl?rl.text:'var(--teal)'}} onClick={e=>{e.stopPropagation();setDetail({type:'base',record:r})}}>Base</button>
+                              <span style={{fontWeight:600}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span>
+                            </div>
+                            <div style={{height:5, background:'rgba(0,0,0,0.10)', borderRadius:3}}>
+                              <div style={{height:5, width:`${r.baseRisk!=null?Math.min(100,(r.baseRisk/10)*100):0}%`, background:barColor(r.baseRisk), borderRadius:3, transition:'width .4s'}}/>
+                            </div>
                           </div>
-                          <div style={{height:6, background:'var(--bg3)', borderRadius:3}}>
-                            <div style={{height:6, width:`${r.baseRisk!=null?Math.min(100,(r.baseRisk/10)*100):0}%`, background:'#6366f1', borderRadius:3, transition:'width .4s'}}/>
+                          <div>
+                            <div style={{display:'flex', justifyContent:'space-between', fontSize:11, color:rl?rl.text:'var(--text2)', marginBottom:3, opacity:0.8}}>
+                              <button className="tp-detail-btn" style={{color:rl?rl.text:'var(--teal)'}} onClick={e=>{e.stopPropagation();setDetail({type:'triton',record:r})}}>TRITON</button>
+                              <span style={{fontWeight:600}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span>
+                            </div>
+                            <div style={{height:5, background:'rgba(0,0,0,0.10)', borderRadius:3}}>
+                              <div style={{height:5, width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`, background:barColor(r.tritonScore), borderRadius:3, transition:'width .4s'}}/>
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <div style={{display:'flex', justifyContent:'space-between', fontSize:12, color:'var(--text2)', marginBottom:4}}>
-                            <span>TRITON <span style={{color:'var(--text3)',fontSize:11}}>(60%)</span></span>
-                            <span style={{fontWeight:600}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span>
-                          </div>
-                          <div style={{height:6, background:'var(--bg3)', borderRadius:3}}>
-                            <div style={{height:6, width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`, background:'var(--teal)', borderRadius:3, transition:'width .4s'}}/>
-                          </div>
+                        <div style={{borderTop:'1px solid rgba(0,0,0,0.08)', marginTop:8, paddingTop:6}}>
+                          <button className="tp-detail-btn" style={{color:rl?rl.text:'var(--teal)'}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>QA Process (QAEI) ↗</button>
                         </div>
                       </div>
-                      <div style={{fontSize:11, color:'var(--text3)', marginTop:10, borderTop:'1px solid var(--border)', paddingTop:8}}>
-                        {fmtDate(r.date)} · click para detalle
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
