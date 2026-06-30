@@ -1372,20 +1372,29 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                                   <span style={{fontSize:10, color:ql?ql.text:'var(--text3)', opacity:0.55}}>/ 10</span>
                                 </div>
                                 <div style={{fontSize:11, fontWeight:700, color:ql?ql.text:'var(--text3)', marginBottom:5}}>{ql?ql.label:'—'}</div>
-                                <div style={{marginBottom:4}}>
-                                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                    <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>QA Process ↗</button>
-                                    <span style={{fontWeight:600}}>{qaeiResult.qaei.toFixed(1)}</span>
+                                <div style={{display:'flex', flexDirection:'column', gap:4}}>
+                                  <div>
+                                    <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
+                                      <span>DCE <span style={{opacity:0.6}}>(65%)</span></span>
+                                      <span style={{fontWeight:600}}>{qaeiResult.dceScore.toFixed(1)}</span>
+                                    </div>
+                                    <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
+                                      <div style={{height:4, width:`${Math.min(100,(qaeiResult.dceScore/10)*100)}%`, background:qaBarColor(qaeiResult.dceScore), borderRadius:2, transition:'width .4s'}}/>
+                                    </div>
                                   </div>
-                                  <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                    <div style={{height:4, width:`${Math.min(100,(qaeiResult.qaei/10)*100)}%`, background:qaBarColor(qaeiResult.qaei), borderRadius:2, transition:'width .4s'}}/>
+                                  <div>
+                                    <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
+                                      <span>Process <span style={{opacity:0.6}}>(35%)</span></span>
+                                      <span style={{fontWeight:600}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
+                                    </div>
+                                    <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
+                                      <div style={{height:4, width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`, background:qaBarColor(qaeiResult.pmScore), borderRadius:2, transition:'width .4s'}}/>
+                                    </div>
                                   </div>
                                 </div>
-                                {de && (
-                                  <div style={{fontSize:10, color:ql?ql.text:'var(--text3)', opacity:0.7, marginTop:4}}>
-                                    DCE {de.rate}% · Process {qaeiResult.processMaturity?.toFixed(1)||'—'}
-                                  </div>
-                                )}
+                                <div style={{marginTop:5}}>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>QA Process ↗</button>
+                                </div>
                               </>
                             ) : (
                               <div style={{fontSize:11, color:'var(--text3)', paddingTop:4}}>Sin datos</div>
