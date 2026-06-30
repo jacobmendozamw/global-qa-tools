@@ -559,6 +559,7 @@ function AssessView({ jiraMetrics, testMetrics }) {
   const [project, setProject] = useState('');
   const [scores, setScores] = useState({});
   const [showTickets, setShowTickets] = useState(false);
+  const [showQACatches, setShowQACatches] = useState(false);
 
   const JIRA_IDS = ['escapedDefects'];
   const jiraProject = (jiraMetrics && project) ? jiraMetrics.projects?.[project] : null;
@@ -764,46 +765,54 @@ function AssessView({ jiraMetrics, testMetrics }) {
             );
           })}
 
-          {/* Pre-production (known) ticket viewer — bugs caught by QA in staging before release */}
-          {jiraProject?.preProductionCaught?.tickets?.length > 0 && (() => {
-            const preProductionTickets = jiraProject.preProductionCaught.tickets;
+          {/* QA Catches — pre-production + production-escaped, collapsed by default */}
+          {(() => {
+            const preProductionTickets = jiraProject?.preProductionCaught?.tickets || [];
+            const internalTickets = jiraProject?.internalEscaped?.tickets || [];
+            const total = preProductionTickets.length + internalTickets.length;
+            if (total === 0) return null;
             return (
               <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
-                  <span style={{fontSize:12,fontWeight:600}}>Pre-production catches ({preProductionTickets.length})</span>
-                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Bugs found by QA in staging — never reached production</span>
+                <div style={{display:'flex',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowQACatches(v=>!v)}>
+                  <span style={{fontSize:12,fontWeight:600}}>{showQACatches?'▾':'▸'} QA catches ({total})</span>
+                  <span style={{fontSize:10.5,color:'var(--text3)',marginLeft:'auto'}}>Bugs intercepted by QA before customer reports</span>
                 </div>
-                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
-                  {preProductionTickets.map(t => (
-                    <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
-                      <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--green-bg)',color:'var(--green-text)',border:'.5px solid var(--green-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
-                      <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
-                      <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Internally-escaped ticket viewer — production bugs found by QA before customer reports */}
-          {jiraProject?.internalEscaped?.tickets?.length > 0 && (() => {
-            const internalTickets = jiraProject.internalEscaped.tickets;
-            return (
-              <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
-                  <span style={{fontSize:12,fontWeight:600}}>Production-escaped catches ({internalTickets.length})</span>
-                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Bugs found by QA in production before customer reports</span>
-                </div>
-                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
-                  {internalTickets.map(t => (
-                    <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
-                      <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--blue-bg)',color:'var(--blue-text)',border:'.5px solid var(--blue-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
-                      <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
-                      <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
-                    </div>
-                  ))}
-                </div>
+                {showQACatches && (
+                  <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:6}}>
+                    {preProductionTickets.length > 0 && (
+                      <div>
+                        <div style={{fontSize:10.5,fontWeight:700,color:'var(--green-text)',background:'var(--green-bg)',border:'.5px solid var(--green-border)',borderRadius:5,padding:'2px 8px',marginBottom:4,display:'inline-block'}}>
+                          Pre-production ({preProductionTickets.length}) · staging, never reached production
+                        </div>
+                        <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                          {preProductionTickets.map(t => (
+                            <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
+                              <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--green-bg)',color:'var(--green-text)',border:'.5px solid var(--green-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
+                              <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                              <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {internalTickets.length > 0 && (
+                      <div style={{marginTop: preProductionTickets.length > 0 ? 4 : 0}}>
+                        <div style={{fontSize:10.5,fontWeight:700,color:'var(--blue-text)',background:'var(--blue-bg)',border:'.5px solid var(--blue-border)',borderRadius:5,padding:'2px 8px',marginBottom:4,display:'inline-block'}}>
+                          Production-escaped ({internalTickets.length}) · found in production before customers
+                        </div>
+                        <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                          {internalTickets.map(t => (
+                            <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
+                              <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--blue-bg)',color:'var(--blue-text)',border:'.5px solid var(--blue-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
+                              <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                              <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -1025,6 +1034,109 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
   );
 }
 
+// ── DCEDetailBody ─────────────────────────────────────────────────────────────
+function DCEDetailBody({ r }) {
+  const [openSection, setOpenSection] = React.useState(null);
+  const de = r.jira?.detectionEfficiency;
+  const preTickets      = r.jira?.preProductionCaught?.tickets || [];
+  const internalTickets = r.jira?.internalEscaped?.tickets || [];
+  const customerTickets = r.jira?.escapedDefects?.tickets || [];
+
+  const toggle = s => setOpenSection(v => v === s ? null : s);
+
+  const rowStyle = {padding:'4px 8px 4px 0', fontWeight:600, verticalAlign:'top'};
+  const countStyle = {padding:'4px 8px', color:'var(--text)', fontWeight:700, whiteSpace:'nowrap', verticalAlign:'top'};
+  const linkStyle = {fontSize:10.5, color:'var(--purple)', cursor:'pointer', background:'none', border:'none', padding:0, fontWeight:600, whiteSpace:'nowrap', verticalAlign:'top'};
+
+  const priorityColor = p => {
+    if (p === 'Blocker' || p === 'Critical') return {bg:'#FAECE7', text:'#712B13', border:'#D85A30'};
+    if (p === 'Major'   || p === 'High')     return {bg:'#FAEEDA', text:'#633806', border:'#BA7517'};
+    return {bg:'var(--bg3)', text:'var(--text2)', border:'var(--border2)'};
+  };
+
+  const TicketList = ({ tickets, section }) => (
+    <div style={{marginTop:4, marginBottom:2, display:'flex', flexDirection:'column', overflow:'hidden'}}>
+      {tickets.length === 0
+        ? <span style={{fontSize:11,color:'var(--text3)'}}>No tickets available.</span>
+        : tickets.map(t => {
+            const pc = priorityColor(t.priority);
+            return (
+              <div key={t.key} style={{display:'flex', alignItems:'center', gap:8, padding:'4px 0', borderBottom:'.5px solid var(--border)', minWidth:0}}>
+                <span style={{fontSize:9.5, fontWeight:600, padding:'1px 6px', borderRadius:4, background:pc.bg, color:pc.text, border:`.5px solid ${pc.border}`, whiteSpace:'nowrap', flexShrink:0}}>{t.priority}</span>
+                <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11, fontWeight:600, color:'var(--purple)', textDecoration:'none', whiteSpace:'nowrap', flexShrink:0}}>{t.key}</a>
+                <span style={{fontSize:11, color:'var(--text2)', flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}} title={t.summary}>{t.summary}</span>
+              </div>
+            );
+          })
+      }
+      <button style={{...linkStyle, marginTop:4, alignSelf:'flex-start'}} onClick={() => toggle(section)}>▴ Hide</button>
+    </div>
+  );
+
+  const SectionToggle = ({ section, count, tickets }) => {
+    if (count === 0) return null;
+    const open = openSection === section;
+    return (
+      <button style={linkStyle} onClick={() => toggle(section)}>
+        {open ? '▾' : '▸'} {open ? 'Hide' : 'View tickets'}
+      </button>
+    );
+  };
+
+  if (!de) {
+    return (
+      <div className="helper">No DCE data recorded for this snapshot. DCE tracking is available from Q2-2026 onward, when the <code>escaped</code> and <code>known</code> Jira labels were implemented.</div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="helper" style={{marginBottom:10}}>
+        DCE measures what fraction of known bugs were caught by QA before or during production, vs. reported by customers.
+        Formula: (pre-production + internally found) / (pre-production + internally found + customer-reported) × 100
+      </div>
+      <div className="hist-detail-section">
+        <div className="hist-detail-crit-header">
+          <span style={{fontWeight:700, fontSize:13}}>DCE Rate</span>
+          <span className="pill" style={{background:'var(--blue-bg)', color:'var(--blue-text)', border:'1px solid var(--blue-border)'}}>{de.rate}%</span>
+        </div>
+        <table style={{width:'100%', borderCollapse:'collapse', marginTop:8, fontSize:11}}>
+          <tbody>
+            <tr>
+              <td style={{...rowStyle, color:'var(--green-text)', width:'52%'}}>Pre-production catches (staging)</td>
+              <td style={countStyle}>{de.preProductionCaught ?? 0}</td>
+              <td style={{padding:'4px 0', verticalAlign:'top'}}><SectionToggle section="pre" count={de.preProductionCaught ?? 0} /></td>
+            </tr>
+            {openSection === 'pre' && (
+              <tr><td colSpan={3} style={{paddingBottom:4}}><TicketList tickets={preTickets} section="pre" /></td></tr>
+            )}
+            <tr>
+              <td style={{...rowStyle, color:'var(--blue-text)'}}>Internally found (post-prod)</td>
+              <td style={countStyle}>{de.internallyFound ?? 0}</td>
+              <td style={{padding:'4px 0', verticalAlign:'top'}}><SectionToggle section="internal" count={de.internallyFound ?? 0} /></td>
+            </tr>
+            {openSection === 'internal' && (
+              <tr><td colSpan={3} style={{paddingBottom:4}}><TicketList tickets={internalTickets} section="internal" /></td></tr>
+            )}
+            <tr style={{borderTop:'.5px solid var(--border)'}}>
+              <td style={{...rowStyle, color:'var(--red-text)', paddingTop:6}}>Customer-reported</td>
+              <td style={{...countStyle, paddingTop:6}}>{de.customerFound ?? 0}</td>
+              <td style={{padding:'6px 0 4px', verticalAlign:'top'}}><SectionToggle section="customer" count={de.customerFound ?? 0} /></td>
+            </tr>
+            {openSection === 'customer' && (
+              <tr><td colSpan={3} style={{paddingBottom:4}}><TicketList tickets={customerTickets} section="customer" /></td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="hist-detail-footer">
+        DCE Score: <strong>{Math.round(de.rate / 10 * 10) / 10}</strong> / 10
+        &nbsp;·&nbsp; formula: rate% ÷ 10
+      </div>
+    </div>
+  );
+}
+
 // ── HistoryDetailModal ────────────────────────────────────────────────────────
 function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMetrics, testMetrics }) {
   if (!detail) return null;
@@ -1072,36 +1184,57 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
     body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} onSaveRecord={onSaveRecord}/>;
   } else if (type === 'dce') {
     title = 'Detection Coverage Efficiency (DCE)';
-    const de = r.jira?.detectionEfficiency;
-    body = de ? (
-      <div>
-        <div className="helper" style={{marginBottom:10}}>
-          DCE measures what fraction of known bugs were caught by QA before or during production, vs. reported by customers.
-          Formula: (pre-production + internally found) / (pre-production + internally found + customer-reported) × 100
-        </div>
-        <div className="hist-detail-section">
-          <div className="hist-detail-crit-header">
-            <span style={{fontWeight:700,fontSize:13}}>DCE Rate</span>
-            <span className="pill" style={{background:'var(--blue-bg)',color:'var(--blue-text)',border:'1px solid var(--blue-border)'}}>{de.rate}%</span>
-          </div>
-          <table style={{width:'100%',borderCollapse:'collapse',marginTop:8,fontSize:11}}>
-            <tbody>
-              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600,width:'55%'}}>Pre-production catches (staging)</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.preProductionCaught ?? 0}</td></tr>
-              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600}}>Internally found (post-prod)</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.internallyFound ?? 0}</td></tr>
-              <tr><td style={{padding:'4px 8px 4px 0',color:'var(--text3)',fontWeight:600}}>Customer-reported</td><td style={{padding:'4px 0',color:'var(--text2)',fontWeight:600}}>{de.customerFound ?? 0}</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="hist-detail-footer">
-          DCE Score: <strong>{de ? Math.round(de.rate / 10 * 10) / 10 : '—'}</strong> / 10
-          &nbsp;·&nbsp; formula: rate% ÷ 10
-        </div>
-      </div>
-    ) : (
-      <div className="helper">No DCE data recorded for this snapshot. DCE tracking is available from Q2-2026 onward, when the <code>escaped</code> and <code>known</code> Jira labels were implemented.</div>
-    );
+    body = <DCEDetailBody r={r} />;
   } else if (type === 'mit') {
     title = 'QA Process Evidence';
+
+    const mitLabelColor = label => {
+      const l = label.toLowerCase();
+      if (/^assessment/.test(l)) return null;
+      if (/^covered$|^flows covered$|^covered flows|^critical flows covered|^flows automated$/.test(l)) return '#1D6B4E';
+      if (/^gaps?$|^not covered|^not automated|^most critical gap|^core flows not covered|^functional flows covered$|^coverage$/.test(l)) return '#9B3520';
+      if (/^limitation|^impact|^production skip/.test(l)) return '#7A4C0C';
+      if (/^next step/.test(l)) return '#2C5282';
+      return 'var(--text2)';
+    };
+
+    const mitValueColor = (label, value) => {
+      const l = label.toLowerCase();
+      const v = value.toLowerCase();
+      // "X of Y" ratio
+      const ratioMatch = value.match(/^(\d+) of (\d+)/);
+      if (ratioMatch) {
+        const [, num, den] = ratioMatch.map(Number);
+        if (den === 0) return 'var(--text2)';
+        const frac = num / den;
+        if (frac === 0) return '#9B3520';
+        if (frac >= 0.7) return '#1D6B4E';
+        if (frac >= 0.4) return '#7A4C0C';
+        return '#9B3520';
+      }
+      // percentage
+      const pctMatch = value.match(/(\d+)%/);
+      if (pctMatch) {
+        const pct = parseInt(pctMatch[1]);
+        if (pct >= 70) return '#1D6B4E';
+        if (pct >= 40) return '#7A4C0C';
+        return '#9B3520';
+      }
+      // bare "0" or "0 (…)"
+      if (/^0(\s|\(|$)/.test(value.trim())) return '#9B3520';
+      // label-driven negatives
+      if (/^gaps?$|^not covered|^not automated|^most critical gap|^core flows not covered|^coverage$/.test(l)) return '#9B3520';
+      // label-driven positives
+      if (/^covered$|^flows covered$|^flows automated$|^critical flows covered/.test(l)) return '#1D6B4E';
+      if (/^limitation|^impact|^production skip/.test(l)) return '#7A4C0C';
+      // qualitative value patterns
+      if (/^none\b|^no automated\b/.test(v)) return '#9B3520';
+      if (/skips (in|on)|only testable in production|limits pre-production/.test(v)) return '#7A4C0C';
+      if (/^good\b|^stable,|page object model|page object exists|deterministic throughout|stable testids/.test(v)) return '#1D6B4E';
+      if (/^baseline estimate|^reassess/.test(v)) return '#7A4C0C';
+      return 'var(--text2)';
+    };
+
     body = (
       <div>
         <div className="helper" style={{marginBottom:10}}>These criteria drive the Process Maturity component of the QA Effectiveness Index. They are recorded here for reference but do not affect the Risk score.</div>
@@ -1110,22 +1243,40 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
           const opt     = c.options.find(o => o.score === score);
           const colorMap= c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS;
           const col     = colorMap[score] || {};
+          const hasScore = score != null && col.bg;
           const evidence= PROJECT_EVIDENCE[r.project]?.[c.id];
           return (
-            <div key={c.id} className="hist-detail-section">
+            <div key={c.id} className="hist-detail-section" style={hasScore ? {borderLeft:`3px solid ${col.border}`, paddingLeft:10, marginLeft:-10} : {}}>
               <div className="hist-detail-crit-header">
                 <span style={{fontWeight:700,fontSize:13}}>{c.label}</span>
-                {opt && <span className="pill" style={{background:col.bg,color:col.text,border:`1px solid ${col.border}`}}>{opt.label} · {score}/{c.scale||3}</span>}
+                {hasScore
+                  ? <span style={{fontSize:12,fontWeight:700,padding:'3px 10px',borderRadius:6,background:col.bg,color:col.text,border:`1.5px solid ${col.border}`}}>{opt.label} · {score}/{c.scale||3}</span>
+                  : <span style={{fontSize:11,color:'var(--text3)',fontStyle:'italic'}}>No score recorded</span>
+                }
               </div>
               {evidence ? (
                 <table style={{width:'100%',borderCollapse:'collapse',marginTop:6,fontSize:11}}>
                   <tbody>
-                    {evidence.map(([label,value],i) => (
-                      <tr key={i} style={{borderBottom:i<evidence.length-1?'.5px solid var(--border)':'none'}}>
-                        <td style={{padding:'3px 8px 3px 0',color:'var(--text3)',fontWeight:600,width:'36%',verticalAlign:'top'}}>{label}</td>
-                        <td style={{padding:'3px 0',color:'var(--text2)',lineHeight:1.45}}>{value}</td>
-                      </tr>
-                    ))}
+                    {evidence.map(([label,value],i) => {
+                      const isAssessment = label.toLowerCase().startsWith('assessment');
+                      const lc = mitLabelColor(label);
+                      const vc = mitValueColor(label, value);
+                      if (isAssessment) {
+                        return (
+                          <tr key={i}>
+                            <td colSpan={2} style={{padding:'6px 0 2px',borderTop:'.5px solid var(--border)'}}>
+                              <span style={{fontSize:10.5,fontStyle:'italic',color:col.text||'var(--text3)',background:col.bg||'var(--bg2)',border:`1px solid ${col.border||'var(--border)'}`,borderRadius:5,padding:'2px 8px',display:'inline-block'}}>{value}</span>
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return (
+                        <tr key={i} style={{borderBottom:i<evidence.length-1?'.5px solid var(--border)':'none'}}>
+                          <td style={{padding:'4px 8px 4px 0',color:lc||'var(--text3)',fontWeight:700,width:'36%',verticalAlign:'top'}}>{label}</td>
+                          <td style={{padding:'4px 0',color:vc,fontWeight: vc !== 'var(--text2)' ? 600 : 400,lineHeight:1.45}}>{value}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               ) : (
@@ -1231,13 +1382,21 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const allQuarters = [...new Set(allRecords.map(r=>quarterOf(r.date)))].sort().reverse();
 
   // Deduplicate: keep one record per project+quarter, preferring auto over manual backfill
+  const PM_SCORE_KEYS = ['automationConfidence', 'testCoverage', 'testability'];
+  const mergePMScores = (winner, loser) => {
+    if (!loser?.scores) return winner;
+    const missing = PM_SCORE_KEYS.filter(k => winner.scores?.[k] == null && loser.scores[k] != null);
+    if (!missing.length) return winner;
+    return { ...winner, scores: { ...winner.scores, ...Object.fromEntries(missing.map(k => [k, loser.scores[k]])) } };
+  };
+
   const deduped = Object.values(
     allRecords.reduce((acc, r) => {
       const key = `${r.project}::${quarterOf(r.date)}`;
       const ex = acc[key];
       if (!ex) { acc[key] = r; return acc; }
-      if (r.evaluator === 'auto' && ex.evaluator !== 'auto') { acc[key] = r; return acc; }
-      if (ex.evaluator === 'auto' && r.evaluator !== 'auto') return acc;
+      if (r.evaluator === 'auto' && ex.evaluator !== 'auto') { acc[key] = mergePMScores(r, ex); return acc; }
+      if (ex.evaluator === 'auto' && r.evaluator !== 'auto') { acc[key] = mergePMScores(ex, r); return acc; }
       if (new Date(r.date) > new Date(ex.date)) acc[key] = r;
       return acc;
     }, {})
@@ -1308,6 +1467,8 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
         <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{filteredRecords.length} snapshot{filteredRecords.length!==1?'s':''}</span>
         <div className="toggle-wrap">
           <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Cards</button>
+          <button className={`toggle-btn${viewMode==='matrix'?' active':''}`} onClick={()=>setViewMode('matrix')}>Matrix</button>
+          <button className={`toggle-btn${viewMode==='gauge'?' active':''}`} onClick={()=>setViewMode('gauge')}>Gauge</button>
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
@@ -1319,105 +1480,124 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
       {!loading && filteredRecords.length===0 && <div className="empty-state">No snapshots for this selection.</div>}
 
       {!loading && filteredRecords.length>0 && viewMode==='timeline' && (
-        <div>
-          {PROJECTS.filter(p => visibleProjects.has(p)).map(proj => {
-            const projCards = filteredRecords.filter(r => r.project === proj)
-              .sort((a,b) => new Date(a.date)-new Date(b.date));
-            if (!projCards.length) return null;
-            return (
-              <div key={proj} style={{marginBottom:28}}>
-                <div style={{fontSize:15, fontWeight:700, marginBottom:10, paddingBottom:8, borderBottom:'1px solid var(--border)'}}>{proj}</div>
-                <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:12}}>
-                  {projCards.map((r, i) => {
+        <div style={{overflowX:'auto', paddingBottom:8}}>
+          <div style={{display:'flex', gap:16, alignItems:'flex-start', minWidth:'max-content'}}>
+          {(() => {
+            // build lookup: project → quarter → record (for delta)
+            const byProjQ = {};
+            deduped.forEach(r => {
+              const q = quarterOf(r.date);
+              if (!byProjQ[r.project]) byProjQ[r.project] = {};
+              byProjQ[r.project][q] = r;
+            });
+            return PROJECTS.filter(p => visibleProjects.has(p)).map(proj => {
+              const projQuarters = allQuarters
+                .filter(q => (!filterQuarter || q === filterQuarter) && byProjQ[proj]?.[q]);
+              if (!projQuarters.length) return null;
+              return (
+                <div key={proj} style={{display:'flex', flexDirection:'column', gap:12, width:300, flexShrink:0}}>
+                  <div style={{fontSize:14, fontWeight:700, paddingBottom:8, borderBottom:'1px solid var(--border)'}}>{proj}</div>
+                  {projQuarters.map(q => {
+                    const r = byProjQ[proj][q];
+                    const prevQ = allQuarters[allQuarters.indexOf(q) + 1];
+                    const prev = prevQ ? byProjQ[proj]?.[prevQ] : null;
                     const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
-                    const prev = i > 0 ? projCards[i-1] : null;
                     const delta = (prev&&prev.finalRisk!=null&&r.finalRisk!=null) ? r.finalRisk-prev.finalRisk : null;
                     const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
                     const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                     const qi = quarterInfo(quarterOf(r.date));
                     const de = r.jira?.detectionEfficiency;
                     const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
-                    const qaeiResult = computeQAEI(de ? de.rate : 0, PROJECT_DEFAULTS[r.project]||{}, mp);
+                    const pmScores = Object.fromEntries(
+                      ['automationConfidence','testCoverage','testability'].map(k => [k, r.scores?.[k] ?? PROJECT_DEFAULTS[r.project]?.[k]])
+                    );
+                    const qaeiResult = computeQAEI(de ? de.rate : 0, pmScores, mp);
                     const hasDCE = !!de;
-                    const ql = (qaeiResult && hasDCE) ? qaLevel(qaeiResult.qaei) : null;
+                    const ql = qaeiResult ? qaLevel(qaeiResult.qaei) : null;
                     const qaBarColor = v => v==null ? 'var(--border2)' : v>=7.5 ? '#1D9E75' : v>=5.0 ? '#BA7517' : '#D85A30';
+                    const ScoreBadge = ({level}) => level
+                      ? <span style={{fontSize:10,fontWeight:700,padding:'1px 7px',borderRadius:20,background:level.bg,color:level.text,border:`1px solid ${level.border}`,letterSpacing:'.02em'}}>{level.label}</span>
+                      : null;
+                    const DetailBtn = ({label, onClick}) => (
+                      <button className="tp-detail-btn" style={{color:'var(--teal)',fontSize:10,fontWeight:600}} onClick={onClick}>{label}</button>
+                    );
                     return (
                       <div key={r.id}
-                        style={{border:`1.5px solid ${ql?ql.border:rl?rl.border:'var(--border)'}`, borderRadius:12, overflow:'hidden', transition:'box-shadow .15s'}}
-                        onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
+                        style={{border:'1px solid var(--border)',borderRadius:10,overflow:'hidden',background:'var(--bg)',transition:'box-shadow .15s'}}
+                        onMouseEnter={e=>e.currentTarget.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)'}
                         onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
 
-                        {/* Quarter header — neutral */}
-                        <div style={{padding:'8px 14px', background:ql?ql.bg:'var(--bg)', borderBottom:`1px solid ${ql?ql.border:'rgba(0,0,0,0.06)'}`, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                          <span style={{fontSize:11, fontWeight:700, color:'var(--text2)'}}>{qi.label}</span>
-                          <div style={{display:'flex', gap:4}}>
-                            {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--blue-bg)', color:'var(--blue-text)', fontWeight:600}}>live</span>}
-                            {r.evaluator==='auto' && !qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--bg3)', color:'var(--text3)', fontWeight:600}}>auto</span>}
+                        {/* Header */}
+                        <div style={{padding:'7px 12px',borderBottom:'1px solid var(--border)',display:'flex',justifyContent:'space-between',alignItems:'center',background:'var(--bg2)'}}>
+                          <span style={{fontSize:11,fontWeight:600,color:'var(--text2)'}}>{qi.label}</span>
+                          <div style={{display:'flex',gap:4}}>
+                            {qi.isCurrent && <span style={{fontSize:9,padding:'1px 6px',borderRadius:20,background:'var(--blue-bg)',color:'var(--blue-text)',fontWeight:600}}>live</span>}
+                            {r.evaluator==='auto'&&!qi.isCurrent && <span style={{fontSize:9,padding:'1px 6px',borderRadius:20,background:'var(--bg3)',color:'var(--text3)',fontWeight:600}}>auto</span>}
                           </div>
                         </div>
 
-                        {/* Two colored sections */}
-                        <div style={{display:'grid', gridTemplateColumns:'1fr 1px 1fr'}}>
+                        {/* Two sections */}
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1px 1fr'}}>
 
                           {/* Risk Score */}
-                          <div style={{background:rl?rl.bg:'var(--bg2)', padding:'12px 14px'}}>
-                            <div style={{fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', color:rl?rl.text:'var(--text3)', opacity:0.65, marginBottom:4}}>Risk Score</div>
-                            <div style={{display:'flex', alignItems:'baseline', gap:6, marginBottom:1, flexWrap:'wrap'}}>
-                              <span style={{fontSize:26, fontWeight:700, lineHeight:1, color:rl?rl.text:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
-                              <span style={{fontSize:10, color:rl?rl.text:'var(--text3)', opacity:0.55}}>/ 10</span>
-                              {dtxt && <span style={{fontSize:10, fontWeight:700, color:dcol}}>{dtxt}</span>}
+                          <div style={{padding:'12px 12px 10px'}}>
+                            <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>Risk Score</div>
+                            <div style={{display:'flex',alignItems:'baseline',gap:5,marginBottom:4}}>
+                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
+                              <span style={{fontSize:10,color:'var(--text3)'}}>/ 10</span>
+                              {dtxt && <span style={{fontSize:10,fontWeight:700,color:dcol,marginLeft:2}}>{dtxt}</span>}
                             </div>
-                            <div style={{fontSize:11, fontWeight:700, color:rl?rl.text:'var(--text3)', marginBottom:5}}>{rl?rl.label:'—'}</div>
-                            <div style={{display:'flex', flexDirection:'column', gap:4}}>
+                            <div style={{marginBottom:8}}><ScoreBadge level={rl}/></div>
+                            <div style={{display:'flex',flexDirection:'column',gap:5}}>
                               <div>
-                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:rl?rl.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:rl?rl.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'base',record:r})}}>Base</button>
-                                  <span style={{fontWeight:600}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label="Base" onClick={e=>{e.stopPropagation();setDetail({type:'base',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</span>
                                 </div>
-                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                  <div style={{height:4, width:`${r.baseRisk!=null?Math.min(100,(r.baseRisk/10)*100):0}%`, background:barColor(r.baseRisk), borderRadius:2, transition:'width .4s'}}/>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${r.baseRisk!=null?Math.min(100,(r.baseRisk/10)*100):0}%`,background:barColor(r.baseRisk),borderRadius:2,transition:'width .4s'}}/>
                                 </div>
                               </div>
                               <div>
-                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:rl?rl.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:rl?rl.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'triton',record:r})}}>TRITON</button>
-                                  <span style={{fontWeight:600}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label="TRITON" onClick={e=>{e.stopPropagation();setDetail({type:'triton',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</span>
                                 </div>
-                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                  <div style={{height:4, width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`, background:barColor(r.tritonScore), borderRadius:2, transition:'width .4s'}}/>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`,background:barColor(r.tritonScore),borderRadius:2,transition:'width .4s'}}/>
                                 </div>
                               </div>
                             </div>
                           </div>
 
                           {/* Divider */}
-                          <div style={{background:'rgba(0,0,0,0.08)'}}/>
+                          <div style={{background:'var(--border)'}}/>
 
                           {/* QAEI */}
-                          <div style={{background:ql?ql.bg:'var(--bg2)', padding:'12px 14px'}}>
-                            <div style={{fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', color:ql?ql.text:'var(--text3)', opacity:0.65, marginBottom:4}}>QAEI</div>
-                            <div style={{display:'flex', alignItems:'baseline', gap:4, marginBottom:1}}>
-                              <span style={{fontSize:26, fontWeight:700, lineHeight:1, color:ql?ql.text:'var(--text)'}}>{hasDCE?qaeiResult.qaei.toFixed(1):'NA'}</span>
-                              <span style={{fontSize:10, color:ql?ql.text:'var(--text3)', opacity:0.55}}>/ 10</span>
+                          <div style={{padding:'12px 12px 10px'}}>
+                            <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>QAEI</div>
+                            <div style={{display:'flex',alignItems:'baseline',gap:5,marginBottom:4}}>
+                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{qaeiResult.qaei.toFixed(1)}</span>
+                              <span style={{fontSize:10,color:'var(--text3)'}}>/ 10</span>
                             </div>
-                            <div style={{fontSize:11, fontWeight:700, color:ql?ql.text:'var(--text3)', marginBottom:5}}>{hasDCE&&ql?ql.label:'—'}</div>
-                            <div style={{display:'flex', flexDirection:'column', gap:4}}>
+                            <div style={{marginBottom:8}}>{ql ? <ScoreBadge level={ql}/> : <span style={{fontSize:10,color:'var(--text3)'}}>—</span>}</div>
+                            <div style={{display:'flex',flexDirection:'column',gap:5}}>
                               <div>
-                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'dce',record:r})}}>DCE ↗</button>
-                                  <span style={{fontWeight:600}}>{hasDCE?qaeiResult.dceScore.toFixed(1):'NA'}</span>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label={hasDCE?"DCE ↗":"DCE (est.)"} onClick={e=>{e.stopPropagation();setDetail({type:'dce',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.dceScore.toFixed(1)}{!hasDCE&&<span style={{fontSize:9,color:'var(--text3)'}}> ≈0</span>}</span>
                                 </div>
-                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                  <div style={{height:4, width:`${hasDCE?Math.min(100,(qaeiResult.dceScore/10)*100):0}%`, background:hasDCE?qaBarColor(qaeiResult.dceScore):'var(--border2)', borderRadius:2, transition:'width .4s'}}/>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${Math.min(100,(qaeiResult.dceScore/10)*100)}%`,background:qaBarColor(qaeiResult.dceScore),borderRadius:2,transition:'width .4s'}}/>
                                 </div>
                               </div>
                               <div>
-                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>Process ↗</button>
-                                  <span style={{fontWeight:600}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label="Process ↗" onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
                                 </div>
-                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                  <div style={{height:4, width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`, background:qaBarColor(qaeiResult.pmScore), borderRadius:2, transition:'width .4s'}}/>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`,background:qaBarColor(qaeiResult.pmScore),borderRadius:2,transition:'width .4s'}}/>
                                 </div>
                               </div>
                             </div>
@@ -1427,11 +1607,221 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                     );
                   })}
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
+          </div>
         </div>
       )}
+
+      {!loading && filteredRecords.length>0 && viewMode==='matrix' && (() => {
+        // build lookup: project → quarter → record
+        const byProjQ = {};
+        deduped.forEach(r => {
+          const q = quarterOf(r.date);
+          if (!byProjQ[r.project]) byProjQ[r.project] = {};
+          byProjQ[r.project][q] = r;
+        });
+        const visProjs = PROJECTS.filter(p => visibleProjects.has(p));
+        const quarters = allQuarters.filter(q => !filterQuarter || q === filterQuarter).slice().reverse(); // oldest→newest
+
+        const W = 200, H = 200, PAD = 28;
+        const toX = risk  => PAD + ((risk  ?? 0) / 10) * (W - PAD * 2);
+        const toY = qaei  => H - PAD - ((qaei  ?? 0) / 10) * (H - PAD * 2);
+        const dotColor = (risk, qaei) => {
+          if (risk == null) return '#aaa';
+          if (risk >= 7.4) return '#D85A30';
+          if (risk >= 5.1) return '#BA7517';
+          return '#1D9E75';
+        };
+
+        return (
+          <div style={{display:'flex', flexWrap:'wrap', gap:20, paddingBottom:8}}>
+            {visProjs.map(proj => {
+              const points = quarters.map(q => {
+                const r = byProjQ[proj]?.[q];
+                if (!r) return null;
+                const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+                const de = r.jira?.detectionEfficiency;
+                const pmScores = Object.fromEntries(['automationConfidence','testCoverage','testability'].map(k=>[k, r.scores?.[k] ?? PROJECT_DEFAULTS[proj]?.[k]]));
+                const qaeiResult = computeQAEI(de ? de.rate : 0, pmScores, mp);
+                return { q, qi: quarterInfo(q), risk: r.finalRisk, qaei: qaeiResult.qaei, hasDCE: !!de, r };
+              }).filter(Boolean);
+
+              if (!points.length) return null;
+
+              return (
+                <div key={proj} style={{background:'var(--bg)', border:'1px solid var(--border)', borderRadius:10, padding:'14px 16px', minWidth:W+32}}>
+                  <div style={{fontSize:12, fontWeight:700, color:'var(--text)', marginBottom:10}}>{proj}</div>
+                  <svg width={W} height={H} style={{display:'block', overflow:'visible'}}>
+                    {/* Quadrant backgrounds */}
+                    <rect x={PAD} y={PAD} width={(W-PAD*2)/2} height={(H-PAD*2)/2} fill="#E1F5EE" opacity="0.5" rx="3"/>
+                    <rect x={PAD+(W-PAD*2)/2} y={PAD} width={(W-PAD*2)/2} height={(H-PAD*2)/2} fill="#FAEEDA" opacity="0.5" rx="3"/>
+                    <rect x={PAD} y={PAD+(H-PAD*2)/2} width={(W-PAD*2)/2} height={(H-PAD*2)/2} fill="#FAEEDA" opacity="0.45" rx="3"/>
+                    <rect x={PAD+(W-PAD*2)/2} y={PAD+(H-PAD*2)/2} width={(W-PAD*2)/2} height={(H-PAD*2)/2} fill="#FAECE7" opacity="0.5" rx="3"/>
+
+                    {/* Grid lines */}
+                    {[2,4,6,8].map(v => (
+                      <g key={v}>
+                        <line x1={toX(v)} y1={PAD} x2={toX(v)} y2={H-PAD} stroke="var(--border)" strokeWidth="0.5"/>
+                        <line x1={PAD} y1={toY(v)} x2={W-PAD} y2={toY(v)} stroke="var(--border)" strokeWidth="0.5"/>
+                      </g>
+                    ))}
+
+                    {/* Axis borders */}
+                    <rect x={PAD} y={PAD} width={W-PAD*2} height={H-PAD*2} fill="none" stroke="var(--border2)" strokeWidth="1"/>
+
+                    {/* Axis labels */}
+                    <text x={W/2} y={H-4} textAnchor="middle" fontSize="9" fill="var(--text3)">Risk Score →</text>
+                    <text x={8} y={H/2} textAnchor="middle" fontSize="9" fill="var(--text3)" transform={`rotate(-90,8,${H/2})`}>QAEI →</text>
+                    <text x={PAD} y={PAD-4} fontSize="8" fill="var(--text3)">0</text>
+                    <text x={W-PAD-4} y={PAD-4} fontSize="8" fill="var(--text3)" textAnchor="end">10</text>
+
+                    {/* Trend line */}
+                    {points.length > 1 && points.map((pt, i) => {
+                      if (i === 0) return null;
+                      const prev = points[i-1];
+                      const x1 = toX(prev.risk), y1 = toY(prev.qaei ?? 0);
+                      const x2 = toX(pt.risk),   y2 = toY(pt.qaei ?? 0);
+                      return (
+                        <g key={i}>
+                          <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#999" strokeWidth="1.5" strokeDasharray="3,2"/>
+                          {/* Arrowhead */}
+                          <polygon
+                            points={`0,-4 3,2 -3,2`}
+                            fill="#999"
+                            transform={`translate(${x2},${y2}) rotate(${Math.atan2(y2-y1, x2-x1)*180/Math.PI+90})`}
+                          />
+                        </g>
+                      );
+                    })}
+
+                    {/* Dots */}
+                    {points.map((pt, i) => {
+                      const cx = toX(pt.risk);
+                      const cy = toY(pt.qaei ?? 0);
+                      const col = dotColor(pt.risk, pt.qaei);
+                      const isLast = i === points.length - 1;
+                      return (
+                        <g key={pt.q} style={{cursor:'pointer'}} onClick={()=>setDetail({type:'base', record:pt.r})}>
+                          <circle cx={cx} cy={cy} r={isLast ? 7 : 5} fill={col} stroke="var(--bg)" strokeWidth="2"/>
+                          <text x={cx} y={cy - 10} textAnchor="middle" fontSize="8.5" fontWeight={isLast?'700':'400'} fill="var(--text2)">{pt.qi.label}</text>
+                          {pt.qaei == null && (
+                            <text x={cx} y={cy+3} textAnchor="middle" fontSize="6.5" fill="var(--bg)">NA</text>
+                          )}
+                        </g>
+                      );
+                    })}
+                  </svg>
+
+                  {/* Legend: scores of latest quarter */}
+                  {(() => {
+                    const last = points[points.length-1];
+                    const rl = last.r.finalRisk!=null ? riskLevel(last.r.finalRisk) : null;
+                    return (
+                      <div style={{display:'flex', gap:10, marginTop:10, paddingTop:8, borderTop:'1px solid var(--border)', fontSize:11}}>
+                        <div>
+                          <span style={{color:'var(--text3)'}}>Risk </span>
+                          <span style={{fontWeight:700, color:rl?.text||'var(--text)', background:rl?.bg, padding:'1px 6px', borderRadius:4, border:`1px solid ${rl?.border||'var(--border)'}`}}>{last.risk?.toFixed(1) ?? '—'}</span>
+                        </div>
+                        <div>
+                          <span style={{color:'var(--text3)'}}>QAEI </span>
+                          <span style={{fontWeight:700, color:'var(--text2)'}}>{last.qaei!=null ? last.qaei.toFixed(1) : 'NA'}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
+      {!loading && filteredRecords.length>0 && viewMode==='gauge' && (() => {
+        const byProjQ = {};
+        deduped.forEach(r => {
+          const q = quarterOf(r.date);
+          if (!byProjQ[r.project]) byProjQ[r.project] = {};
+          byProjQ[r.project][q] = r;
+        });
+        const visProjs = PROJECTS.filter(p => visibleProjects.has(p));
+
+        const CX=100, CY=96, R=70, SW=14;
+        const toRad = d => d * Math.PI / 180;
+        const gpt = deg => [CX + R*Math.cos(toRad(deg)), CY - R*Math.sin(toRad(deg))];
+        const bgPath = `M${gpt(180)[0].toFixed(1)},${gpt(180)[1].toFixed(1)} A${R},${R},0,0,1,${gpt(0)[0].toFixed(1)},${gpt(0)[1].toFixed(1)}`;
+        const rArc = v => {
+          if (!v || v <= 0) return null;
+          const [x1,y1] = gpt(180), [x2,y2] = gpt(180-(v/10)*90);
+          return `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R},0,0,1,${x2.toFixed(1)},${y2.toFixed(1)}`;
+        };
+        const qArc = v => {
+          if (!v || v <= 0) return null;
+          const [x1,y1] = gpt(0), [x2,y2] = gpt((v/10)*90);
+          return `M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R},0,0,0,${x2.toFixed(1)},${y2.toFixed(1)}`;
+        };
+
+        return (
+          <div style={{overflowX:'auto', paddingBottom:8}}>
+            <div style={{display:'flex', gap:16, alignItems:'flex-start', minWidth:'max-content'}}>
+              {visProjs.map(proj => {
+                const projQuarters = allQuarters.filter(q => (!filterQuarter || q === filterQuarter) && byProjQ[proj]?.[q]);
+                if (!projQuarters.length) return null;
+                return (
+                  <div key={proj} style={{display:'flex', flexDirection:'column', gap:12, width:210, flexShrink:0}}>
+                    <div style={{fontSize:14, fontWeight:700, paddingBottom:8, borderBottom:'1px solid var(--border)'}}>{proj}</div>
+                    {projQuarters.map(q => {
+                      const r = byProjQ[proj][q];
+                      const qi = quarterInfo(quarterOf(r.date));
+                      const de = r.jira?.detectionEfficiency;
+                      const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+                      const pmScores = Object.fromEntries(['automationConfidence','testCoverage','testability'].map(k=>[k, r.scores?.[k] ?? PROJECT_DEFAULTS[proj]?.[k]]));
+                      const qaeiResult = computeQAEI(de ? de.rate : 0, pmScores, mp);
+                      const hasDCE = !!de;
+                      const risk = r.finalRisk ?? 0;
+                      const qaei = qaeiResult?.qaei ?? 0;
+                      const rl = riskLevel(risk);
+                      const ql = qaLevel(qaei);
+                      const W=210, H=126;
+                      const [sepX, sepY] = gpt(90);
+                      return (
+                        <div key={q} style={{border:'1px solid var(--border)', borderRadius:10, overflow:'hidden', background:'var(--bg)'}}>
+                          <div style={{padding:'7px 12px', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between', alignItems:'center', background:'var(--bg2)'}}>
+                            <span style={{fontSize:11, fontWeight:600, color:'var(--text2)'}}>{qi.label}</span>
+                            <div style={{display:'flex', gap:4}}>
+                              {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--blue-bg)', color:'var(--blue-text)', fontWeight:600}}>live</span>}
+                              {r.evaluator==='auto'&&!qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--bg3)', color:'var(--text3)', fontWeight:600}}>auto</span>}
+                            </div>
+                          </div>
+                          <div style={{paddingTop:4, textAlign:'center'}}>
+                            <svg width={W} height={H} style={{display:'block', margin:'0 auto', overflow:'visible'}}>
+                              <path d={bgPath} fill="none" stroke="var(--border)" strokeWidth={SW} strokeLinecap="butt"/>
+                              {rArc(risk) && <path d={rArc(risk)} fill="none" stroke={rl?.border||'#ccc'} strokeWidth={SW} strokeLinecap="butt"/>}
+                              {qArc(qaei) && <path d={qArc(qaei)} fill="none" stroke={ql?.border||'#ccc'} strokeWidth={SW} strokeLinecap="butt" opacity={hasDCE?1:0.6}/>}
+                              <line x1={sepX.toFixed(1)} y1={(CY-R-SW/2-1).toFixed(1)} x2={sepX.toFixed(1)} y2={(CY-R+SW/2+1).toFixed(1)} stroke="var(--bg)" strokeWidth="2.5"/>
+                              <text x={(gpt(180)[0]-4).toFixed(1)} y={(CY+16).toFixed(1)} textAnchor="end" fontSize="10" fontWeight="600" fill={rl?.border||'var(--text2)'}>{risk.toFixed(1)}</text>
+                              <text x={(gpt(180)[0]-4).toFixed(1)} y={(CY+27).toFixed(1)} textAnchor="end" fontSize="8" fill="var(--text3)">Risk</text>
+                              <text x={(gpt(0)[0]+4).toFixed(1)} y={(CY+16).toFixed(1)} textAnchor="start" fontSize="10" fontWeight="600" fill={hasDCE?(ql?.border||'var(--text2)'):'var(--text3)'}>{hasDCE?qaei.toFixed(1):`~${qaei.toFixed(1)}`}</text>
+                              <text x={(gpt(0)[0]+4).toFixed(1)} y={(CY+27).toFixed(1)} textAnchor="start" fontSize="8" fill="var(--text3)">QAEI</text>
+                              <text x={CX} y={(CY-R*0.30).toFixed(1)} textAnchor="middle" fontSize="26" fontWeight="700" fill={rl?.border||'var(--text)'}>{risk.toFixed(1)}</text>
+                              <text x={CX} y={(CY-R*0.30+16).toFixed(1)} textAnchor="middle" fontSize="9" fill="var(--text3)">{rl?.label||'—'}</text>
+                            </svg>
+                          </div>
+                          <div style={{padding:'0 12px 10px', display:'flex', justifyContent:'center', gap:6}}>
+                            {rl && <span style={{fontSize:9, fontWeight:700, padding:'1px 7px', borderRadius:20, background:rl.bg, color:rl.text, border:`1px solid ${rl.border}`}}>{rl.label}</span>}
+                            {ql && <span style={{fontSize:9, fontWeight:700, padding:'1px 7px', borderRadius:20, background:ql.bg, color:ql.text, border:`1px solid ${ql.border}`, opacity:hasDCE?1:0.65}}>{hasDCE?ql.label:`~${ql.label}`}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {!loading && filteredRecords.length>0 && viewMode==='table' && (
         <div className="card" style={{padding:0,overflow:'hidden'}}>
