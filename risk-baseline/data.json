@@ -261,7 +261,7 @@
   },
   {
     "id": "auto-2026-Q2-genai-lens",
-    "date": "2026-06-30T06:46:52.073Z",
+    "date": "2026-06-30T09:37:46.607Z",
     "modelVersion": "2026-Q3-v3",
     "project": "GenAI Lens",
     "evaluator": "auto",
@@ -286,7 +286,7 @@
         "quarterEnd": "2026-06-30",
         "elapsedPct": 100
       },
-      "generatedAt": "2026-06-30T06:46:52.073Z",
+      "generatedAt": "2026-06-30T09:37:46.607Z",
       "escapedDefects": {
         "score": 9.7,
         "total": 12,
@@ -609,7 +609,7 @@
   },
   {
     "id": "auto-2026-Q2-mira-studio",
-    "date": "2026-06-30T06:46:52.073Z",
+    "date": "2026-06-30T09:37:46.607Z",
     "modelVersion": "2026-Q3-v3",
     "project": "Mira Studio",
     "evaluator": "auto",
@@ -634,7 +634,7 @@
         "quarterEnd": "2026-06-30",
         "elapsedPct": 100
       },
-      "generatedAt": "2026-06-30T06:46:52.073Z",
+      "generatedAt": "2026-06-30T09:37:46.607Z",
       "escapedDefects": {
         "score": 4,
         "total": 3,
@@ -733,7 +733,7 @@
   },
   {
     "id": "auto-2026-Q2-mira",
-    "date": "2026-06-30T06:46:52.073Z",
+    "date": "2026-06-30T09:37:46.607Z",
     "modelVersion": "2026-Q3-v3",
     "project": "Mira",
     "evaluator": "auto",
@@ -758,7 +758,7 @@
         "quarterEnd": "2026-06-30",
         "elapsedPct": 100
       },
-      "generatedAt": "2026-06-30T06:46:52.073Z",
+      "generatedAt": "2026-06-30T09:37:46.607Z",
       "escapedDefects": {
         "score": 10,
         "total": 16,
@@ -1014,7 +1014,7 @@
   },
   {
     "id": "auto-2026-Q2-mobile",
-    "date": "2026-06-30T06:46:52.073Z",
+    "date": "2026-06-30T09:37:46.607Z",
     "modelVersion": "2026-Q3-v3",
     "project": "Mobile",
     "evaluator": "auto",
@@ -1039,7 +1039,7 @@
         "quarterEnd": "2026-06-30",
         "elapsedPct": 100
       },
-      "generatedAt": "2026-06-30T06:46:52.073Z",
+      "generatedAt": "2026-06-30T09:37:46.607Z",
       "escapedDefects": {
         "score": 6,
         "total": 6,
@@ -1145,7 +1145,7 @@
   },
   {
     "id": "auto-2026-Q2-engage--legacy-",
-    "date": "2026-06-30T06:46:52.073Z",
+    "date": "2026-06-30T09:37:46.607Z",
     "modelVersion": "2026-Q3-v3",
     "project": "Engage (Legacy)",
     "evaluator": "auto",
@@ -1170,7 +1170,7 @@
         "quarterEnd": "2026-06-30",
         "elapsedPct": 100
       },
-      "generatedAt": "2026-06-30T06:46:52.073Z",
+      "generatedAt": "2026-06-30T09:37:46.607Z",
       "escapedDefects": {
         "score": 10,
         "total": 12,
