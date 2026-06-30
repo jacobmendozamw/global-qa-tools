@@ -46,5 +46,101 @@
         "note": "Mobile test suite did not exist in this quarter"
       }
     }
+  },
+  "Q2-2026": {
+    "generatedAt": "2026-06-30T21:17:50.143Z",
+    "commitSha": "5f4063ca824ea71cc02eac4fe5f82afdc2c3bf35",
+    "projects": {
+      "GenAI Lens": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/monitor/genai-lens",
+        "specFiles": 21,
+        "activeTests": 244,
+        "skipped": 3
+      },
+      "Mira Studio": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/mira-studio",
+        "specFiles": 10,
+        "activeTests": 88,
+        "skipped": 11
+      },
+      "Klear": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src_klear/tests",
+        "specFiles": 8,
+        "activeTests": 11,
+        "skipped": 0
+      },
+      "Explore": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/explore",
+        "specFiles": 318,
+        "activeTests": 784,
+        "skipped": 5
+      },
+      "Explore+": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/explore-plus",
+        "specFiles": 123,
+        "activeTests": 383,
+        "skipped": 6
+      },
+      "Monitor": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/monitor",
+        "specFiles": 73,
+        "activeTests": 456,
+        "skipped": 49
+      },
+      "Media Relations": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/media-relations",
+        "specFiles": 62,
+        "activeTests": 246,
+        "skipped": 45
+      },
+      "Newsletters": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/newsletters",
+        "specFiles": 31,
+        "activeTests": 77,
+        "skipped": 0
+      },
+      "Smart Alerts": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/alerts",
+        "specFiles": 9,
+        "activeTests": 90,
+        "skipped": 1
+      },
+      "Engage (Legacy)": {
+        "repo": "global-qa-test-suite",
+        "treeSha": "74f2681ad4334fe71c1bb70d74cd16eb10604637",
+        "directory": "src/tests/engage",
+        "specFiles": 1,
+        "activeTests": 1,
+        "skipped": 1
+      },
+      "Mobile": {
+        "repo": "global-qa-mobile-test-suite",
+        "treeSha": "n/a (suite not yet created)",
+        "directory": "(root)",
+        "specFiles": 0,
+        "activeTests": 0,
+        "skipped": 0,
+        "subflows": 0,
+        "note": "Mobile test suite did not exist in this quarter"
+      }
+    }
   }
 }
