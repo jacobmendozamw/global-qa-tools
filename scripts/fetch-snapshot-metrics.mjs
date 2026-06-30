@@ -6,7 +6,7 @@
 //     --tree=<SHA>  --label=q1-2026
 //
 // --tree   : full commit or tree SHA from the target repo snapshot
-// --label  : quarter label written into the output (e.g. Q1-2026, Q4-2025)
+// --label  : quarter label written into the output (e.g. Q1-2026, Q2-2026)
 //
 // The script appends/updates that quarter entry in historical-test-metrics.json
 // so you can run it multiple times for different quarters without overwriting.
@@ -40,10 +40,23 @@ const headers = {
 
 // Project → directory within global-qa-test-suite
 const PLAYWRIGHT_DIRS = {
-  'GenAI Lens':     'src/tests/monitor/genai-lens',
-  'Mira Studio':    'src/tests/mira-studio',
-  'Mira':           'src/tests/mira',
-  'Engage (Legacy)':'src/tests/engage',
+  'GenAI Lens':      'src/tests/monitor/genai-lens',
+  'Mira Studio':     'src/tests/mira-studio',
+  'Klear':           'src_klear/tests',
+  'Explore':         'src/tests/explore',
+  'Explore+':        'src/tests/explore-plus',
+  'Monitor':         'src/tests/monitor',
+  'Media Relations': 'src/tests/media-relations',
+  'Newsletters':     'src/tests/newsletters',
+  'Smart Alerts':    'src/tests/alerts',
+  'Engage (Legacy)': 'src/tests/engage',
+  // Mira, Analytics, UDS, App Framework: no Playwright tests yet
+};
+
+// Sub-directories to exclude from a project's spec scan
+// (used when a sub-product has its own dedicated PLAYWRIGHT_DIRS entry)
+const EXCLUDE_DIRS = {
+  'Monitor': ['src/tests/monitor/genai-lens'],
 };
 
 async function ghGet(path, params = {}) {
@@ -86,8 +99,13 @@ async function main() {
   const results = {};
 
   for (const [project, dir] of Object.entries(PLAYWRIGHT_DIRS)) {
-    const prefix = dir + '/';
-    const specs  = blobs.filter(f => f.path.startsWith(prefix) && f.path.endsWith('.spec.ts'));
+    const prefix   = dir + '/';
+    const excludes = (EXCLUDE_DIRS[project] || []).map(e => e + '/');
+    const specs    = blobs.filter(f =>
+      f.path.startsWith(prefix) &&
+      f.path.endsWith('.spec.ts') &&
+      !excludes.some(ex => f.path.startsWith(ex))
+    );
     console.log(`${project}: ${specs.length} spec files`);
 
     let activeTests = 0, skipped = 0;

@@ -167,6 +167,7 @@ function buildInternalEscapedJQL(devProjects, quarterStart) {
       );
     } else {
       regularProjects.push(conf.project);
+      if (conf.additionalProjects?.length) regularProjects.push(...conf.additionalProjects);
     }
   }
   const clauses = [];
@@ -324,7 +325,8 @@ async function computeProject(name, component, internalEscapedMap, preProduction
   const avgDays = openCount ? Math.round(ages.reduce((a, b) => a + b, 0) / openCount) : 0;
 
   const devConf = DEV_PROJECTS[name];
-  const internalTickets = devConf ? (internalEscapedMap.get(devConf.project) || []) : [];
+  const allBoardKeys = devConf?.project ? [devConf.project, ...(devConf.additionalProjects || [])] : [];
+  const internalTickets = allBoardKeys.flatMap(k => internalEscapedMap.get(k) || []);
   const internalTotal = internalTickets.length;
   // preProductionMap is keyed by Risk Baseline project name (not board key), so MIRALEGACY
   // tickets are already merged into "Mira" by fetchAllPreProductionCaught.

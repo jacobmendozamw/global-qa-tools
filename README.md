@@ -1,83 +1,343 @@
 # global-qa-tools
 
-Internal tooling for the Mira & GenAI QA Team. This repo centralizes web-based tools used to support QA operations, risk tracking, and team visibility. The site is **fully static** (no serverless functions, no database) and deployed as a **single project**, served under one domain.
+Internal tooling for the Global QA Organization — Meltwater. This repo centralizes web-based tools used to support QA operations, risk tracking, and team visibility across all QA teams. The site is **fully static** (no serverless functions, no database) and deployed as a **single project**, served under one domain.
+
+> **Current scope:** Mira & GenAI QA Team (5 projects, 4 sub-teams). See [Scaling to the full organization](#scaling-to-the-full-organization) for the complete guide to onboarding new teams and projects.
 
 ## Tools
 
 | Tool | URL path | Description | Data |
 |---|---|---|---|
 | Landing | `/` | Index page linking to all tools. | Static |
-| QA Risk Baseline | `/risk-baseline/` | Score and track project risk over time using a two-layer model (base risk + QA mitigations). | Saved in the browser (localStorage) |
-| 2026 Roadmap | `/roadmap/` | Customized Gantt viewer for the Mira & GenAI QA 2026 roadmap. Filter by epic/person/pillar, edit items, import/export JSON. | Static (`roadmap/data.json` + localStorage) |
-| GitHub Metrics | `/git-metrics/` | Per-team activity (commits / PRs) with a team selector, a team-comparison view (which team is most active), and an individual contributor ranking for `meltwater/global-qa-test-suite`. | Static (`git-metrics/data.json`, refreshed by a GitHub Action) |
+| QA Risk Baseline | `/risk-baseline/` | Score and track project risk over time using a two-layer model (base risk + QA mitigations). Integrates Jira escaped-defect data, test coverage, and detection efficiency automatically. | `risk-baseline/data.json` + `jira-metrics.json` + `test-metrics.json` (refreshed by Actions) |
+| 2026 Roadmap | `/roadmap/` | Customized Gantt viewer for the QA 2026 roadmap. Filter by epic/person/pillar, edit items, import/export JSON. | `roadmap/data.json` + localStorage |
+| GitHub Metrics | `/git-metrics/` | Per-team activity (commits / PRs) with a team selector, a team-comparison view (which team is most active), and an individual contributor ranking for tracked QA repos. | `git-metrics/data.json` (refreshed by Actions) |
 | Transformation ROI | `/roi/` | Static business-case page estimating the impact of the 2026 QA improvement program. | Static |
 
 ## Stack
 
 - Vanilla HTML + React (via CDN) for the frontend — no build step
 - Static hosting only (no serverless functions, no database)
-- GitHub Actions to refresh the GitHub Metrics data file on a schedule
+- GitHub Actions running Node.js scripts to refresh JSON data files on a schedule
+- All secrets (Jira token, GitHub PAT) live exclusively in Actions Secrets — never committed
 
 ## Structure
 
 ```
 global-qa-tools/
-├── index.html                       # landing page
+├── index.html                              # landing page
 ├── scripts/
-│   └── fetch-github-metrics.mjs      # generates git-metrics/data.json
+│   ├── fetch-github-metrics.mjs            # generates git-metrics/data.json
+│   ├── fetch-jira-metrics.mjs              # generates risk-baseline/jira-metrics.json + data.json
+│   ├── fetch-test-metrics.mjs              # generates risk-baseline/test-metrics.json
+│   ├── fetch-snapshot-metrics.mjs          # one-off historical snapshot (manual)
+│   ├── backfill-jira-history-tickets.mjs   # one-off ticket backfill for past quarters (manual)
+│   └── jira-projects.json                  # ⚙️ primary config: projects, Jira boards, QA reporters
 ├── .github/
 │   ├── workflows/
-│   │   └── refresh-github-metrics.yml  # scheduled data refresh
+│   │   ├── refresh-all-metrics.yml         # dispatches all three refresh workflows in parallel
+│   │   ├── refresh-github-metrics.yml      # daily GitHub activity refresh
+│   │   ├── refresh-jira-metrics.yml        # daily Jira + Risk Baseline refresh
+│   │   ├── refresh-test-metrics.yml        # test coverage refresh
+│   │   └── backfill-snapshot-metrics.yml   # manual historical snapshot workflow
 │   ├── CODEOWNERS
 │   └── dependabot.yml
 ├── roadmap/
 │   ├── index.html
-│   └── data.json
+│   └── data.json                           # ⚙️ edit to update roadmap items
 ├── git-metrics/
 │   ├── index.html
-│   ├── teams.json                    # team → members mapping (edit this)
-│   └── data.json                     # generated; do not edit by hand
+│   ├── teams.json                          # ⚙️ team → GitHub handles mapping (edit this)
+│   └── data.json                           # generated; do not edit by hand
 ├── risk-baseline/
-│   └── index.html
+│   ├── index.html
+│   ├── data.json                           # generated + manual assessments merged
+│   ├── jira-metrics.json                   # generated; do not edit by hand
+│   ├── test-metrics.json                   # generated; do not edit by hand
+│   ├── historical-test-metrics.json        # generated by snapshot script; do not edit by hand
+│   └── jira-history.json                   # historical per-quarter Jira data
 └── roi/
     └── index.html
 ```
 
 ## Deployment
 
-A single **static** project with the Root Directory at the repo root (default). The
-host serves the HTML by path (`/roadmap/`, `/git-metrics/`, …). There are no
-serverless functions and no environment variables to set on the host — every tool
-runs entirely in the browser.
+A single **static** project with the Root Directory at the repo root (default). The host
+serves the HTML by path (`/roadmap/`, `/git-metrics/`, …). There are no serverless
+functions and no environment variables to set on the host — every tool runs entirely in
+the browser.
 
-### GitHub Metrics data refresh
+### Data refresh workflows
 
-The metrics dashboard reads `git-metrics/data.json`, which is regenerated by the
-`Refresh GitHub Metrics` workflow (daily + manual `workflow_dispatch`). The workflow
-runs `scripts/fetch-github-metrics.mjs` and, because `main` is protected (changes must
-go through a PR), opens/updates a single rolling pull request (`automated/metrics-refresh`)
-with the new data. Merging that PR publishes the latest metrics.
+All three data sources are refreshed daily by GitHub Actions. The workflows commit the
+updated JSON files via a rolling PR (because `main` is branch-protected).
 
-Requirements:
+| Workflow | Schedule | Output files | Secrets required |
+|---|---|---|---|
+| `refresh-github-metrics.yml` | Daily 06:00 UTC | `git-metrics/data.json` | `METRICS_READ_TOKEN` |
+| `refresh-jira-metrics.yml` | Daily 06:00 UTC | `risk-baseline/jira-metrics.json`, `risk-baseline/data.json` | `JIRA_EMAIL`, `JIRA_API_TOKEN` |
+| `refresh-test-metrics.yml` | Daily 06:00 UTC | `risk-baseline/test-metrics.json` | `METRICS_READ_TOKEN` |
+| `refresh-all-metrics.yml` | Manual (`workflow_dispatch`) | Triggers all three above in parallel | — |
 
-| What | Where | Purpose |
+**Required Actions secrets (Settings → Secrets and variables → Actions):**
+
+| Secret | Value | Used by |
 |---|---|---|
-| `METRICS_READ_TOKEN` secret | Settings → Secrets and variables → Actions | A fine-grained, **read-only** PAT with access to `meltwater/global-qa-test-suite`. Never committed; lives only in Actions secrets. |
-| Workflow permissions | Settings → Actions → General | "Read and write permissions" **and** "Allow GitHub Actions to create and approve pull requests" must be enabled so the workflow can open the refresh PR. |
+| `METRICS_READ_TOKEN` | Fine-grained, read-only PAT with access to `meltwater/global-qa-test-suite` (and any other QA test repos) | `refresh-github-metrics.yml`, `refresh-test-metrics.yml` |
+| `JIRA_EMAIL` | Atlassian account email used to mint the API token | `refresh-jira-metrics.yml` |
+| `JIRA_API_TOKEN` | API token from `id.atlassian.com` → Security → API tokens. Must have **read** access to TRITON and all configured dev boards. | `refresh-jira-metrics.yml` |
 
-### Configuring teams
+**Required workflow permissions (Settings → Actions → General):**
+- "Read and write permissions" **and** "Allow GitHub Actions to create and approve pull requests" — needed to open the rolling refresh PRs.
 
-Team membership is defined in [`git-metrics/teams.json`](git-metrics/teams.json) — a
-plain mapping of GitHub handles to teams. To add a team, append an object to `teams`
-with a `name` and a `members` map (`github-handle` → display name). Any contributor not
-listed there is grouped under `unassignedLabel` automatically. The next data refresh
-(or a local run of `scripts/fetch-github-metrics.mjs`) picks up the change — no code
-edits needed.
+---
+
+## Scaling to the full organization
+
+The application was initially built for the **Mira & GenAI QA Team**. The following
+sections document every file that must be updated and exactly what to change to onboard
+additional teams, projects, and engineers.
+
+### Overview of hardcoded limits (current state)
+
+| File | What is hardcoded | Impact if not changed |
+|---|---|---|
+| `scripts/fetch-github-metrics.mjs` | Single repo (`global-qa-test-suite`) | Only Mira/GenAI commits & PRs tracked |
+| `scripts/fetch-test-metrics.mjs` | `TEST_PROJECTS` constant with 5 project→dir mappings | New projects/repos not counted |
+| `scripts/fetch-snapshot-metrics.mjs` | `PLAYWRIGHT_DIRS` constant with 4 project paths | Historical snapshots miss new projects |
+| `git-metrics/teams.json` | 4 teams, ~21 engineers | Other teams appear as "Unassigned" |
+| `scripts/jira-projects.json` | 5 projects under TRITON, 5 dev boards, 6 QA reporters | New projects & engineers invisible in Risk Baseline |
+| `risk-baseline/index.html` | `PROJECTS`, `PROJECT_DEFAULTS`, `PROJECT_EVIDENCE` constants | New projects not visible in the UI |
+
+---
+
+### 1 · Add a new QA team to GitHub Metrics
+
+**File:** [`git-metrics/teams.json`](git-metrics/teams.json)
+
+Append an object to the `teams` array. Handles are matched case-insensitively.
+Any contributor not listed is grouped under `unassignedLabel` automatically.
+
+```jsonc
+{
+  "name": "Your Team Name",
+  "members": {
+    "github-handle-1": "Display Name 1",
+    "github-handle-2": "Display Name 2"
+  }
+}
+```
+
+No code changes are needed — the next data refresh picks up the new team automatically.
+
+> **Note:** The GitHub Metrics dashboard currently tracks commits and PRs in a single
+> repo (`meltwater/global-qa-test-suite`). If your team contributes to a **different
+> repo**, see §4 below to add multi-repo support in the fetch script.
+
+---
+
+### 2 · Add a new project to the QA Risk Baseline (Jira side)
+
+**File:** [`scripts/jira-projects.json`](scripts/jira-projects.json)
+
+There are **four** sections to update:
+
+#### 2a — `projects` — maps the display name to its TRITON component
+```jsonc
+"projects": {
+  "Your Project Name": "TRITON Component Name"
+}
+```
+
+#### 2b — `devProjects` — maps the display name to its dev Jira board
+```jsonc
+"devProjects": {
+  "Your Project Name": { "project": "BOARDKEY" }
+}
+```
+If the project shares a board with another via a Jira component, add:
+```jsonc
+{ "project": "BOARDKEY", "component": "Component Name" }
+```
+
+#### 2c — `qaPreProductionReporters` — add the engineer's Atlassian email (or account ID)
+```jsonc
+"qaPreProductionReporters": [
+  "engineer@meltwater.com"
+]
+```
+This powers the Detection Efficiency score. Every QA engineer who files bugs on dev
+boards before production must be listed here.
+
+#### 2d — `riskBaselineDefaults` — seed the three qualitative base-risk scores (1–3)
+```jsonc
+"riskBaselineDefaults": {
+  "Your Project Name": { "userImpact": 2, "rateOfChange": 2, "complexity": 2 }
+}
+```
+
+#### 2e — (Optional) `exposure.byProject` — seed story-point denominator if density normalization is enabled
+```jsonc
+"exposure": {
+  "byProject": {
+    "Your Project Name": { "devProject": "BOARDKEY" }
+  }
+}
+```
+
+#### 2f — (Optional) `linkAttribution` — if two projects share a TRITON component, split by linked-issue prefix
+```jsonc
+"linkAttribution": {
+  "Project A": ["PREFIX_A"],
+  "Project B": ["PREFIX_B"]
+}
+```
+
+After editing `jira-projects.json`, run the Jira refresh workflow manually
+(`refresh-jira-metrics.yml` → Run workflow) or run locally:
+```bash
+JIRA_EMAIL=you@meltwater.com JIRA_API_TOKEN=<token> node scripts/fetch-jira-metrics.mjs
+```
+
+---
+
+### 3 · Add a new project to the QA Risk Baseline (test coverage side)
+
+**File:** [`scripts/fetch-test-metrics.mjs`](scripts/fetch-test-metrics.mjs)
+
+The `TEST_PROJECTS` constant is currently hardcoded. Add a new entry:
+
+```js
+const TEST_PROJECTS = {
+  // existing entries …
+  'Your Project Name': {
+    owner: 'meltwater',
+    repo:  'your-qa-test-repo',
+    branch: 'develop',
+    dir:   'src/tests/your-project-dir',
+    type:  'playwright',   // or 'maestro' for mobile YAML flows
+  },
+};
+```
+
+> **Recommended improvement:** Move `TEST_PROJECTS` to a config JSON file (e.g.
+> `scripts/test-projects.json`) so it can be edited without touching code, following
+> the same pattern as `jira-projects.json`. See §6 for the full migration plan.
+
+Then update the Playwright evidence in `risk-baseline/index.html` → `PROJECT_EVIDENCE`
+to reflect the new project's coverage data (spec files, active tests, critical flows).
+
+---
+
+### 4 · Track a new GitHub repo in the GitHub Metrics dashboard
+
+**File:** [`scripts/fetch-github-metrics.mjs`](scripts/fetch-github-metrics.mjs)
+
+The script currently fetches commits and PRs for a **single hardcoded repo**:
+```js
+const OWNER = 'meltwater';
+const REPO  = 'global-qa-test-suite';
+```
+
+To support multiple repos, the script needs to be extended to:
+1. Read a `repos` list from `git-metrics/teams.json` (or a new config key).
+2. Run `getAllCommitsByMonth()` and `getAllPRsByMonth()` for each repo.
+3. Merge the results before grouping by team.
+
+**Minimal change (short-term):** If your team contributes to a second repo but you
+don't need per-repo breakdowns yet, add `"repos": ["global-qa-test-suite", "your-repo"]`
+to `git-metrics/teams.json` and update the script to iterate over that list.
+
+**Token scope:** Expand the `METRICS_READ_TOKEN` PAT in Actions Secrets to include
+read access to every additional repo you want to track.
+
+---
+
+### 5 · Add a new engineer to performance tracking
+
+An engineer must be registered in **two places**:
+
+| Where | What to add | Effect |
+|---|---|---|
+| `git-metrics/teams.json` → `members` | `"github-handle": "Display Name"` | Appears in GitHub Metrics team view and contributor ranking |
+| `scripts/jira-projects.json` → `qaPreProductionReporters` | `"engineer@meltwater.com"` | Bugs they file in staging (labels = `known`) count toward Detection Efficiency |
+
+If the engineer works across multiple projects, no extra config is needed — the existing
+JQL queries already scope by reporter across all configured dev boards.
+
+---
+
+### 6 · Recommended config-driven refactor (multi-team scale)
+
+The following changes remove the remaining hardcoded constants and make the application
+fully driven by config files. These are **not required** for a working deployment but
+are recommended before onboarding more than ~3 additional teams.
+
+| Change | Effort | Benefit |
+|---|---|---|
+| Move `TEST_PROJECTS` in `fetch-test-metrics.mjs` to `scripts/test-projects.json` | Low | Add new projects without touching code |
+| Move `PLAYWRIGHT_DIRS` in `fetch-snapshot-metrics.mjs` to the same config | Low | Historical snapshots auto-cover new projects |
+| Make `REPO` in `fetch-github-metrics.mjs` a list read from `git-metrics/teams.json` | Medium | Track any number of QA repos |
+| Remove `PROJECTS` / `PROJECT_DEFAULTS` hardcoded arrays from `risk-baseline/index.html` and derive them from the loaded `jira-metrics.json` | Medium | New projects in `jira-projects.json` appear in the UI automatically |
+| Replace `PROJECT_EVIDENCE` in `risk-baseline/index.html` with a `risk-baseline/evidence.json` file | Medium | Per-project test coverage notes are editable without touching the HTML |
+
+---
+
+### 7 · Update the landing page and page titles
+
+When onboarding the site as a full-org tool, update the following:
+
+- **`index.html`** — subtitle and footer copy currently say "Mira & GenAI QA Team". Change to "Global QA Organization" (or the appropriate scope).
+- **`git-metrics/index.html`** — header title says "GitHub Activity — global-qa-test-suite". Update to the broader label once multi-repo tracking is in place.
+- **`roadmap/data.json`** — roadmap items are Mira & GenAI-specific. Duplicate the file or add a team-selector to the Gantt viewer to support multiple team roadmaps.
+
+---
+
+### 8 · Access control for a wider audience
+
+The site is currently restricted via the hosting platform's whitelist. When expanding
+to the full org:
+
+1. **Add new team members** to the hosting platform's allowed-users list (Vercel
+   Authentication, password protection, or equivalent).
+2. Consider moving to **SSO-based protection** (e.g. Vercel's `@meltwater.com` domain
+   restriction) instead of maintaining a manual whitelist.
+3. The **Risk Baseline** and **GitHub Metrics** pages contain per-individual activity
+   data — keep access scoped to QA managers, leads, and the engineers themselves.
+
+---
+
+### 9 · Multi-Jira-instance or multi-project support
+
+The current setup assumes **one Jira project** (`TRITON`) as the customer-ticket
+source, with multiple dev boards (GAIL, HZN, MOB, MIRA, SMM) as the internal source.
+
+If other QA teams use a **different Jira project** for customer tickets (not TRITON),
+the `fetch-jira-metrics.mjs` script needs to be updated to accept multiple
+`jiraProject` values — or a separate instance of the script must run per Jira project.
+Add the `JIRA_API_TOKEN` to Secrets once; as long as the Atlassian account has read
+access to all boards, no additional secrets are needed.
+
+---
+
+## Configuring teams (quick reference)
+
+Team membership for GitHub Metrics is defined in
+[`git-metrics/teams.json`](git-metrics/teams.json) — a plain mapping of GitHub handles
+to teams. Any contributor not listed is grouped under `unassignedLabel` automatically.
+The next data refresh picks up changes — no code edits needed.
+
+Jira project config (for Risk Baseline) is defined in
+[`scripts/jira-projects.json`](scripts/jira-projects.json). This file controls which
+projects appear in the Risk Baseline, which Jira boards are queried, which issue types
+count as defects, severity weights, and the scoring model parameters.
+
+---
 
 ## Ownership & Security
 
 ### Ownership
-- **Owner:** Mira & GenAI QA Team (GQA) — Meltwater. The project is team-owned, not
+- **Owner:** Global QA Organization — Meltwater. The project is team-owned, not
   personal; the code lives in the org repo `meltwater/global-qa-tools`.
 - **Primary maintainer:** Jacob Mendoza (`jacob.mendoza@meltwater.com`).
 - Repository review is enforced via [`.github/CODEOWNERS`](.github/CODEOWNERS) so the
@@ -85,18 +345,20 @@ edits needed.
 
 ### Data exposed
 - No customer data, credentials, or regulated PII. The only personal data is Meltwater
-  employees' first names and GitHub handles.
+  employees' first names, GitHub handles, and Atlassian emails.
 - Content is **internal**, and some is sensitive: GitHub Metrics shows per-individual
   activity, and the ROI page contains internal business-case figures. Access should be
-  limited to the QA team and relevant leadership — not shared broadly.
+  limited to QA managers, leads, and the relevant engineering teams — not shared broadly.
 
 ### Access control
-- Access is gated at the **hosting platform** level, not in-app. There is no SSO; the
-  site is restricted to an explicit **whitelist** of users (e.g. members added to the
-  hosting team via Vercel Authentication / Deployment Protection, or password
-  protection). Only whitelisted people can reach the pages.
-- Risk Baseline data lives in each user's browser (localStorage) and is never sent to a
-  server.
+- Access is gated at the **hosting platform** level, not in-app. There is no in-app
+  SSO; the site should be restricted to an explicit **whitelist** of users (Vercel
+  Authentication / Deployment Protection, or password protection). Only whitelisted
+  people can reach the pages.
+- Risk Baseline assessment data lives in each user's browser (localStorage) and is
+  merged with the shared `data.json` on load. It is never sent to a server.
+- The `METRICS_READ_TOKEN` and `JIRA_API_TOKEN` secrets live exclusively in GitHub
+  Actions Secrets. They are never committed or exposed in the static site.
 
 ### Secrets
 - No secrets are committed to the repo. The only secret is `METRICS_READ_TOKEN`, stored

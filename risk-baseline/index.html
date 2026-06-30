@@ -189,16 +189,50 @@ function exportAssessments(records) {
 }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
-const PROJECTS = ['GenAI Lens','Mira Studio','Mira','Mobile','Engage (Legacy)'];
+const PROJECTS = [
+  // Pod 1 — Mira, GAIL & Klear
+  'GenAI Lens','Mira Studio','Mira','Mobile','Klear',
+  // Pod 2 — Explore / E+, Analytics & UDS
+  'Explore','Explore+','Analytics','UDS',
+  // Pod 3 — Media Intelligence
+  'Monitor','App Framework','Media Relations','Newsletters','Smart Alerts',
+  // Legacy
+  'Engage (Legacy)',
+];
+
+// Pod hierarchy — each entry is a manager’s scope.
+// Used to render the pod-filter shortcut above project pills in every view.
+const PODS = [
+  { id:'pod1', name:'Mira, GAIL & Klear',           projects:['GenAI Lens','Mira Studio','Mira','Mobile','Klear'] },
+  { id:'pod2', name:'Explore / E+, Analytics & UDS', projects:['Explore','Explore+','Analytics','UDS'] },
+  { id:'pod3', name:'Media Intelligence',            projects:['Monitor','App Framework','Media Relations','Newsletters','Smart Alerts'] },
+];
+
+// Returns the pod a project belongs to (or null for legacy).
+const podOf = proj => PODS.find(pod => pod.projects.includes(proj)) || null;
 
 // Project defaults map — synced to Confluence §4.8 (2026-Q3-v2)
 const PROJECT_DEFAULTS = {
   // testCoverage is on the 5-level scale (1=0–20%, 2=20–40%, 3=40–60%, 4=60–80%, 5=80–100%).
-  'GenAI Lens':    { userImpact:3, rateOfChange:3, complexity:3, testability:3, testCoverage:5, automationConfidence:3 },
-  'Mira Studio':   { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:3, automationConfidence:2 },
-  'Mira':          { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
-  'Mobile':        { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
-  'Engage (Legacy)':{ userImpact:2, rateOfChange:1, complexity:1, testability:2, testCoverage:1, automationConfidence:1 },
+  // Pod 1 — Mira, GAIL & Klear
+  'GenAI Lens':         { userImpact:3, rateOfChange:3, complexity:3, testability:3, testCoverage:5, automationConfidence:3 },
+  'Mira Studio':        { userImpact:3, rateOfChange:3, complexity:3, testability:2, testCoverage:3, automationConfidence:2 },
+  'Mira':               { userImpact:3, rateOfChange:3, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Mobile':             { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Klear':              { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  // Pod 2 — Explore / E+, Analytics & UDS
+  'Explore':            { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Explore+':           { userImpact:3, rateOfChange:2, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'Analytics':          { userImpact:2, rateOfChange:2, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  'UDS':                { userImpact:2, rateOfChange:2, complexity:3, testability:2, testCoverage:1, automationConfidence:1 },
+  // Pod 3 — Media Intelligence
+  'Monitor':            { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'App Framework':      { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Media Relations':    { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Newsletters':        { userImpact:2, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  'Smart Alerts':       { userImpact:3, rateOfChange:2, complexity:2, testability:2, testCoverage:1, automationConfidence:1 },
+  // Legacy
+  'Engage (Legacy)':    { userImpact:2, rateOfChange:1, complexity:1, testability:2, testCoverage:1, automationConfidence:1 },
 };
 
 // Evidence behind each pre-loaded default — mirrors Confluence §6 analysis.
@@ -534,7 +568,7 @@ function CriterionCard({ criterion, score, onScore, colorMap, weightPct, autoLoa
   );
 }
 
-// ── AssessView ────────────────────────────────────────────────────────────────
+// ── RiskIndexView ────────────────────────────────────────────────────────────────
 // Merges static PROJECT_EVIDENCE rows with live counts from test-metrics.json.
 // Only quantitative rows (Spec files, Active tests, Spec files / tests, Flows automated)
 // are replaced — qualitative analysis rows stay as-is.
@@ -555,11 +589,18 @@ function buildEvidence(project, criterionId, testMetrics) {
   });
 }
 
-function AssessView({ jiraMetrics, testMetrics }) {
-  const [project, setProject] = useState('');
+function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, project, onProjectChange }) {
   const [scores, setScores] = useState({});
   const [showTickets, setShowTickets] = useState(false);
   const [showQACatches, setShowQACatches] = useState(false);
+
+  const setProject = onProjectChange;
+  const selectPod = pod => {
+    const next = (activePod && activePod.id === pod.id) ? null : pod;
+    onPodChange(next);
+    onProjectChange(next ? next.projects[0] : '');
+  };
+  const shownProjects = activePod ? activePod.projects : PROJECTS;
 
   const JIRA_IDS = ['escapedDefects'];
   const jiraProject = (jiraMetrics && project) ? jiraMetrics.projects?.[project] : null;
@@ -627,11 +668,26 @@ function AssessView({ jiraMetrics, testMetrics }) {
 
   return (
     <div>
-      {/* Project selector — radio pills */}
+      {/* Project selector — pod filter + radio pills */}
       <div className="card" style={{marginBottom:20}}>
+        {/* Pod filter row */}
+        <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:10, paddingBottom:10, borderBottom:'1px solid var(--border)'}}>
+          <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Pod:</span>
+          {PODS.map(pod => (
+            <button type="button" key={pod.id} onClick={()=>selectPod(pod)}
+              style={{fontSize:11, padding:'3px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                fontWeight: activePod && activePod.id===pod.id ? 600 : 400,
+                border: activePod && activePod.id===pod.id ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
+                background: activePod && activePod.id===pod.id ? 'var(--teal-light)' : 'transparent',
+                color: activePod && activePod.id===pod.id ? 'var(--teal-dim)' : 'var(--text3)', transition:'all .15s'}}>
+              {pod.name}
+            </button>
+          ))}
+        </div>
+        {/* Project pills */}
         <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
-          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Proyecto:</span>
-          {PROJECTS.map(p => (
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Project:</span>
+          {shownProjects.map(p => (
             <button key={p} onClick={()=>setProject(prev=>prev===p?'':p)}
               style={{fontSize:12, padding:'5px 14px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
                 fontWeight: project===p ? 600 : 400,
@@ -1313,11 +1369,13 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
 function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [allRecords, setAllRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [visibleProjects, setVisibleProjects] = useState(new Set(PROJECTS));
+  const [visibleProjects, setVisibleProjects] = useState(new Set(PODS[0].projects));
   const [filterQuarter, setFilterQuarter] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
+  const [weightBase, setWeightBase] = useState(40);
   const [localRefresh, setLocalRefresh] = useState(0);
   const [detail, setDetail] = useState(null);
+  const [activePod, setActivePod] = useState(PODS[0]);
   const fileRef = useRef(null);
 
   useEffect(()=>{
@@ -1359,6 +1417,12 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
+
+  const selectPod = pod => {
+    const next = (activePod && activePod.id === pod.id) ? null : pod;
+    setActivePod(next);
+    setVisibleProjects(next ? new Set(next.projects) : new Set(PROJECTS));
+  };
 
   const fmtDate = iso => new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
@@ -1407,10 +1471,13 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
     .filter(r => !filterQuarter || quarterOf(r.date) === filterQuarter);
 
   const barColor = v => v==null ? 'var(--border2)' : v>=7.4 ? '#D85A30' : v>=5.1 ? '#BA7517' : '#1D9E75';
+  const computedRisk = r => (r.baseRisk != null && r.tritonScore != null)
+    ? Math.round((r.baseRisk * (weightBase/100) + r.tritonScore * ((100-weightBase)/100)) * 10) / 10
+    : r.finalRisk;
 
   const latestByProject = PROJECTS.reduce((acc, p) => {
     const r = allRecords.find(rec => rec.project === p); // allRecords sorted newest first
-    if (r) acc[p] = r.level ? levelByLabel(r.level) : (r.finalRisk!=null ? riskLevel(r.finalRisk) : null);
+    if (r) acc[p] = riskLevel(computedRisk(r) ?? r.finalRisk);
     return acc;
   }, {});
 
@@ -1418,9 +1485,24 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
     <div>
       {/* Project filter pills */}
       <div className="card" style={{marginBottom:12}}>
+        {/* Pod filter row */}
+        <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:10, paddingBottom:10, borderBottom:'1px solid var(--border)'}}>
+          <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Pod:</span>
+          {PODS.map(pod => (
+            <button key={pod.id} onClick={()=>selectPod(pod)}
+              style={{fontSize:11, padding:'3px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                fontWeight: activePod && activePod.id===pod.id ? 600 : 400,
+                border: activePod && activePod.id===pod.id ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
+                background: activePod && activePod.id===pod.id ? 'var(--teal-light)' : 'transparent',
+                color: activePod && activePod.id===pod.id ? 'var(--teal-dim)' : 'var(--text3)', transition:'all .15s'}}>
+              {pod.name}
+            </button>
+          ))}
+        </div>
+        {/* Project pills — filtered to the active pod */}
         <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
           <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Projects:</span>
-          {PROJECTS.map(proj => {
+          {(activePod ? activePod.projects : PROJECTS).map(proj => {
             const visible = visibleProjects.has(proj);
             const rl = latestByProject[proj];
             return (
@@ -1435,13 +1517,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
               </button>
             );
           })}
-          {visibleProjects.size < PROJECTS.length && (
-            <button onClick={()=>setVisibleProjects(new Set(PROJECTS))}
-              style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
-                border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
-              Show all
-            </button>
-          )}
         </div>
       </div>
 
@@ -1465,6 +1540,13 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           })}
         </div>
         <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{filteredRecords.length} snapshot{filteredRecords.length!==1?'s':''}</span>
+        <div style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:8,background:weightBase!==40?'var(--amber-bg)':'var(--bg2)',border:`1px solid ${weightBase!==40?'var(--amber-border)':'var(--border)'}`,transition:'background .2s, border .2s'}}>
+          <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>Base<br/>{weightBase}%</span>
+          <input type="range" min="0" max="100" step="5" value={weightBase} onChange={e=>setWeightBase(+e.target.value)}
+            style={{width:80,accentColor:'var(--teal)',cursor:'pointer',verticalAlign:'middle'}}/>
+          <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>TRITON<br/>{100-weightBase}%</span>
+          {weightBase!==40 && <button onClick={()=>setWeightBase(40)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid var(--amber-border)',background:'transparent',color:'var(--amber-text)',cursor:'pointer',fontFamily:'inherit',marginLeft:2}}>↩ reset</button>}
+        </div>
         <div className="toggle-wrap">
           <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Cards</button>
           <button className={`toggle-btn${viewMode==='matrix'?' active':''}`} onClick={()=>setViewMode('matrix')}>Matrix</button>
@@ -1501,8 +1583,9 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                     const r = byProjQ[proj][q];
                     const prevQ = allQuarters[allQuarters.indexOf(q) + 1];
                     const prev = prevQ ? byProjQ[proj]?.[prevQ] : null;
-                    const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
-                    const delta = (prev&&prev.finalRisk!=null&&r.finalRisk!=null) ? r.finalRisk-prev.finalRisk : null;
+                    const cr = computedRisk(r), prevCr = prev ? computedRisk(prev) : null;
+                    const rl = riskLevel(cr ?? r.finalRisk);
+                    const delta = (prevCr!=null&&cr!=null) ? cr-prevCr : null;
                     const dtxt = delta==null ? null : (delta>0?`▲ +${delta.toFixed(1)}`:delta<0?`▼ ${delta.toFixed(1)}`:'± 0.0');
                     const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                     const qi = quarterInfo(quarterOf(r.date));
@@ -1543,7 +1626,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                           <div style={{padding:'12px 12px 10px'}}>
                             <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>Risk Score</div>
                             <div style={{display:'flex',alignItems:'baseline',gap:5,marginBottom:4}}>
-                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
+                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{cr!=null?cr.toFixed(1):'—'}</span>
                               <span style={{fontSize:10,color:'var(--text3)'}}>/ 10</span>
                               {dtxt && <span style={{fontSize:10,fontWeight:700,color:dcol,marginLeft:2}}>{dtxt}</span>}
                             </div>
@@ -1645,7 +1728,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                 const de = r.jira?.detectionEfficiency;
                 const pmScores = Object.fromEntries(['automationConfidence','testCoverage','testability'].map(k=>[k, r.scores?.[k] ?? PROJECT_DEFAULTS[proj]?.[k]]));
                 const qaeiResult = computeQAEI(de ? de.rate : 0, pmScores, mp);
-                return { q, qi: quarterInfo(q), risk: r.finalRisk, qaei: qaeiResult.qaei, hasDCE: !!de, r };
+                return { q, qi: quarterInfo(q), risk: computedRisk(r), qaei: qaeiResult.qaei, hasDCE: !!de, r };
               }).filter(Boolean);
 
               if (!points.length) return null;
@@ -1717,7 +1800,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                   {/* Legend: scores of latest quarter */}
                   {(() => {
                     const last = points[points.length-1];
-                    const rl = last.r.finalRisk!=null ? riskLevel(last.r.finalRisk) : null;
+                    const rl = last.risk!=null ? riskLevel(last.risk) : null;
                     return (
                       <div style={{display:'flex', gap:10, marginTop:10, paddingTop:8, borderTop:'1px solid var(--border)', fontSize:11}}>
                         <div>
@@ -1779,7 +1862,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                       const pmScores = Object.fromEntries(['automationConfidence','testCoverage','testability'].map(k=>[k, r.scores?.[k] ?? PROJECT_DEFAULTS[proj]?.[k]]));
                       const qaeiResult = computeQAEI(de ? de.rate : 0, pmScores, mp);
                       const hasDCE = !!de;
-                      const risk = r.finalRisk ?? 0;
+                      const risk = computedRisk(r) ?? 0;
                       const qaei = qaeiResult?.qaei ?? 0;
                       const rl = riskLevel(risk);
                       const ql = qaLevel(qaei);
@@ -1834,13 +1917,14 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
             </thead>
             <tbody>
               {filteredRecords.map(r=>{
-                const rl = r.level ? levelByLabel(r.level) : (r.finalRisk!=null?riskLevel(r.finalRisk):null);
+                const cr = computedRisk(r);
+                const rl = riskLevel(cr ?? r.finalRisk);
                 return (
                   <tr key={r.id} style={{cursor:'pointer'}} onClick={()=>setDetail({type:'base',record:r})}>
                     <td style={{color:'var(--text2)',whiteSpace:'nowrap'}}>{fmtDate(r.date)}</td>
                     <td style={{fontWeight:600}}>{r.project}</td>
                     <td style={{color:'var(--text3)'}}>{quarterOf(r.date)}</td>
-                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</td>
+                    <td style={{fontWeight:700,color:rl?rl.text:'var(--text3)'}}>{cr!=null?cr.toFixed(1):'—'}</td>
                     <td>{rl&&<span className="pill" style={{background:rl.bg,color:rl.text}}>{rl.label}</span>}</td>
                     <td style={{color:'var(--text2)'}}>{r.baseRisk!=null?r.baseRisk.toFixed(1):'—'}</td>
                     <td style={{color:'var(--text2)'}}>{r.tritonScore!=null?r.tritonScore.toFixed(1):'—'}</td>
@@ -2016,10 +2100,16 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
 // ── QAEffectivenessView ───────────────────────────────────────────────────────
 function QAEffectivenessView({ jiraMetrics }) {
   const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
-  const [visibleProjects, setVisibleProjects] = useState(new Set(PROJECTS));
+  const [activePod, setActivePod] = useState(PODS[0]);
+  const [visibleProjects, setVisibleProjects] = useState(new Set(PODS[0].projects));
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
+
+  const selectPod = pod => {
+    setActivePod(pod);
+    setVisibleProjects(pod ? new Set(pod.projects) : new Set(PROJECTS));
+  };
 
   const projectData = PROJECTS.map(proj => {
     const de       = jiraMetrics?.projects?.[proj]?.detectionEfficiency;
@@ -2079,9 +2169,24 @@ function QAEffectivenessView({ jiraMetrics }) {
 
       {/* Project filter */}
       <div className="card" style={{marginBottom:16}}>
+        {/* Pod filter row */}
+        <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:10, paddingBottom:10, borderBottom:'1px solid var(--border)'}}>
+          <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Pod:</span>
+          {PODS.map(pod => (
+            <button key={pod.id} onClick={()=>selectPod(pod)}
+              style={{fontSize:11, padding:'3px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
+                fontWeight: activePod && activePod.id===pod.id ? 600 : 400,
+                border: activePod && activePod.id===pod.id ? '1.5px solid var(--teal)' : '.5px solid var(--border)',
+                background: activePod && activePod.id===pod.id ? 'var(--teal-light)' : 'transparent',
+                color: activePod && activePod.id===pod.id ? 'var(--teal-dim)' : 'var(--text3)', transition:'all .15s'}}>
+              {pod.name}
+            </button>
+          ))}
+        </div>
+        {/* Project pills — filtered to the active pod */}
         <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
           <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Projects:</span>
-          {PROJECTS.map(proj => {
+          {(activePod ? activePod.projects : PROJECTS).map(proj => {
             const visible = visibleProjects.has(proj);
             const pd = projectData.find(p => p.proj === proj);
             const ql = pd?.ql;
@@ -2097,13 +2202,6 @@ function QAEffectivenessView({ jiraMetrics }) {
               </button>
             );
           })}
-          {visibleProjects.size < PROJECTS.length && (
-            <button onClick={() => setVisibleProjects(new Set(PROJECTS))}
-              style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
-                border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
-              Show all
-            </button>
-          )}
         </div>
       </div>
 
@@ -2239,11 +2337,14 @@ function QAEffectivenessView({ jiraMetrics }) {
 
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
-  const [tab, setTab] = useState('assess');
+  const [tab, setTab] = useState('history');
   const [historyRefresh, setHistoryRefresh] = useState(0);
   const [jiraMetrics, setJiraMetrics] = useState(null);
   const [jiraHistory, setJiraHistory] = useState(null);
   const [testMetrics, setTestMetrics] = useState(null);
+  // Persisted Risk Index selection — survives tab switches
+  const [riskIndexPod, setRiskIndexPod] = useState(PODS[0]);           // default: Mira, GAIL & Klear
+  const [riskIndexProject, setRiskIndexProject] = useState('GenAI Lens'); // default: GenAI Lens
 
   // Load Jira metrics once; shared by the header period label and the assessment.
   useEffect(() => {
@@ -2275,13 +2376,15 @@ function App() {
           <p>Q3 2026 model · {periodText}</p>
         </div>
         <div className="nav-tabs">
-          <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Risk Index</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>RI History</button>
+          <button className={`nav-tab${tab==='risk-index'?' active':''}`} onClick={()=>setTab('risk-index')}>Risk Index</button>
           <button className={`nav-tab${tab==='qa'?' active':''}`} onClick={()=>setTab('qa')}>QA Effectiveness</button>
           <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
-      {tab==='assess' && <AssessView jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
+      {tab==='risk-index' && <RiskIndexView jiraMetrics={jiraMetrics} testMetrics={testMetrics}
+        activePod={riskIndexPod} onPodChange={setRiskIndexPod}
+        project={riskIndexProject} onProjectChange={setRiskIndexProject}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='qa' && <QAEffectivenessView jiraMetrics={jiraMetrics}/>}
       {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}

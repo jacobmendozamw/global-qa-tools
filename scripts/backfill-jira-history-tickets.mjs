@@ -8,7 +8,7 @@
 // tritonScore, density, …) are left untouched so the historical scores stay stable.
 //
 // Quarters to patch are taken from the --quarters flag (comma-separated, default Q1-2026):
-//   node scripts/backfill-jira-history-tickets.mjs --quarters=Q1-2026,Q4-2025
+//   node scripts/backfill-jira-history-tickets.mjs --quarters=Q1-2026,Q2-2026
 import { readFile, writeFile } from 'node:fs/promises';
 
 const email = process.env.JIRA_EMAIL;
@@ -24,11 +24,12 @@ const QUARTERS = (cliArgs.quarters || 'Q1-2026').split(',').map(s => s.trim());
 const cfg = JSON.parse(await readFile(new URL('./jira-projects.json', import.meta.url), 'utf8'));
 const SITE           = cfg.site;
 const PROJECT        = cfg.jiraProject;
-const DEFECT_TYPE    = cfg.defectIssueType || 'Defect';
+const DEFECT_TYPES   = cfg.defectIssueTypes || (cfg.defectIssueType ? [cfg.defectIssueType] : ['Defect']);
 const CRITICAL       = cfg.criticalPriorities || ['Blocker', 'Critical'];
 const EXCLUDE_KW     = cfg.excludeKeywords || [];
 const LINK_ATTR      = cfg.linkAttribution || {};
 const SEV_WEIGHTS    = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
+const RISK_DEFAULTS  = cfg.riskBaselineDefaults || {};
 
 const auth    = Buffer.from(`${email}:${token}`).toString('base64');
 const headers = { Authorization: `Basic ${auth}`, Accept: 'application/json' };
@@ -89,7 +90,10 @@ async function fetchTicketsForQuarter(projectName, component, from, to) {
   const prefixes  = [].concat(LINK_ATTR[projectName] || []);
   const needLinks = prefixes.length > 0;
   const excludeClause = EXCLUDE_KW.map(k => ` AND summary !~ ${q(k)}`).join('');
-  const jql = `project = ${q(PROJECT)} AND issuetype = ${q(DEFECT_TYPE)} AND component = ${q(component)} AND created >= ${q(from)} AND created <= ${q(to)}${excludeClause}`;
+  const issueTypeClause = DEFECT_TYPES.length === 1
+    ? `issuetype = ${q(DEFECT_TYPES[0])}`
+    : `issuetype in (${DEFECT_TYPES.map(q).join(', ')})`;
+  const jql = `project = ${q(PROJECT)} AND ${issueTypeClause} AND component = ${q(component)} AND created >= ${q(from)} AND created <= ${q(to)}${excludeClause}`;
   const fields = needLinks ? ['priority', 'summary', 'issuelinks'] : ['priority', 'summary'];
 
   const raw      = await searchAll(jql, fields);
@@ -109,25 +113,44 @@ async function main() {
   const histPath  = new URL('../risk-baseline/jira-history.json', import.meta.url);
   const jiraHist  = JSON.parse(await readFile(histPath, 'utf8'));
 
+  // Ensure all configured projects and quarters exist in jira-history structure.
+  if (!jiraHist.projects) jiraHist.projects = {};
+  const allQuartersSet = new Set(jiraHist.quarters || []);
+  QUARTERS.forEach(q => allQuartersSet.add(q));
+  jiraHist.quarters = [...allQuartersSet].sort();
+
+  for (const projectName of Object.keys(cfg.projects)) {
+    if (!jiraHist.projects[projectName]) {
+      jiraHist.projects[projectName] = {};
+      console.log(`  [new] Created history entry for ${projectName}`);
+    }
+    for (const ql of QUARTERS) {
+      if (!jiraHist.projects[projectName][ql]) {
+        jiraHist.projects[projectName][ql] = { total: null, weighted: null, tritonScore: null, tickets: [] };
+      }
+    }
+  }
+
   for (const ql of QUARTERS) {
     const { from, to } = quarterWindow(ql);
     console.log(`\n── ${ql}  (${from} → ${to}) ──`);
 
     for (const [projectName, component] of Object.entries(cfg.projects)) {
-      const entry = jiraHist.projects?.[projectName]?.[ql];
-      if (!entry) {
-        console.log(`  ${projectName}: no ${ql} entry in jira-history.json — skip`);
+      if (!component || component.startsWith('TODO_')) {
+        console.log(`  ${projectName}: TRITON component not set — skip`);
         continue;
       }
-      if (entry.total === 0) {
-        entry.tickets = [];
-        console.log(`  ${projectName}: 0 escapes recorded — setting tickets: []`);
+      const entry = jiraHist.projects?.[projectName]?.[ql];
+      if (!entry) {
+        console.log(`  ${projectName}: no ${ql} entry — skip (should not happen after init)`);
         continue;
       }
       try {
         const tickets = await fetchTicketsForQuarter(projectName, component, from, to);
         entry.tickets = tickets;
+        entry.total   = tickets.length;
         const weighted = Math.round(tickets.reduce((s, t) => s + t.weight, 0) * 100) / 100;
+        entry.weighted = weighted;
         console.log(`  ${projectName}: ${tickets.length} tickets fetched (weighted ${weighted})`);
       } catch (e) {
         console.error(`  ${projectName}: ERROR — ${e.message}`);
