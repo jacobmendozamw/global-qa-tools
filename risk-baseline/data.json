@@ -22,7 +22,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -48,7 +48,7 @@
     "finalRisk": 10,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -74,7 +74,7 @@
     "finalRisk": 4.9,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -100,7 +100,7 @@
     "finalRisk": 5,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -126,7 +126,267 @@
     "finalRisk": 3,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot. Test suite did not exist this quarter.",
+    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot. Test suite did not exist this quarter.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-klear",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Klear",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 5.0,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.0,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=57, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-explore",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Explore",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 6.7,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.7,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=154.5, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-exploreplus",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Explore+",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 8.3,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 9.3,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=80.5, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-analytics",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Analytics",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 1.1,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 6.7,
+    "tritonScore": 1.1,
+    "mitScore": null,
+    "finalRisk": 3.3,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=0, tritonScore=1.1.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-uds",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "UDS",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 6.7,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.7,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=85.5, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-monitor",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Monitor",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 6.7,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.7,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=40, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-app-framework",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "App Framework",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 5.0,
+    "tritonScore": 1.1,
+    "mitScore": null,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=0, tritonScore=1.1.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-media-relations",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Media Relations",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 5.0,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.0,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=61, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-newsletters",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Newsletters",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 5.0,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.0,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=105, tritonScore=10.0.",
+    "jira": null
+  },
+  {
+    "id": "backfill-q1-2026-smart-alerts",
+    "date": "2026-03-31T00:00:00.000Z",
+    "modelVersion": "2026-Q3-v2",
+    "project": "Smart Alerts",
+    "evaluator": "QA Team (backfill)",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 10.0,
+      "automationConfidence": 1,
+      "testCoverage": 1,
+      "testability": 2
+    },
+    "overrideActive": false,
+    "overrideJustification": "",
+    "baseRisk": 6.7,
+    "tritonScore": 10.0,
+    "mitScore": null,
+    "finalRisk": 8.7,
+    "level": "High",
+    "scaleMax": 10,
+    "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=34, tritonScore=10.0.",
     "jira": null
   },
   {
@@ -152,7 +412,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -178,7 +438,7 @@
     "finalRisk": 7.9,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -204,7 +464,7 @@
     "finalRisk": 9.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -230,7 +490,7 @@
     "finalRisk": 6.4,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -256,7 +516,7 @@
     "finalRisk": 5,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -276,7 +536,7 @@
     "finalRisk": 9.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -630,7 +890,7 @@
     "finalRisk": 6.4,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -760,7 +1020,7 @@
     "finalRisk": 9.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -891,7 +1151,7 @@
           },
           {
             "key": "TRITON-36197",
-            "summary": "MIRA – Coverage Report Generation Failure",
+            "summary": "MIRA \u2013 Coverage Report Generation Failure",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -907,7 +1167,7 @@
           },
           {
             "key": "TRITON-36159",
-            "summary": "#86529274 MIRA – Coverage Report Generation Fails",
+            "summary": "#86529274 MIRA \u2013 Coverage Report Generation Fails",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -935,7 +1195,7 @@
         "tickets": [
           {
             "key": "MIRALEGACY-3224",
-            "summary": "MIRA PPT Export : Generate PPT” CTA visible on bot response for confirmation scenario",
+            "summary": "MIRA PPT Export : Generate PPT\u201d CTA visible on bot response for confirmation scenario",
             "priority": "Low",
             "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3224"
           },
@@ -1049,7 +1309,7 @@
     "finalRisk": 5.6,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1180,7 +1440,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1420,7 +1680,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1575,7 +1835,7 @@
           },
           {
             "key": "TRITON-36498",
-            "summary": "Klear – Redirecting Users to Creator Login (Incorrect Routing)",
+            "summary": "Klear \u2013 Redirecting Users to Creator Login (Incorrect Routing)",
             "priority": "High",
             "weight": 1.5,
             "critical": false,
@@ -1647,7 +1907,7 @@
           },
           {
             "key": "TRITON-36271",
-            "summary": "Klear - Centralized Connect Inbox – Message notification redirect broken for influencers with single-brand interaction",
+            "summary": "Klear - Centralized Connect Inbox \u2013 Message notification redirect broken for influencers with single-brand interaction",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -1727,7 +1987,7 @@
           },
           {
             "key": "TRITON-36168",
-            "summary": "#86522131 Klear – Instagram Reel Reach Discrepancy vs Native",
+            "summary": "#86522131 Klear \u2013 Instagram Reel Reach Discrepancy vs Native",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -1780,7 +2040,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2076,7 +2336,7 @@
     "finalRisk": 9.3,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2396,7 +2656,7 @@
     "finalRisk": 3.2,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2459,7 +2719,7 @@
     "finalRisk": 8.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2971,7 +3231,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3070,7 +3330,7 @@
           },
           {
             "key": "TRITON-36640",
-            "summary": "98514665 Incorrect selection display in Added Content – shows all articles selected when only one is selected",
+            "summary": "98514665 Incorrect selection display in Added Content \u2013 shows all articles selected when only one is selected",
             "priority": "Low",
             "weight": 1,
             "critical": false,
@@ -3086,7 +3346,7 @@
           },
           {
             "key": "TRITON-36607",
-            "summary": "Monitor View shows “No documents found” ",
+            "summary": "Monitor View shows \u201cNo documents found\u201d ",
             "priority": "Low",
             "weight": 1,
             "critical": false,
@@ -3246,7 +3506,7 @@
           },
           {
             "key": "UCS-3305",
-            "summary": "Trends Center: Missing “Open in new tab” action on content cards in slideout",
+            "summary": "Trends Center: Missing \u201cOpen in new tab\u201d action on content cards in slideout",
             "priority": "High",
             "url": "https://meltwater.atlassian.net/browse/UCS-3305"
           },
@@ -3306,7 +3566,7 @@
     "finalRisk": 2.7,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3369,7 +3629,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3476,7 +3736,7 @@
           },
           {
             "key": "TRITON-36921",
-            "summary": "Media Relation | OutReach- Discrepancy in Outreach Analytics",
+            "summary": "Media Relation | OutReach- Discrepancy in\u00a0Outreach Analytics",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -3636,7 +3896,7 @@
           },
           {
             "key": "TRITON-36202",
-            "summary": "#87949520 Media Relations – Error when clicking on Media List (Review Contact Updates)",
+            "summary": "#87949520 Media Relations \u2013 Error when clicking on Media List (Review Contact Updates)",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -3697,7 +3957,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -4345,7 +4605,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot — 2026-Q2",
+    "notes": "Auto-generated snapshot \u2014 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
