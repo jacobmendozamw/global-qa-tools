@@ -37,8 +37,8 @@ jobs:
           add-paths: risk-baseline/jira-metrics.json
           branch: automated/jira-metrics-refresh
           base: main
-          commit-message: "chore: refresh Jira metrics data (TRITON + internal escaped)"
-          title: "chore: refresh Jira metrics data (TRITON + internal escaped)"
+          commit-message: "chore: refresh Jira metrics data (TRITON + escaped + pre-production)"
+          title: "chore: refresh Jira metrics data (TRITON + escaped + pre-production)"
           assignees: |
             jacobmendozamw
           reviewers: |
@@ -47,9 +47,10 @@ jobs:
             Automated refresh of `risk-baseline/jira-metrics.json` by the **Refresh Jira Metrics** workflow.
 
             **What this updates:**
-            - **TRITON escaped defects** — customer-reported Defects this quarter, per project component (service requests excluded by keyword filter)
-            - **Internal escaped defects** — tickets tagged `labels = escaped` across dev boards (GAIL, HZN, MOB, MIRA, SMM/Conversations), fetched in a single combined JQL query
-            - **Detection Efficiency score** — ratio of internally-detected vs. customer-detected production bugs, mapped to a 1–3 mitigation score
+            - **TRITON escaped defects** — customer-reported Defects/Tickets this quarter, per project component (service requests excluded by keyword filter)
+            - **Pre-production catches** — tickets tagged `labels = known` and reported by the QA team on dev boards (GAIL, HZN, MOB, MIRA, MIRALEGACY, SMM/Conversations) — bugs found in staging that never reached production
+            - **Production-escaped catches** — tickets tagged `labels = escaped` across dev boards — bugs found in production before customer reports
+            - **Comprehensive DCE score** — (pre-production + escaped) / (pre-production + escaped + customer-reported), mapped to a 1–3 mitigation score for the Risk Index and driving the QAEI
 
             Merge to publish the latest values into the QA Risk Baseline tool.
           labels: |

@@ -33,6 +33,7 @@ const LINK_ATTRIBUTION = cfg.linkAttribution || {};
 const TRITON_CURVE = cfg.tritonCurve || { mu: 5, sigma: 4, scaleMax: 10 };
 const SEVERITY_WEIGHTS = Object.fromEntries(Object.entries(cfg.severityWeights || {}).filter(([, v]) => typeof v === 'number'));
 const EXPOSURE = cfg.exposure || { enabled: false };
+const PRE_PRODUCTION_REPORTERS = cfg.qaPreProductionReporters || [];
 const MODEL_VERSION = cfg.modelVersion || 'unversioned';
 const stripComment = o => { if (!o) return o; const { comment, ...rest } = o; return rest; };
 const MODEL_PARAMS = stripComment(cfg.modelParams) || { curveType: 'gaussian', baseFloor: 0, multiplierMin: 0.70, multiplierMax: 1.10 };
@@ -174,6 +175,68 @@ function buildInternalEscapedJQL(devProjects, quarterStart) {
   return clauses.join(' OR ');
 }
 
+// Builds a single combined JQL for bugs caught by QA in staging (labels = known,
+// reported by QA team members). Mirrors buildInternalEscapedJQL structure but adds
+// reporter filtering and uses preProductionProjects for MIRALEGACY → Mira mapping.
+function buildPreProductionJQL(devProjects, reporters, quarterStart) {
+  if (!reporters?.length) return '';
+  const reporterClause = `reporter in (${reporters.map(q).join(', ')})`;
+  const regularProjects = [];
+  const componentClauses = [];
+  for (const conf of Object.values(devProjects)) {
+    if (!conf?.project) continue;
+    const projects = conf.preProductionProjects ?? [conf.project];
+    if (conf.component) {
+      componentClauses.push(
+        `(project in (${projects.join(', ')}) AND component = ${q(conf.component)} AND labels = known AND created >= ${q(quarterStart)} AND ${reporterClause})`
+      );
+    } else {
+      regularProjects.push(...projects);
+    }
+  }
+  const dedupedRegular = [...new Set(regularProjects)];
+  const clauses = [];
+  if (dedupedRegular.length)
+    clauses.push(`(project in (${dedupedRegular.join(', ')}) AND labels = known AND created >= ${q(quarterStart)} AND ${reporterClause})`);
+  clauses.push(...componentClauses);
+  return clauses.join(' OR ');
+}
+
+// Fetch all pre-production tickets (labels = known, QA-reported) in one JQL query.
+// Returns Map<riskBaselineProjectName → ticket[]> — keyed by project name (not board
+// key) so that MIRALEGACY tickets are merged into "Mira" automatically.
+async function fetchAllPreProductionCaught(devProjects, reporters, quarterStart) {
+  const jql = buildPreProductionJQL(devProjects, reporters, quarterStart);
+  if (!jql) return new Map();
+  const reverseMap = new Map();
+  for (const [name, conf] of Object.entries(devProjects)) {
+    if (!conf?.project) continue;
+    const projects = conf.preProductionProjects ?? [conf.project];
+    for (const proj of projects) reverseMap.set(proj, name);
+  }
+  try {
+    const issues = await searchAll(jql, ['summary', 'priority', 'project']);
+    const byName = new Map();
+    for (const i of issues) {
+      const pk = i.fields?.project?.key;
+      if (!pk) continue;
+      const name = reverseMap.get(pk);
+      if (!name) continue;
+      if (!byName.has(name)) byName.set(name, []);
+      byName.get(name).push({
+        key: i.key,
+        summary: i.fields?.summary || '',
+        priority: i.fields?.priority?.name || '—',
+        url: `https://${SITE}/browse/${i.key}`,
+      });
+    }
+    return byName;
+  } catch (e) {
+    console.error(`Pre-production catch fetch failed: ${e.message}`);
+    return new Map();
+  }
+}
+
 // Fetch all internally-detected escaped tickets across every configured dev project
 // in a single JQL query, then return a Map<projectKey → ticket[]> for O(1) lookup.
 async function fetchAllInternalEscaped(devProjects, quarterStart) {
@@ -200,15 +263,21 @@ async function fetchAllInternalEscaped(devProjects, quarterStart) {
   }
 }
 
-function detectionEfficiencyScore(internalCount, customerCount) {
-  const total = internalCount + customerCount;
-  if (total === 0 || internalCount === 0) return 1;
-  const rate = internalCount / total;
+// Comprehensive DCE score using all QA-caught signals:
+//   preProductionCount  — bugs caught in staging (labels = known, never shipped)
+//   internalEscapedCount — bugs caught in production before customers (labels = escaped)
+//   customerCount       — bugs found by customers first (TRITON)
+// Scoring: 1 = no internal signal, 2 = partial, 3 = ≥50% of all bugs caught internally.
+function detectionEfficiencyScore(preProductionCount, internalEscapedCount, customerCount) {
+  const internalTotal = preProductionCount + internalEscapedCount;
+  const grandTotal = internalTotal + customerCount;
+  if (grandTotal === 0 || internalTotal === 0) return 1;
+  const rate = internalTotal / grandTotal;
   if (rate >= 0.50) return 3;
   return 2;
 }
 
-async function computeProject(name, component, internalEscapedMap) {
+async function computeProject(name, component, internalEscapedMap, preProductionMap) {
   const linkPrefixes = prefixesFor(name);
   const needLinks = linkPrefixes.length > 0;
   const issueTypeClause = DEFECT_TYPES.length === 1
@@ -256,8 +325,15 @@ async function computeProject(name, component, internalEscapedMap) {
   const devConf = DEV_PROJECTS[name];
   const internalTickets = devConf ? (internalEscapedMap.get(devConf.project) || []) : [];
   const internalTotal = internalTickets.length;
-  const deScore = detectionEfficiencyScore(internalTotal, total);
-  const deRate = (internalTotal + total) > 0 ? Math.round((internalTotal / (internalTotal + total)) * 100) : 0;
+  // preProductionMap is keyed by Risk Baseline project name (not board key), so MIRALEGACY
+  // tickets are already merged into "Mira" by fetchAllPreProductionCaught.
+  const preProductionTickets = preProductionMap.get(name) || [];
+  const preProductionTotal = preProductionTickets.length;
+  const comprehensiveInternal = preProductionTotal + internalTotal;
+  const deScore = detectionEfficiencyScore(preProductionTotal, internalTotal, total);
+  const deRate = (comprehensiveInternal + total) > 0
+    ? Math.round((comprehensiveInternal / (comprehensiveInternal + total)) * 100)
+    : 0;
 
   const result = {
     escapedDefects: { score: tritonScore10(tritonInput), total, critical, weighted, tickets,
@@ -265,8 +341,10 @@ async function computeProject(name, component, internalEscapedMap) {
     avgAgeOpenIssues: { avgDays, openCount, informational: true },
     dataQuality: { manualReview: needLinks ? { escaped: escMR, open: openMR } : { escaped: 0, open: 0 } },
     internalEscaped: { total: internalTotal, tickets: internalTickets },
+    preProductionCaught: { total: preProductionTotal, tickets: preProductionTickets },
     detectionEfficiency: {
       score: deScore,
+      preProductionCaught: preProductionTotal,
       internallyFound: internalTotal,
       customerFound: total,
       rate: deRate,
@@ -281,22 +359,26 @@ function quarterLabel(d) {
 }
 
 async function main() {
-  // Fetch all internally-detected escaped tickets across dev boards in one query,
-  // then distribute to each project's computeProject call via the Map.
+  // Fetch all QA-detected bugs in a single pass per source, then distribute
+  // to each project's computeProject call via Maps.
   const internalEscapedMap = await fetchAllInternalEscaped(DEV_PROJECTS, QUARTER_START);
   const internalTotal = [...internalEscapedMap.values()].reduce((s, t) => s + t.length, 0);
   console.log(`Internal escaped (all projects): ${internalTotal} tickets across ${internalEscapedMap.size} dev project(s)`);
 
+  const preProductionMap = await fetchAllPreProductionCaught(DEV_PROJECTS, PRE_PRODUCTION_REPORTERS, QUARTER_START);
+  const preProductionTotal = [...preProductionMap.values()].reduce((s, t) => s + t.length, 0);
+  console.log(`Pre-production caught (all projects): ${preProductionTotal} tickets across ${preProductionMap.size} dev project(s)`);
+
   const projects = {};
   for (const [name, component] of Object.entries(cfg.projects)) {
     try {
-      projects[name] = await computeProject(name, component, internalEscapedMap);
+      projects[name] = await computeProject(name, component, internalEscapedMap, preProductionMap);
       const e = projects[name].escapedDefects;
       const de = projects[name].detectionEfficiency;
       const mr = projects[name].needsManualReview ? ` [manual review: ${projects[name].needsManualReview.escaped} esc / ${projects[name].needsManualReview.open} open]` : '';
       const exp = e.exposure != null ? ` /exp ${e.exposure}` : '';
-      const deStr = de ? ` | internal=${de.internallyFound} DE=${de.rate}% score=${de.score}` : '';
-      console.log(`${name} (${component}): escaped=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${deStr}${mr}`);
+      const deStr = de ? ` | pre-prod=${de.preProductionCaught} escaped=${de.internallyFound} DCE=${de.rate}% score=${de.score}` : '';
+      console.log(`${name} (${component}): customer=${e.total} (crit ${e.critical}) weighted=${e.weighted}${exp} → ${e.score}${deStr}${mr}`);
     } catch (err) {
       console.error(`Failed for ${name} (${component}): ${err.message}`);
       projects[name] = { error: err.message };

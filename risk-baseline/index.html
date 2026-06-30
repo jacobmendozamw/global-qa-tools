@@ -443,6 +443,39 @@ function compute(scores, overrideActive, mp) {
   return { baseRisk:base10, tritonScore, mitScore, multiplier, finalRisk, overridden:false };
 }
 
+// ── QA Effectiveness Index model ──────────────────────────────────────────────
+// Criteria that measure process maturity (subset of MITIGATION_CRITERIA, excluding
+// detectionEfficiency which is DCE — already the primary input to QAEI).
+const PM_CRITERIA_QAEI = [
+  { id:'automationConfidence', scale:3 },
+  { id:'testCoverage',         scale:5 },
+  { id:'testability',          scale:3 },
+];
+// Weights re-normalized to 1.0 after removing detectionEfficiency (0.35+0.30+0.20=0.85 → /0.85).
+const PM_WEIGHTS_QAEI = { automationConfidence:0.412, testCoverage:0.353, testability:0.235 };
+
+// QAEI levels: higher = better (inverse of Risk levels).
+const QA_LEVELS = [
+  { max:3.9, label:'Needs attention', text:'#712B13', bg:'#FAECE7', border:'#D85A30' },
+  { max:5.9, label:'Developing',      text:'#633806', bg:'#FAEEDA', border:'#BA7517' },
+  { max:7.9, label:'Effective',       text:'#085041', bg:'#E1F5EE', border:'#1D9E75' },
+  { max:10,  label:'Excellent',       text:'#1a3a6b', bg:'#E8F0FE', border:'#4A6FA5' },
+];
+const qaLevel = score => score == null ? null : (QA_LEVELS.find(l => score <= l.max) || QA_LEVELS[QA_LEVELS.length - 1]);
+
+// Q3 formula: QAEI = DCE×0.65 + ProcessMaturity×0.35
+// Q4+: QAEI = DCE×0.50 + Trend×0.30 + ProcessMaturity×0.20 (once 2 real quarters exist)
+function computeQAEI(dceRate, processScores, mp) {
+  if (dceRate == null) return null;
+  const dceScore  = Math.round(dceRate / 10 * 10) / 10;  // 0–100 % → 0–10
+  const pmRaw     = wavg(PM_CRITERIA_QAEI, PM_WEIGHTS_QAEI, processScores || {});
+  const pmScore   = pmRaw != null ? Math.round(to10(pmRaw, mp) * 10) / 10 : null;
+  const qaei      = pmScore != null
+    ? Math.round((dceScore * 0.65 + pmScore * 0.35) * 10) / 10
+    : Math.round(dceScore * 10) / 10;
+  return { qaei, dceScore, pmScore };
+}
+
 // 0–10 scale (linear rescale of the previous 1.5 / 2.2 thresholds × 10/3).
 const LEVELS = [
   {max:5.0, label:'Low',    text:'#085041', bg:'#E1F5EE', border:'#1D9E75'},
@@ -594,9 +627,12 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
     if (id === 'detectionEfficiency') {
       const de = jiraProject.detectionEfficiency;
       if (!de) return null;
-      const hasData = (jiraProject.internalEscaped?.total ?? 0) > 0;
-      const src = hasData ? 'dev board (labels = escaped)' : 'dev board (no escaped tickets found)';
-      return `From ${src} · ${de.internallyFound} internal + ${de.customerFound} customer-reported = ${de.internallyFound + de.customerFound} total · team detection rate ${de.rate}%${upd}`;
+      const preP = de.preProductionCaught ?? 0;
+      const parts = [];
+      if (preP > 0) parts.push(`${preP} pre-production (known)`);
+      if (de.internallyFound > 0) parts.push(`${de.internallyFound} post-production (escaped)`);
+      parts.push(`${de.customerFound} customer-reported`);
+      return `Dev boards · ${parts.join(' · ')} · comprehensive DCE ${de.rate}%${upd}`;
     }
     return null;
   };
@@ -837,14 +873,36 @@ function AssessView({ onSaved, jiraMetrics, testMetrics }) {
             );
           })}
 
-          {/* Internally-escaped ticket viewer — informational breakdown for detectionEfficiency */}
+          {/* Pre-production (known) ticket viewer — bugs caught by QA in staging before release */}
+          {jiraProject?.preProductionCaught?.tickets?.length > 0 && (() => {
+            const preProductionTickets = jiraProject.preProductionCaught.tickets;
+            return (
+              <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+                  <span style={{fontSize:12,fontWeight:600}}>Pre-production catches ({preProductionTickets.length})</span>
+                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Bugs found by QA in staging — never reached production</span>
+                </div>
+                <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
+                  {preProductionTickets.map(t => (
+                    <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
+                      <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--green-bg)',color:'var(--green-text)',border:'.5px solid var(--green-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
+                      <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
+                      <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Internally-escaped ticket viewer — production bugs found by QA before customer reports */}
           {jiraProject?.internalEscaped?.tickets?.length > 0 && (() => {
             const internalTickets = jiraProject.internalEscaped.tickets;
             return (
               <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
-                  <span style={{fontSize:12,fontWeight:600}}>Internally detected ({internalTickets.length})</span>
-                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Production bugs found by QA before customer reports</span>
+                  <span style={{fontSize:12,fontWeight:600}}>Production-escaped catches ({internalTickets.length})</span>
+                  <span style={{fontSize:10.5,color:'var(--text3)'}}>Bugs found by QA in production before customer reports</span>
                 </div>
                 <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
                   {internalTickets.map(t => (
@@ -1544,6 +1602,189 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
   );
 }
 
+// ── QAEffectivenessView ───────────────────────────────────────────────────────
+function QAEffectivenessView({ jiraMetrics }) {
+  const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+
+  const projectData = PROJECTS.map(proj => {
+    const de       = jiraMetrics?.projects?.[proj]?.detectionEfficiency;
+    const defaults = PROJECT_DEFAULTS[proj] || {};
+    const result   = de ? computeQAEI(de.rate, defaults, mp) : null;
+    const ql       = result ? qaLevel(result.qaei) : null;
+    return { proj, de, defaults, result, ql };
+  });
+
+  const ScoreBar = ({ value, max = 10, color, dim }) => (
+    <div style={{height:5, background:'var(--bg3)', borderRadius:3, opacity: dim ? 0.5 : 1}}>
+      <div style={{height:5, width:`${Math.min(100, (value / max) * 100)}%`, background:color||'var(--teal)', borderRadius:3, transition:'width .4s'}}/>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="card" style={{marginBottom:16}}>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
+          <div style={{fontSize:13, fontWeight:700}}>QA Effectiveness Index (QAEI)</div>
+          <span className="dim-badge" style={{background:'var(--blue-bg)', color:'var(--blue-text)', borderColor:'var(--blue-border)'}}>Q3 2026 · Phase 1 of 2</span>
+        </div>
+        <div className="helper" style={{lineHeight:1.7}}>
+          Measures the value QA adds independently of product complexity or user base size.
+          A product can score <strong>High Risk</strong> and <strong>Excellent QA</strong> simultaneously — they answer different questions.
+        </div>
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:10}}>
+          <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
+            <div style={{fontWeight:700, marginBottom:4}}>Formula — Q3 2026</div>
+            <code style={{fontSize:10, display:'block', lineHeight:1.6, color:'var(--text2)'}}>
+              QAEI = DCE × 0.65 + Process Maturity × 0.35
+            </code>
+            <div style={{fontSize:10, color:'var(--text3)', marginTop:4}}>
+              <strong>DCE</strong> — bugs caught by QA (staging + production) as % of all known bugs<br/>
+              <strong>Process Maturity</strong> — automation, coverage, testability
+            </div>
+          </div>
+          <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
+            <div style={{fontWeight:700, marginBottom:4}}>Phase 2 — Q4 2026</div>
+            <code style={{fontSize:10, display:'block', lineHeight:1.6, color:'var(--text3)'}}>
+              QAEI = DCE × 0.50 + Trend × 0.30 + Process × 0.20
+            </code>
+            <div style={{fontSize:10, color:'var(--text3)', marginTop:4}}>
+              Trend (quarter-over-quarter improvement) requires 2 consecutive real quarters of data. Unlocks after Q3 closes.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Project cards */}
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(330px, 1fr))', gap:12, marginBottom:16}}>
+        {projectData.map(({ proj, de, defaults, result, ql }) => (
+          <div key={proj} className="card" style={{
+            border: ql ? `1.5px solid ${ql.border}` : '1px solid var(--border)',
+            background: ql ? `${ql.bg}cc` : 'var(--bg2)',
+          }}>
+            {/* Card header */}
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12}}>
+              <div style={{fontWeight:700, fontSize:13}}>{proj}</div>
+              {ql
+                ? <span className="pill" style={{background:ql.bg, color:ql.text, border:`1px solid ${ql.border}`, fontWeight:600}}>{ql.label}</span>
+                : <span className="pill" style={{background:'var(--bg3)', color:'var(--text3)', border:'.5px solid var(--border)'}}>No data</span>}
+            </div>
+
+            {/* Score + breakdown */}
+            <div style={{display:'flex', alignItems:'flex-start', gap:14, marginBottom:12}}>
+              {/* Big number */}
+              <div style={{textAlign:'center', flexShrink:0, minWidth:56}}>
+                <div style={{fontSize:34, fontWeight:700, lineHeight:1, color:ql?.text||'var(--text3)'}}>
+                  {result ? result.qaei.toFixed(1) : '—'}
+                </div>
+                <div style={{fontSize:9, color:ql?.text||'var(--text3)', fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', marginTop:2}}>/ 10</div>
+              </div>
+
+              {/* Bars */}
+              <div style={{flex:1}}>
+                {/* DCE */}
+                <div style={{marginBottom:8}}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                    <span style={{color:'var(--text2)'}}>Defect Containment <span style={{fontWeight:700, color:'var(--text)'}}>65%</span></span>
+                    <span style={{fontWeight:700, color: de ? ql?.text||'var(--text)' : 'var(--text3)'}}>
+                      {de ? `${de.rate}%` : '—'}
+                    </span>
+                  </div>
+                  <ScoreBar value={de?.rate||0} max={100} color={ql?.border||'var(--border2)'}/>
+                  {de && (
+                    <div style={{fontSize:9.5, color:'var(--text3)', marginTop:2}}>
+                      {(() => {
+                        const preP = de.preProductionCaught ?? 0;
+                        const parts = [];
+                        if (preP > 0) parts.push(`${preP} pre-prod`);
+                        if (de.internallyFound > 0) parts.push(`${de.internallyFound} escaped`);
+                        parts.push(`${de.customerFound} customer`);
+                        return `${parts.join(' + ')} · score ${result?.dceScore?.toFixed(1)||'—'}/10`;
+                      })()}
+                    </div>
+                  )}
+                </div>
+
+                {/* Process Maturity */}
+                <div style={{marginBottom:8}}>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                    <span style={{color:'var(--text2)'}}>Process Maturity <span style={{fontWeight:700, color:'var(--text)'}}>35%</span></span>
+                    <span style={{fontWeight:700, color:'var(--text)'}}>
+                      {result?.pmScore != null ? `${result.pmScore.toFixed(1)}/10` : '—'}
+                    </span>
+                  </div>
+                  <ScoreBar value={result?.pmScore||0} max={10} color='var(--teal)' dim={true}/>
+                  <div style={{fontSize:9.5, color:'var(--text3)', marginTop:2}}>
+                    Auto {defaults.automationConfidence||'—'}/3 · Coverage {defaults.testCoverage||'—'}/5 · Testability {defaults.testability||'—'}/3
+                  </div>
+                </div>
+
+                {/* Trend */}
+                <div>
+                  <div style={{display:'flex', justifyContent:'space-between', fontSize:10.5, marginBottom:3}}>
+                    <span style={{color:'var(--text3)'}}>Trend (Q4+) <span style={{fontWeight:700}}>—</span></span>
+                    <span style={{color:'var(--text3)', fontStyle:'italic', fontSize:9.5}}>Available Q4 2026</span>
+                  </div>
+                  <ScoreBar value={0} max={10} color='var(--border2)' dim={true}/>
+                </div>
+              </div>
+            </div>
+
+            {/* DCE interpretation */}
+            {de && (
+              <div style={{borderTop:'.5px solid var(--border)', paddingTop:8, fontSize:10.5, color:'var(--text2)', lineHeight:1.5}}>
+                {de.rate >= 80
+                  ? '✓ World-class containment — QA catches most bugs before customers, in staging and production.'
+                  : de.rate >= 50
+                  ? '~ About half of known bugs are caught by QA — room to grow pre-production detection.'
+                  : de.rate > 0
+                  ? '⚠ Most bugs reach customers first — increase usage of known and escaped labels in dev boards.'
+                  : '⚠ No pre-production or internal catches found — verify known/escaped label usage in dev boards.'}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Industry benchmarks + methodology */}
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
+        <div className="card">
+          <div style={{fontSize:12, fontWeight:700, marginBottom:8}}>DCE Industry Benchmarks</div>
+          <div style={{fontSize:11, color:'var(--text3)', marginBottom:8}}>Defect Containment Effectiveness — Capers Jones / IEEE / Atlassian</div>
+          {[
+            { range:'≥ 80%', label:'World-class', ...QA_LEVELS[3] },
+            { range:'50–79%', label:'Effective', ...QA_LEVELS[2] },
+            { range:'< 50%', label:'Needs improvement', ...QA_LEVELS[0] },
+          ].map(b => (
+            <div key={b.range} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
+              <span className="pill" style={{background:b.bg, color:b.text, border:`1px solid ${b.border}`}}>{b.label}</span>
+              <span style={{fontSize:11, color:'var(--text2)', fontWeight:600}}>{b.range} of bugs caught internally</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="card">
+          <div style={{fontSize:12, fontWeight:700, marginBottom:8}}>What to improve first</div>
+          {projectData.filter(p => p.de).sort((a,b) => (a.result?.qaei||0) - (b.result?.qaei||0)).map(({ proj, de, result, ql }) => (
+            <div key={proj} style={{display:'flex', alignItems:'center', gap:8, padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
+              <span style={{fontSize:11, fontWeight:600, minWidth:110}}>{proj}</span>
+              <div style={{flex:1, height:5, background:'var(--bg3)', borderRadius:3}}>
+                <div style={{height:5, width:`${Math.min(100, (result?.qaei||0) * 10)}%`, background:ql?.border||'var(--border)', borderRadius:3}}/>
+              </div>
+              <span style={{fontSize:11, fontWeight:700, color:ql?.text||'var(--text3)', minWidth:26, textAlign:'right'}}>
+                {result?.qaei?.toFixed(1)||'—'}
+              </span>
+            </div>
+          ))}
+          <div className="helper" style={{marginTop:8}}>
+            DCE improves by labeling bugs with <code>known</code> (staging catches, strongest signal) and <code>escaped</code> (production catches before customer reports) on dev boards. Process Maturity improves through automation and coverage growth.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 function App() {
   const [tab, setTab] = useState('assess');
@@ -1584,11 +1825,13 @@ function App() {
         <div className="nav-tabs">
           <button className={`nav-tab${tab==='assess'?' active':''}`} onClick={()=>setTab('assess')}>Assessment</button>
           <button className={`nav-tab${tab==='history'?' active':''}`} onClick={()=>setTab('history')}>History</button>
+          <button className={`nav-tab${tab==='qa'?' active':''}`} onClick={()=>setTab('qa')}>QA Effectiveness</button>
           <button className={`nav-tab${tab==='config'?' active':''}`} onClick={()=>setTab('config')}>Model</button>
         </div>
       </div>
       {tab==='assess' && <AssessView onSaved={()=>setHistoryRefresh(n=>n+1)} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
       {tab==='history' && <HistoryView refreshKey={historyRefresh} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>}
+      {tab==='qa' && <QAEffectivenessView jiraMetrics={jiraMetrics}/>}
       {tab==='config' && <ConfigView jiraMetrics={jiraMetrics} jiraHistory={jiraHistory}/>}
     </div>
   );
