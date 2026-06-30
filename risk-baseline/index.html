@@ -1374,7 +1374,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                             <div style={{display:'flex', flexDirection:'column', gap:4}}>
                               <div>
                                 <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>DCE <span style={{opacity:0.6}}>(65%)</span></button>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>DCE ↗</button>
                                   <span style={{fontWeight:600}}>{hasDCE?qaeiResult.dceScore.toFixed(1):'NA'}</span>
                                 </div>
                                 <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
@@ -1383,7 +1383,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                               </div>
                               <div>
                                 <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>Process <span style={{opacity:0.6}}>(35%)</span></button>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>Process ↗</button>
                                   <span style={{fontWeight:600}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
                                 </div>
                                 <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
