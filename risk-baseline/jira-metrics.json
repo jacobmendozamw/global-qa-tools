@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T04:31:39.108Z",
+  "generatedAt": "2026-06-30T05:18:22.675Z",
   "modelVersion": "2026-Q3-v2",
   "quarter": "2026-Q2",
   "project": "TRITON",
@@ -187,11 +187,179 @@
           }
         ]
       },
+      "preProductionCaught": {
+        "total": 27,
+        "tickets": [
+          {
+            "key": "GAIL-1611",
+            "summary": "FE: Internal Server Error banner appearing",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1611"
+          },
+          {
+            "key": "GAIL-1607",
+            "summary": "FE: Brand slide-out > broken UX in component",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1607"
+          },
+          {
+            "key": "GAIL-1605",
+            "summary": "FE: Demographics: Missing some country flags",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1605"
+          },
+          {
+            "key": "GAIL-1593",
+            "summary": "FE: Wrong Learn More button in G.A. setup screen",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1593"
+          },
+          {
+            "key": "GAIL-1587",
+            "summary": "FE: Table column titles > should match other GenAI Lens tables",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1587"
+          },
+          {
+            "key": "GAIL-1584",
+            "summary": "FE/BE: Recent Sessions - clicking cards don't apply what they should",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1584"
+          },
+          {
+            "key": "GAIL-1524",
+            "summary": "BE: [STAGING] Overview Widgets Last 24 Hours > Not loading data",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1524"
+          },
+          {
+            "key": "GAIL-1490",
+            "summary": "[STAGING] BE: Top Sources: Reach is missing",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1490"
+          },
+          {
+            "key": "GAIL-1489",
+            "summary": "BE: Production Issues Loading - Failing Test Automation",
+            "priority": "Major",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1489"
+          },
+          {
+            "key": "GAIL-1480",
+            "summary": "[*fix test automation] FE: Local storage for Charts not persisting when changing tabs and hard refreshes occur",
+            "priority": "Critical",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1480"
+          },
+          {
+            "key": "GAIL-1479",
+            "summary": "[STAGING ONLY] BE: Sources: source & journalist profiles - Content tab appearing w/0 results and not loading content",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1479"
+          },
+          {
+            "key": "GAIL-1435",
+            "summary": "Sentiment page doesn't always load when Language is changed",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1435"
+          },
+          {
+            "key": "GAIL-1413",
+            "summary": "[MERGED] FE: Sentiment column chart > star for branding is showing \"black\" instead of \"gold\"",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1413"
+          },
+          {
+            "key": "GAIL-1381",
+            "summary": "Add brand flow > Create Topic & Prompts: Takes a long time to generate",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1381"
+          },
+          {
+            "key": "GAIL-1332",
+            "summary": "[*see comments] Some Date Ranges (all prompts): 1st Benchmarking Heat Map Times Out - Doesn't Load",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1332"
+          },
+          {
+            "key": "GAIL-1279",
+            "summary": "FE: pagination is not resetting to page 1 when different AI recommendations load",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1279"
+          },
+          {
+            "key": "GAIL-1278",
+            "summary": "BE: Overview table Excel & JSON exports not working [staging]",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1278"
+          },
+          {
+            "key": "GAIL-1275",
+            "summary": "FE: After prompts & topics are generated > requires hard refresh to see Prompt Settings table correctly",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1275"
+          },
+          {
+            "key": "GAIL-1273",
+            "summary": "FE: Topic not created when other topics toggled off (prompt still created though)",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1273"
+          },
+          {
+            "key": "GAIL-1265",
+            "summary": "BE: some lines are lowercase (need to capitalizer 1st word)",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1265"
+          },
+          {
+            "key": "GAIL-1264",
+            "summary": "FE: Wrong infotip/hover UX being used",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1264"
+          },
+          {
+            "key": "GAIL-1225",
+            "summary": "FE: Need FE Onboarding Error updates/UX",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1225"
+          },
+          {
+            "key": "GAIL-1224",
+            "summary": "FE: [see comments] Review Your Topics & Prompts section doesn't match Figma (slightly different UX & font colors) ",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1224"
+          },
+          {
+            "key": "GAIL-1223",
+            "summary": "FE: disabled Topics not moving to bottom of list",
+            "priority": "Medium",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1223"
+          },
+          {
+            "key": "GAIL-1222",
+            "summary": "BE: Handle onboarding errors in API",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1222"
+          },
+          {
+            "key": "GAIL-1220",
+            "summary": "FE: The new brand workflow > no longer adds or removes brand \"live\" (requiring refresh to see)",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1220"
+          },
+          {
+            "key": "GAIL-1219",
+            "summary": "FE: (onboarding) Brands & Prompts being added aren't updating \"live\" (requiring hard refresh to see them) ",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/GAIL-1219"
+          }
+        ]
+      },
       "detectionEfficiency": {
-        "score": 2,
+        "score": 3,
+        "preProductionCaught": 27,
         "internallyFound": 4,
         "customerFound": 12,
-        "rate": 25
+        "rate": 72
       }
     },
     "Mira Studio": {
@@ -255,11 +423,35 @@
           }
         ]
       },
+      "preProductionCaught": {
+        "total": 3,
+        "tickets": [
+          {
+            "key": "HZN-814",
+            "summary": "Bug: Add `Duplicate Project` option",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/HZN-814"
+          },
+          {
+            "key": "HZN-774",
+            "summary": "Selected search count not updated in project configuration after hiding the searches for the user.",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/HZN-774"
+          },
+          {
+            "key": "HZN-733",
+            "summary": "Bug: use of \"Add translated keywords\" English, Chinese, and finally German ",
+            "priority": "Minor",
+            "url": "https://meltwater.atlassian.net/browse/HZN-733"
+          }
+        ]
+      },
       "detectionEfficiency": {
-        "score": 2,
+        "score": 3,
+        "preProductionCaught": 3,
         "internallyFound": 2,
         "customerFound": 3,
-        "rate": 40
+        "rate": 63
       },
       "needsManualReview": {
         "escaped": 4,
@@ -418,11 +610,101 @@
         "total": 0,
         "tickets": []
       },
+      "preProductionCaught": {
+        "total": 14,
+        "tickets": [
+          {
+            "key": "MIRALEGACY-3224",
+            "summary": "MIRA PPT Export : Generate PPT” CTA visible on bot response for confirmation scenario",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3224"
+          },
+          {
+            "key": "MIRALEGACY-3221",
+            "summary": "MIRA PPT Export: Validation error message persists after clearing Company Website field",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3221"
+          },
+          {
+            "key": "MIRALEGACY-3220",
+            "summary": "Mira Studio: Incorrect logo detected for valid domain (Amazon.in) without validation error",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3220"
+          },
+          {
+            "key": "MIRALEGACY-3184",
+            "summary": "Teams(Preview) : Formatting issue persists for second prompt (large bold text)",
+            "priority": "Minor",
+            "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3184"
+          },
+          {
+            "key": "MIRA-191",
+            "summary": "StoryFlow: Story Flow displays incorrect date in title due to UTC timezone conversion (Asia/Kolkata and similar timezones)",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-191"
+          },
+          {
+            "key": "MIRA-99",
+            "summary": "MIRA PPT Export : Error shown when uploading valid WEBP , PNG, JPG/JPEG, logo and generating branded PowerPoint",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-99"
+          },
+          {
+            "key": "MIRA-98",
+            "summary": "MIRA PPT Export: HEIC file format incorrectly allowed for logo upload on Safari",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-98"
+          },
+          {
+            "key": "MIRA-67",
+            "summary": "Incorrect Run ID Handling in Studio (Mongo Object ID Used Instead)",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-67"
+          },
+          {
+            "key": "MIRA-55",
+            "summary": "Defect: StoryFlow agent: Scheduled Storyflow prompt email shows confirmation message instead of actual report",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-55"
+          },
+          {
+            "key": "MIRA-49",
+            "summary": "Defect: StoryFlow agent : Platform Name Not Updated to \"X\" in Storyflow Impact Summary table.",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-49"
+          },
+          {
+            "key": "MIRA-48",
+            "summary": "Defect: StoryFlow agent: Scope Parameter Overwrites Existing Values When ask to Add \"Broadcast\"",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-48"
+          },
+          {
+            "key": "MIRA-46",
+            "summary": "Defect: StoryFlow agent: Story Flow Agent selects content outside expected document scope due to limited relevant docs in scheduled prompt.",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-46"
+          },
+          {
+            "key": "MIRA-44",
+            "summary": "Defect: StoryFlow agent: Inconsistent behavior in story flow generation without URL (TopDocumentsTool usage)",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-44"
+          },
+          {
+            "key": "MIRA-31",
+            "summary": "Intermittent issue with filter set name in prompt not triggering correct tool call",
+            "priority": "Low",
+            "url": "https://meltwater.atlassian.net/browse/MIRA-31"
+          }
+        ]
+      },
       "detectionEfficiency": {
-        "score": 1,
+        "score": 2,
+        "preProductionCaught": 14,
         "internallyFound": 0,
         "customerFound": 16,
-        "rate": 0
+        "rate": 47
       },
       "needsManualReview": {
         "escaped": 4,
@@ -520,8 +802,13 @@
           }
         ]
       },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
       "detectionEfficiency": {
         "score": 2,
+        "preProductionCaught": 0,
         "internallyFound": 3,
         "customerFound": 6,
         "rate": 33
@@ -654,11 +941,65 @@
           }
         ]
       },
+      "preProductionCaught": {
+        "total": 8,
+        "tickets": [
+          {
+            "key": "SMM-9292",
+            "summary": "BE: TikTok DM's are not hitting content stream",
+            "priority": "Critical",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9292"
+          },
+          {
+            "key": "SMM-9267",
+            "summary": "App borks if you click \"Load older replies\" enough on X document ",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9267"
+          },
+          {
+            "key": "SMM-9266",
+            "summary": "[*PRODUCTION ONLY] X Docs: Replies are not pulling unless filtered to Mentions as well",
+            "priority": "Critical",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9266"
+          },
+          {
+            "key": "SMM-9219",
+            "summary": "[STAGING] Responding to slightly older X content is getting stuck in Posting and NOT going to Native",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9219"
+          },
+          {
+            "key": "SMM-9194",
+            "summary": "Convo & Publish: Dall-E image creator not working ",
+            "priority": "High",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9194"
+          },
+          {
+            "key": "SMM-9173",
+            "summary": "Filtering to \"New & Complete\" Wrong counts",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9173"
+          },
+          {
+            "key": "SMM-9169",
+            "summary": "FB Mentions pulling Replies (filter to mention msg type)",
+            "priority": "Blocker",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9169"
+          },
+          {
+            "key": "SMM-9139",
+            "summary": "Responding to public X content is getting stuck in \"posting\" and doesn't post out to native [staging & prod] ",
+            "priority": "Critical",
+            "url": "https://meltwater.atlassian.net/browse/SMM-9139"
+          }
+        ]
+      },
       "detectionEfficiency": {
         "score": 2,
+        "preProductionCaught": 8,
         "internallyFound": 1,
         "customerFound": 12,
-        "rate": 8
+        "rate": 43
       }
     }
   }
