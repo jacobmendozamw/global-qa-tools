@@ -642,7 +642,7 @@ function AssessView({ jiraMetrics, testMetrics }) {
             </button>
           ))}
         </div>
-        {!project && <div style={{fontSize:11,color:'var(--text3)',marginTop:8}}>Selecciona un proyecto para ver su Risk Index.</div>}
+        {!project && <div style={{fontSize:11,color:'var(--text3)',marginTop:8}}>Select a project to view its Risk Index.</div>}
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 280px',gap:16,alignItems:'start'}}>
@@ -1230,7 +1230,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
       {/* Project filter pills */}
       <div className="card" style={{marginBottom:12}}>
         <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
-          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Proyectos:</span>
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Projects:</span>
           {PROJECTS.map(proj => {
             const visible = visibleProjects.has(proj);
             const rl = latestByProject[proj];
@@ -1250,7 +1250,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
             <button onClick={()=>setVisibleProjects(new Set(PROJECTS))}
               style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
                 border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
-              Mostrar todos
+              Show all
             </button>
           )}
         </div>
@@ -1306,37 +1306,38 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                     const dcol = delta==null||delta===0 ? 'var(--text3)' : delta>0 ? '#D85A30' : '#1D9E75';
                     const qi = quarterInfo(quarterOf(r.date));
                     const de = r.jira?.detectionEfficiency;
-                    const qaeiResult = de ? computeQAEI(de.rate, PROJECT_DEFAULTS[r.project]||{}, jiraMetrics?.modelParams||DEFAULT_MODEL_PARAMS) : null;
-                    const ql = qaeiResult ? qaLevel(qaeiResult.qaei) : null;
+                    const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+                    const qaeiResult = computeQAEI(de ? de.rate : 0, PROJECT_DEFAULTS[r.project]||{}, mp);
+                    const hasDCE = !!de;
+                    const ql = (qaeiResult && hasDCE) ? qaLevel(qaeiResult.qaei) : null;
                     const qaBarColor = v => v==null ? 'var(--border2)' : v>=7.5 ? '#1D9E75' : v>=5.0 ? '#BA7517' : '#D85A30';
                     return (
                       <div key={r.id}
-                        style={{background:rl?rl.bg:'var(--bg2)', border:`1.5px solid ${rl?rl.border:'var(--border)'}`,
-                          borderRadius:12, padding:'14px 16px', transition:'box-shadow .15s'}}
+                        style={{border:`1.5px solid ${rl?rl.border:'var(--border)'}`, borderRadius:12, overflow:'hidden', transition:'box-shadow .15s'}}
                         onMouseEnter={e=>e.currentTarget.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'}
                         onMouseLeave={e=>e.currentTarget.style.boxShadow=''}>
 
-                        {/* Quarter + badges */}
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10}}>
-                          <span style={{fontSize:11, fontWeight:700, color:rl?rl.text:'var(--text3)'}}>{qi.label}</span>
+                        {/* Quarter header — neutral */}
+                        <div style={{padding:'8px 14px', background:'var(--bg)', borderBottom:'1px solid rgba(0,0,0,0.06)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                          <span style={{fontSize:11, fontWeight:700, color:'var(--text2)'}}>{qi.label}</span>
                           <div style={{display:'flex', gap:4}}>
-                            {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'rgba(255,255,255,0.45)', color:rl?rl.text:'var(--text3)', fontWeight:600}}>live</span>}
-                            {r.evaluator==='auto' && !qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'rgba(255,255,255,0.45)', color:rl?rl.text:'var(--text3)', fontWeight:600}}>auto</span>}
+                            {qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--blue-bg)', color:'var(--blue-text)', fontWeight:600}}>live</span>}
+                            {r.evaluator==='auto' && !qi.isCurrent && <span style={{fontSize:9, padding:'1px 6px', borderRadius:20, background:'var(--bg3)', color:'var(--text3)', fontWeight:600}}>auto</span>}
                           </div>
                         </div>
 
-                        {/* Two sections */}
-                        <div style={{display:'grid', gridTemplateColumns:'1fr 1px 1fr', gap:'0 12px'}}>
+                        {/* Two colored sections */}
+                        <div style={{display:'grid', gridTemplateColumns:'1fr 1px 1fr'}}>
 
                           {/* Risk Score */}
-                          <div>
+                          <div style={{background:rl?rl.bg:'var(--bg2)', padding:'12px 14px'}}>
                             <div style={{fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', color:rl?rl.text:'var(--text3)', opacity:0.65, marginBottom:4}}>Risk Score</div>
-                            <div style={{display:'flex', alignItems:'baseline', gap:4, marginBottom:1}}>
+                            <div style={{display:'flex', alignItems:'baseline', gap:6, marginBottom:1, flexWrap:'wrap'}}>
                               <span style={{fontSize:26, fontWeight:700, lineHeight:1, color:rl?rl.text:'var(--text)'}}>{r.finalRisk!=null?r.finalRisk.toFixed(1):'—'}</span>
                               <span style={{fontSize:10, color:rl?rl.text:'var(--text3)', opacity:0.55}}>/ 10</span>
+                              {dtxt && <span style={{fontSize:10, fontWeight:700, color:dcol}}>{dtxt}</span>}
                             </div>
                             <div style={{fontSize:11, fontWeight:700, color:rl?rl.text:'var(--text3)', marginBottom:5}}>{rl?rl.label:'—'}</div>
-                            {dtxt && <div style={{fontSize:10, fontWeight:600, color:dcol, marginBottom:5}}>{dtxt}</div>}
                             <div style={{display:'flex', flexDirection:'column', gap:4}}>
                               <div>
                                 <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:rl?rl.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
@@ -1360,45 +1361,36 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                           </div>
 
                           {/* Divider */}
-                          <div style={{background:'rgba(0,0,0,0.10)'}}/>
+                          <div style={{background:'rgba(0,0,0,0.08)'}}/>
 
                           {/* QAEI */}
-                          <div>
-                            <div style={{fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', color:ql?ql.text:(rl?rl.text:'var(--text3)'), opacity:0.65, marginBottom:4}}>QAEI</div>
-                            {qaeiResult ? (
-                              <>
-                                <div style={{display:'flex', alignItems:'baseline', gap:4, marginBottom:1}}>
-                                  <span style={{fontSize:26, fontWeight:700, lineHeight:1, color:ql?ql.text:'var(--text)'}}>{qaeiResult.qaei.toFixed(1)}</span>
-                                  <span style={{fontSize:10, color:ql?ql.text:'var(--text3)', opacity:0.55}}>/ 10</span>
+                          <div style={{background:ql?ql.bg:'var(--bg2)', padding:'12px 14px'}}>
+                            <div style={{fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', color:ql?ql.text:'var(--text3)', opacity:0.65, marginBottom:4}}>QAEI</div>
+                            <div style={{display:'flex', alignItems:'baseline', gap:4, marginBottom:1}}>
+                              <span style={{fontSize:26, fontWeight:700, lineHeight:1, color:ql?ql.text:'var(--text)'}}>{hasDCE?qaeiResult.qaei.toFixed(1):'NA'}</span>
+                              <span style={{fontSize:10, color:ql?ql.text:'var(--text3)', opacity:0.55}}>/ 10</span>
+                            </div>
+                            <div style={{fontSize:11, fontWeight:700, color:ql?ql.text:'var(--text3)', marginBottom:5}}>{hasDCE&&ql?ql.label:'—'}</div>
+                            <div style={{display:'flex', flexDirection:'column', gap:4}}>
+                              <div>
+                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>DCE <span style={{opacity:0.6}}>(65%)</span></button>
+                                  <span style={{fontWeight:600}}>{hasDCE?qaeiResult.dceScore.toFixed(1):'NA'}</span>
                                 </div>
-                                <div style={{fontSize:11, fontWeight:700, color:ql?ql.text:'var(--text3)', marginBottom:5}}>{ql?ql.label:'—'}</div>
-                                <div style={{display:'flex', flexDirection:'column', gap:4}}>
-                                  <div>
-                                    <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                      <span>DCE <span style={{opacity:0.6}}>(65%)</span></span>
-                                      <span style={{fontWeight:600}}>{qaeiResult.dceScore.toFixed(1)}</span>
-                                    </div>
-                                    <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                      <div style={{height:4, width:`${Math.min(100,(qaeiResult.dceScore/10)*100)}%`, background:qaBarColor(qaeiResult.dceScore), borderRadius:2, transition:'width .4s'}}/>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
-                                      <span>Process <span style={{opacity:0.6}}>(35%)</span></span>
-                                      <span style={{fontWeight:600}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
-                                    </div>
-                                    <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
-                                      <div style={{height:4, width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`, background:qaBarColor(qaeiResult.pmScore), borderRadius:2, transition:'width .4s'}}/>
-                                    </div>
-                                  </div>
+                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
+                                  <div style={{height:4, width:`${hasDCE?Math.min(100,(qaeiResult.dceScore/10)*100):0}%`, background:hasDCE?qaBarColor(qaeiResult.dceScore):'var(--border2)', borderRadius:2, transition:'width .4s'}}/>
                                 </div>
-                                <div style={{marginTop:5}}>
-                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>QA Process ↗</button>
+                              </div>
+                              <div>
+                                <div style={{display:'flex', justifyContent:'space-between', fontSize:10, color:ql?ql.text:'var(--text2)', marginBottom:2, opacity:0.8}}>
+                                  <button className="tp-detail-btn" style={{color:ql?ql.text:'var(--teal)',fontSize:10}} onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}>Process <span style={{opacity:0.6}}>(35%)</span></button>
+                                  <span style={{fontWeight:600}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
                                 </div>
-                              </>
-                            ) : (
-                              <div style={{fontSize:11, color:'var(--text3)', paddingTop:4}}>Sin datos</div>
-                            )}
+                                <div style={{height:4, background:'rgba(0,0,0,0.10)', borderRadius:2}}>
+                                  <div style={{height:4, width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`, background:qaBarColor(qaeiResult.pmScore), borderRadius:2, transition:'width .4s'}}/>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1668,7 +1660,7 @@ function QAEffectivenessView({ jiraMetrics }) {
       {/* Project filter */}
       <div className="card" style={{marginBottom:16}}>
         <div style={{display:'flex', alignItems:'center', gap:10, flexWrap:'wrap'}}>
-          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Mostrar proyectos:</span>
+          <span style={{fontSize:12, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Projects:</span>
           {PROJECTS.map(proj => {
             const visible = visibleProjects.has(proj);
             const pd = projectData.find(p => p.proj === proj);
@@ -1689,7 +1681,7 @@ function QAEffectivenessView({ jiraMetrics }) {
             <button onClick={() => setVisibleProjects(new Set(PROJECTS))}
               style={{fontSize:11, padding:'4px 12px', borderRadius:20, cursor:'pointer', fontFamily:'inherit',
                 border:'.5px solid var(--border)', background:'transparent', color:'var(--text3)'}}>
-              Mostrar todos
+              Show all
             </button>
           )}
         </div>
