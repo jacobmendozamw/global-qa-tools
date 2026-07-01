@@ -777,7 +777,6 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
   const [scores, setScores] = useState({});
   const [showTritonDetail, setShowTritonDetail] = useState(false);
   const [showProcessMetrics, setShowProcessMetrics] = useState(false);
-  const [showSidebarMeta, setShowSidebarMeta] = useState(false);
 
   const setProject = onProjectChange;
   const selectPod = pod => {
@@ -894,7 +893,6 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
             <div className="dim-title">Base Risk</div>
             <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>40% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Inherent product risk. Sourced from project configuration.</div>
           {BASE_RISK_CRITERIA.map(c => (
             <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
               colorMap={RISK_COLORS} weightPct={`${Math.round(BASE_WEIGHTS[c.id]*100)}% of group`}
@@ -906,7 +904,10 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
             <div className="dim-title">TRITON Score</div>
             <span className="dim-badge" style={{background:'#E8F0FE',color:'#1a3a6b',borderColor:'#4A6FA5'}}>60% of Final Risk</span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>Sourced automatically from TRITON (🔒 locked) — Defects this quarter scored 0–10 on an anchored Gaussian curve, severity-adjusted. Falls back to manual entry for projects not mapped in Jira. See §4.6 in Confluence for the JQL filter and curve.</div>
+          <div style={{display:'flex',alignItems:'center',gap:4,marginBottom:10}}>
+            <span className="helper" style={{margin:0}}>🔒 Auto-sourced from Jira · Gaussian curve, severity-adjusted</span>
+            <InfoTip text="Defects this quarter scored 0–10 on an anchored Gaussian curve (severity-weighted). Falls back to manual entry for projects not in TRITON. See §4.6 in Confluence for the JQL filter and curve parameters." />
+          </div>
           {TRITON_CRITERIA.map(c => {
             if (isJiraLocked(c)) {
               const lvl = riskLevel(escScoreEff) || {};
@@ -1039,28 +1040,11 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
             )}
           </div>
 
-          {/* Formula + Legend (colapsable) */}
-          <div className="card" style={{padding:'8px 12px'}}>
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onClick={()=>setShowSidebarMeta(v=>!v)}>
-              <span style={{fontSize:11,fontWeight:600,color:'var(--text2)'}}>Formula &amp; levels</span>
-              <span style={{fontSize:11,color:'var(--text3)'}}>{showSidebarMeta?'▾':'▸'}</span>
-            </div>
-            {showSidebarMeta && (
-              <div style={{marginTop:8}}>
-                <div className="formula-display" style={{marginBottom:10}}>
-                  <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
-                  <code>Base × 0.40 + TRITON × 0.60</code>
-                </div>
-                <div className="section-label" style={{marginTop:0}}>Risk levels</div>
-                {[{l:'Low',r:'0.0 – 5.0',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'5.1 – 7.3',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'7.4 – 10',c:'#712B13',bg:'#FAECE7'}].map(x=>(
-                  <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
-                    <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
-                    <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Formula & levels — link to Model tab */}
+          <button onClick={()=>document.querySelector('.nav-tab:last-child') && document.querySelector('[data-tab="config"]') && document.querySelector('[data-tab="config"]').click()}
+            style={{fontSize:11,color:'var(--text3)',background:'none',border:'none',cursor:'default',padding:'4px 0',fontFamily:'inherit',textAlign:'left'}}>
+            <span style={{fontSize:10,color:'var(--text3)'}}>Formula: Base × 0.40 + TRITON × 0.60 · scale 0–10</span>
+          </button>
 
         </div>
       </div>
@@ -1470,6 +1454,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [filterQuarter, setFilterQuarter] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
   const [weightBase, setWeightBase] = useState(40);
+  const [showWeights, setShowWeights] = useState(false);
   const [detail, setDetail] = useState(null);
   const [activePod, setActivePod] = useState(PODS[0]);
   const [sortBy, setSortBy] = useState('qaei');
@@ -1561,7 +1546,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   return (
     <div>
       {/* Project filter pills */}
-      <div className="card" style={{marginBottom:12}}>
+      <div className="card" style={{marginBottom:12, paddingBottom: viewMode==='timeline' ? undefined : 8}}>
         {/* Pod filter row */}
         <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginBottom:10, paddingBottom:10, borderBottom:'1px solid var(--border)'}}>
           <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Pod:</span>
@@ -1629,18 +1614,24 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           })}
         </div>
         <span style={{fontSize:11,color:'var(--text3)',marginLeft:'auto'}}>{filteredRecords.length} snapshot{filteredRecords.length!==1?'s':''}</span>
-        <div style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:8,background:weightBase!==40?'var(--amber-bg)':'var(--bg2)',border:`1px solid ${weightBase!==40?'var(--amber-border)':'var(--border)'}`,transition:'background .2s, border .2s'}}>
-          <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>Base<br/>{weightBase}%</span>
-          <input type="range" min="0" max="100" step="5" value={weightBase} onChange={e=>setWeightBase(+e.target.value)}
-            style={{width:80,accentColor:'var(--teal)',cursor:'pointer',verticalAlign:'middle'}}/>
-          <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>TRITON<br/>{100-weightBase}%</span>
-          {weightBase!==40 && <button onClick={()=>setWeightBase(40)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid var(--amber-border)',background:'transparent',color:'var(--amber-text)',cursor:'pointer',fontFamily:'inherit',marginLeft:2}}>↩ reset</button>}
-        </div>
+        <button onClick={()=>setShowWeights(v=>!v)}
+          style={{fontSize:11,padding:'4px 10px',borderRadius:6,border:`1px solid ${weightBase!==40?'var(--amber-border)':'var(--border)'}`,background:weightBase!==40?'var(--amber-bg)':'transparent',color:weightBase!==40?'var(--amber-text)':'var(--text2)',cursor:'pointer',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+          ⚖️ {weightBase!==40 ? `${weightBase}/${100-weightBase}` : 'Weights'}
+        </button>
+        {showWeights && (
+          <div style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:8,background:weightBase!==40?'var(--amber-bg)':'var(--bg2)',border:`1px solid ${weightBase!==40?'var(--amber-border)':'var(--border)'}`,transition:'background .2s, border .2s'}}>
+            <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>Base<br/>{weightBase}%</span>
+            <input type="range" min="0" max="100" step="5" value={weightBase} onChange={e=>setWeightBase(+e.target.value)}
+              style={{width:80,accentColor:'var(--teal)',cursor:'pointer',verticalAlign:'middle'}}/>
+            <span style={{fontSize:9,fontWeight:600,color:'var(--text3)',whiteSpace:'nowrap',lineHeight:1.3}}>TRITON<br/>{100-weightBase}%</span>
+            {weightBase!==40 && <button onClick={()=>setWeightBase(40)} style={{fontSize:9,padding:'2px 6px',borderRadius:4,border:'1px solid var(--amber-border)',background:'transparent',color:'var(--amber-text)',cursor:'pointer',fontFamily:'inherit',marginLeft:2}}>↩ reset</button>}
+          </div>
+        )}
         <div className="toggle-wrap">
           <button className={`toggle-btn${viewMode==='timeline'?' active':''}`} onClick={()=>setViewMode('timeline')}>Cards</button>
+          <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
           <button className={`toggle-btn${viewMode==='matrix'?' active':''}`} onClick={()=>setViewMode('matrix')}>Matrix</button>
           <button className={`toggle-btn${viewMode==='gauge'?' active':''}`} onClick={()=>setViewMode('gauge')}>Gauge</button>
-          <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
       </div>
 
@@ -2319,9 +2310,8 @@ function QAEffectivenessView({ jiraMetrics }) {
           <div style={{fontSize:13, fontWeight:700}}>QA Effectiveness Index (QAEI)</div>
           <span className="dim-badge" style={{background:'var(--blue-bg)', color:'var(--blue-text)', borderColor:'var(--blue-border)'}}>Q3 2026 · Phase 1 of 2</span>
         </div>
-        <div className="helper" style={{lineHeight:1.7}}>
-          Measures the value QA adds independently of product complexity or user base size.
-          A product can score <strong>High Risk</strong> and <strong>Excellent QA</strong> simultaneously — they answer different questions.
+        <div className="helper" style={{lineHeight:1.6}}>
+          Measures QA value independently of product complexity. A product can score <strong>High Risk</strong> and <strong>Excellent QA</strong> simultaneously.
         </div>
         <div style={{marginTop:10}}>
           <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
