@@ -1882,6 +1882,39 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                         {/* Two sections */}
                         <div style={{display:'grid',gridTemplateColumns:'1fr 1px 1fr'}}>
 
+                          {/* QAEI */}
+                          <div style={{padding:'12px 12px 10px'}}>
+                            <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>QAEI</div>
+                            <div style={{display:'flex',alignItems:'baseline',gap:5,marginBottom:4}}>
+                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{qaeiResult.qaei.toFixed(1)}</span>
+                              <span style={{fontSize:10,color:'var(--text3)'}}>/ 10</span>
+                            </div>
+                            <div style={{marginBottom:8}}>{ql ? <ScoreBadge level={ql}/> : <span style={{fontSize:10,color:'var(--text3)'}}>—</span>}</div>
+                            <div style={{display:'flex',flexDirection:'column',gap:5}}>
+                              <div>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label={hasDCE?"DCE ↗":"DCE (est.)"} onClick={e=>{e.stopPropagation();setDetail({type:'dce',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.dceScore.toFixed(1)}{!hasDCE&&<span style={{fontSize:9,color:'var(--text3)'}}> ≈0</span>}</span>
+                                </div>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${Math.min(100,(qaeiResult.dceScore/10)*100)}%`,background:qaBarColor(qaeiResult.dceScore),borderRadius:2,transition:'width .4s'}}/>
+                                </div>
+                              </div>
+                              <div>
+                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
+                                  <DetailBtn label="Process ↗" onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}/>
+                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
+                                </div>
+                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
+                                  <div style={{height:3,width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`,background:qaBarColor(qaeiResult.pmScore),borderRadius:2,transition:'width .4s'}}/>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Divider */}
+                          <div style={{background:'var(--border)'}}/>
+
                           {/* Risk Score */}
                           <div style={{padding:'12px 12px 10px'}}>
                             <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>Risk Score</div>
@@ -1908,39 +1941,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
                                 </div>
                                 <div style={{height:3,background:'var(--border)',borderRadius:2}}>
                                   <div style={{height:3,width:`${r.tritonScore!=null?Math.min(100,(r.tritonScore/10)*100):0}%`,background:barColor(r.tritonScore),borderRadius:2,transition:'width .4s'}}/>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Divider */}
-                          <div style={{background:'var(--border)'}}/>
-
-                          {/* QAEI */}
-                          <div style={{padding:'12px 12px 10px'}}>
-                            <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.07em',color:'var(--text3)',marginBottom:6}}>QAEI</div>
-                            <div style={{display:'flex',alignItems:'baseline',gap:5,marginBottom:4}}>
-                              <span style={{fontSize:24,fontWeight:700,lineHeight:1,color:'var(--text)'}}>{qaeiResult.qaei.toFixed(1)}</span>
-                              <span style={{fontSize:10,color:'var(--text3)'}}>/ 10</span>
-                            </div>
-                            <div style={{marginBottom:8}}>{ql ? <ScoreBadge level={ql}/> : <span style={{fontSize:10,color:'var(--text3)'}}>—</span>}</div>
-                            <div style={{display:'flex',flexDirection:'column',gap:5}}>
-                              <div>
-                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
-                                  <DetailBtn label={hasDCE?"DCE ↗":"DCE (est.)"} onClick={e=>{e.stopPropagation();setDetail({type:'dce',record:r})}}/>
-                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.dceScore.toFixed(1)}{!hasDCE&&<span style={{fontSize:9,color:'var(--text3)'}}> ≈0</span>}</span>
-                                </div>
-                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
-                                  <div style={{height:3,width:`${Math.min(100,(qaeiResult.dceScore/10)*100)}%`,background:qaBarColor(qaeiResult.dceScore),borderRadius:2,transition:'width .4s'}}/>
-                                </div>
-                              </div>
-                              <div>
-                                <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:2}}>
-                                  <DetailBtn label="Process ↗" onClick={e=>{e.stopPropagation();setDetail({type:'mit',record:r})}}/>
-                                  <span style={{fontWeight:600,color:'var(--text2)'}}>{qaeiResult.pmScore!=null?qaeiResult.pmScore.toFixed(1):'—'}</span>
-                                </div>
-                                <div style={{height:3,background:'var(--border)',borderRadius:2}}>
-                                  <div style={{height:3,width:`${qaeiResult.pmScore!=null?Math.min(100,(qaeiResult.pmScore/10)*100):0}%`,background:qaBarColor(qaeiResult.pmScore),borderRadius:2,transition:'width .4s'}}/>
                                 </div>
                               </div>
                             </div>
