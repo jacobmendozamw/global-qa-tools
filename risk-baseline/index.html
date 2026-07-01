@@ -144,48 +144,16 @@ tr:last-child td{border-bottom:none}
 const {useState, useEffect, useCallback, useRef} = React;
 
 // ── Storage ──────────────────────────────────────────────────────────────────
-// Shared assessments live in the committed ./data.json (visible to everyone).
-// Local additions are kept in localStorage until exported and committed to the repo.
-const STORAGE_KEY = 'qa-risk-assessments-v2';
+// Assessments are sourced exclusively from ./data.json (populated by GitHub Actions).
 const DATA_URL = './data.json';
 
-function loadLocalAssessments() {
-  try { const r = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); return Array.isArray(r)?r:[]; }
-  catch { return []; }
-}
-
-async function fetchSharedAssessments() {
+async function loadAssessments() {
   try {
     const res = await fetch(DATA_URL, {cache:'no-store'});
     if (!res.ok) return [];
     const r = await res.json();
     return Array.isArray(r) ? r : [];
   } catch { return []; }
-}
-
-// Merge shared (data.json) + local (localStorage) by id; local wins on conflict.
-async function loadAssessments() {
-  const [shared, local] = [await fetchSharedAssessments(), loadLocalAssessments()];
-  const byId = new Map();
-  shared.forEach(r => byId.set(r.id, r));
-  local.forEach(r => byId.set(r.id, r));
-  return [...byId.values()];
-}
-
-function saveAssessment(record) {
-  const all = loadLocalAssessments(); all.push(record);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-}
-
-// Download the full merged set as data.json so it can be committed to the repo.
-function exportAssessments(records) {
-  const sorted = [...records].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const blob = new Blob([JSON.stringify(sorted, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'data.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
 }
 
 // ── Model ─────────────────────────────────────────────────────────────────────
@@ -807,8 +775,9 @@ function buildEvidence(project, criterionId, testMetrics) {
 
 function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, project, onProjectChange }) {
   const [scores, setScores] = useState({});
-  const [showTickets, setShowTickets] = useState(false);
-  const [showQACatches, setShowQACatches] = useState(false);
+  const [showTritonDetail, setShowTritonDetail] = useState(false);
+  const [showProcessMetrics, setShowProcessMetrics] = useState(false);
+  const [showSidebarMeta, setShowSidebarMeta] = useState(false);
 
   const setProject = onProjectChange;
   const selectPod = pod => {
@@ -1011,83 +980,38 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
           })()}
 
           {/* QA Process Metrics — informational, feeds the QAEI tab, not scored in Risk Index */}
-          <div className="dim-header">
-            <div className="dim-title">QA Process Metrics</div>
+          <div className="dim-header" style={{cursor:'pointer',userSelect:'none'}} onClick={()=>setShowProcessMetrics(v=>!v)}>
+            <div className="dim-title" style={{display:'flex',alignItems:'center',gap:6}}>
+              <span style={{fontSize:11,color:'var(--text3)'}}>{showProcessMetrics?'▾':'▸'}</span>
+              QA Process Metrics
+            </div>
             <span className="dim-badge" style={{background:'var(--blue-bg)',color:'var(--blue-text)',borderColor:'var(--blue-border)'}}>
               QAEI tab · not scored in Risk Index
             </span>
           </div>
-          <div className="helper" style={{marginBottom:10}}>
-            {isMitLocked
-              ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). These values drive the Process Maturity component of the QA Effectiveness Index.`
-              : 'These values drive the Process Maturity component in the QA Effectiveness Index. They do not affect the Risk score.'}
-          </div>
-          {MITIGATION_CRITERIA.map(c => {
-            const locked = isMitLocked;
-            const lockedNote = isMitLocked ? mitLockedNote : null;
-            return (
-              <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
-                colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
-                autoLoaded={false}
-                reverseOptions={true}
-                locked={locked}
-                lockedNote={lockedNote}
-                lockedLabel={locked ? 'GitHub' : null}
-                evidence={buildEvidence(project, c.id, testMetrics)} />
-            );
-          })}
-
-          {/* QA Catches — pre-production + production-escaped, collapsed by default */}
-          {(() => {
-            const preProductionTickets = jiraProject?.preProductionCaught?.tickets || [];
-            const internalTickets = jiraProject?.internalEscaped?.tickets || [];
-            const total = preProductionTickets.length + internalTickets.length;
-            if (total === 0) return null;
-            return (
-              <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
-                <div style={{display:'flex',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowQACatches(v=>!v)}>
-                  <span style={{fontSize:12,fontWeight:600}}>{showQACatches?'▾':'▸'} QA catches ({total})</span>
-                  <span style={{fontSize:10.5,color:'var(--text3)',marginLeft:'auto'}}>Bugs intercepted by QA before customer reports</span>
-                </div>
-                {showQACatches && (
-                  <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:6}}>
-                    {preProductionTickets.length > 0 && (
-                      <div>
-                        <div style={{fontSize:10.5,fontWeight:700,color:'var(--green-text)',background:'var(--green-bg)',border:'.5px solid var(--green-border)',borderRadius:5,padding:'2px 8px',marginBottom:4,display:'inline-block'}}>
-                          Pre-production ({preProductionTickets.length}) · staging, never reached production
-                        </div>
-                        <div style={{display:'flex',flexDirection:'column',gap:3}}>
-                          {preProductionTickets.map(t => (
-                            <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
-                              <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--green-bg)',color:'var(--green-text)',border:'.5px solid var(--green-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
-                              <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
-                              <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {internalTickets.length > 0 && (
-                      <div style={{marginTop: preProductionTickets.length > 0 ? 4 : 0}}>
-                        <div style={{fontSize:10.5,fontWeight:700,color:'var(--blue-text)',background:'var(--blue-bg)',border:'.5px solid var(--blue-border)',borderRadius:5,padding:'2px 8px',marginBottom:4,display:'inline-block'}}>
-                          Production-escaped ({internalTickets.length}) · found in production before customers
-                        </div>
-                        <div style={{display:'flex',flexDirection:'column',gap:3}}>
-                          {internalTickets.map(t => (
-                            <div key={t.key} style={{display:'flex',alignItems:'center',gap:8,padding:'4px 6px',borderRadius:5}}>
-                              <span style={{fontSize:9.5,fontWeight:600,padding:'1px 6px',borderRadius:4,background:'var(--blue-bg)',color:'var(--blue-text)',border:'.5px solid var(--blue-border)',whiteSpace:'nowrap'}}>{t.priority}</span>
-                              <a href={t.url} target="_blank" rel="noreferrer" style={{fontSize:11,fontWeight:600,color:'var(--purple)',textDecoration:'none',whiteSpace:'nowrap'}}>{t.key}</a>
-                              <span style={{fontSize:11,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}} title={t.summary}>{t.summary}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+          {showProcessMetrics && (
+            <>
+              <div className="helper" style={{marginBottom:10}}>
+                {isMitLocked
+                  ? `Sourced automatically from the test suite (${mitSrc.repo}, branch ${mitSrc.branch}). These values drive the Process Maturity component of the QA Effectiveness Index.`
+                  : 'These values drive the Process Maturity component in the QA Effectiveness Index. They do not affect the Risk score.'}
               </div>
-            );
-          })()}
+              {MITIGATION_CRITERIA.map(c => {
+                const locked = isMitLocked;
+                const lockedNote = isMitLocked ? mitLockedNote : null;
+                return (
+                  <CriterionCard key={c.id} criterion={c} score={scores[c.id]} onScore={()=>{}}
+                    colorMap={c.scale === 5 ? MIT_COLORS_5 : MIT_COLORS}
+                    autoLoaded={false}
+                    reverseOptions={true}
+                    locked={locked}
+                    lockedNote={lockedNote}
+                    lockedLabel={locked ? 'GitHub' : null}
+                    evidence={buildEvidence(project, c.id, testMetrics)} />
+                );
+              })}
+            </>
+          )}
 
         </div>
 
@@ -1115,21 +1039,27 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
             )}
           </div>
 
-          {/* Formula */}
-          <div className="formula-display">
-            <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
-            <code>Base × 0.40 + TRITON × 0.60</code>
-          </div>
-
-          {/* Legend */}
-          <div className="card">
-            <div className="section-label">Risk levels</div>
-            {[{l:'Low',r:'0.0 – 5.0',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'5.1 – 7.3',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'7.4 – 10',c:'#712B13',bg:'#FAECE7'}].map(x=>(
-              <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
-                <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
-                <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
+          {/* Formula + Legend (colapsable) */}
+          <div className="card" style={{padding:'8px 12px'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',cursor:'pointer'}} onClick={()=>setShowSidebarMeta(v=>!v)}>
+              <span style={{fontSize:11,fontWeight:600,color:'var(--text2)'}}>Formula &amp; levels</span>
+              <span style={{fontSize:11,color:'var(--text3)'}}>{showSidebarMeta?'▾':'▸'}</span>
+            </div>
+            {showSidebarMeta && (
+              <div style={{marginTop:8}}>
+                <div className="formula-display" style={{marginBottom:10}}>
+                  <strong>Formula</strong> <span style={{fontSize:10}}>(0–10 scale)</span><br/>
+                  <code>Base × 0.40 + TRITON × 0.60</code>
+                </div>
+                <div className="section-label" style={{marginTop:0}}>Risk levels</div>
+                {[{l:'Low',r:'0.0 – 5.0',c:'#085041',bg:'#E1F5EE'},{l:'Medium',r:'5.1 – 7.3',c:'#633806',bg:'#FAEEDA'},{l:'High',r:'7.4 – 10',c:'#712B13',bg:'#FAECE7'}].map(x=>(
+                  <div key={x.l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:5}}>
+                    <span className="pill" style={{background:x.bg,color:x.c}}>{x.l}</span>
+                    <span style={{fontSize:11,color:'var(--text2)'}}>{x.r}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
         </div>
@@ -1139,7 +1069,7 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
 }
 
 // ── TritonDetailBody ──────────────────────────────────────────────────────────
-function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
+function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics }) {
   const sevColor = p => {
     if (p === 'Blocker' || p === 'Critical') return {bg:'#FAECE7',text:'#712B13',border:'#D85A30'};
     if (p === 'Major'   || p === 'High')     return {bg:'#FAEEDA',text:'#633806',border:'#BA7517'};
@@ -1159,13 +1089,8 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
   const allTickets = allStoredTix.length > 0 ? allStoredTix : (jmEsc?.tickets || hist?.tickets || []);
   const hasTickets = allTickets.length > 0;
 
-  // Local exclusion state — initialised from the record's saved exclusions.
+  // Local exclusion state — explore impact of excluding tickets (view only, not persisted).
   const [localExcluded, setLocalExcluded] = useState(() => new Set(r.jira?.excludedTickets || []));
-  const [saving, setSaving] = useState(false);
-
-  const originalExcluded = new Set(r.jira?.excludedTickets || []);
-  const isDirty = localExcluded.size !== originalExcluded.size ||
-    [...localExcluded].some(k => !originalExcluded.has(k));
 
   const toggleTicket = key => setLocalExcluded(prev => {
     const next = new Set(prev);
@@ -1188,35 +1113,6 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
 
   const tritonChanged   = hasTickets && Math.abs(recalcTriton - (r.tritonScore ?? 0)) >= 0.05;
   const finalChanged    = hasTickets && Math.abs(recalcFinalRisk - (r.finalRisk ?? 0)) >= 0.05;
-
-  const handleSave = () => {
-    setSaving(true);
-    const newTritonScore  = recalcTriton;
-    const newFinalRisk    = recalcFinalRisk;
-    const updatedRecord   = {
-      ...r,
-      tritonScore: newTritonScore,
-      scores: { ...r.scores, escapedDefects: newTritonScore },
-      finalRisk: newFinalRisk,
-      level: recalcLevel?.label ?? r.level,
-      jira: {
-        ...r.jira,
-        excludedTickets: [...localExcluded],
-        escapedEffective: {
-          total:    activeTickets.length,
-          critical: activeCrit,
-          weighted: activeWtd,
-        },
-      },
-    };
-    // Persist to localStorage (local wins over shared data.json on next load).
-    const locals = loadLocalAssessments();
-    const byId   = new Map(locals.map(rec => [rec.id, rec]));
-    byId.set(updatedRecord.id, updatedRecord);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...byId.values()]));
-    setSaving(false);
-    onSaveRecord(updatedRecord);
-  };
 
   // ── No data case ──────────────────────────────────────────────────────────
   if (r.tritonScore == null && allTickets.length === 0) {
@@ -1253,7 +1149,7 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
       {hasTickets ? (
         <div style={{marginTop:10}}>
           <div style={{fontSize:10,color:'var(--text3)',marginBottom:6,lineHeight:1.5}}>
-            Toggle tickets to exclude non-bugs or out-of-scope items. The score recalculates instantly — save when done.
+            Toggle tickets to explore their impact on the score.
           </div>
           {allTickets.map(t => {
             const sc      = sevColor(t.priority);
@@ -1280,21 +1176,6 @@ function TritonDetailBody({ r, ql, jiraHistory, jiraMetrics, onSaveRecord }) {
               </div>
             );
           })}
-          {isDirty && (
-            <div style={{marginTop:12,display:'flex',alignItems:'center',gap:10}}>
-              <button className="btn-primary" onClick={handleSave} disabled={saving}
-                style={{fontSize:12,padding:'6px 16px'}}>
-                {saving ? 'Saving…' : 'Save adjustments'}
-              </button>
-              <span style={{fontSize:11,color:'var(--text3)'}}>
-                {localExcluded.size - originalExcluded.size > 0
-                  ? `${localExcluded.size - originalExcluded.size} ticket(s) newly excluded`
-                  : localExcluded.size < originalExcluded.size
-                  ? `${originalExcluded.size - localExcluded.size} ticket(s) re-included`
-                  : 'Changes pending'}
-              </span>
-            </div>
-          )}
         </div>
       ) : (
         <div>
@@ -1410,7 +1291,7 @@ function DCEDetailBody({ r }) {
 }
 
 // ── HistoryDetailModal ────────────────────────────────────────────────────────
-function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMetrics, testMetrics }) {
+function HistoryDetailModal({ detail, onClose, jiraHistory, jiraMetrics, testMetrics }) {
   if (!detail) return null;
   const { type, record: r } = detail;
   const d = new Date(r.date);
@@ -1453,7 +1334,7 @@ function HistoryDetailModal({ detail, onClose, onSaveRecord, jiraHistory, jiraMe
     );
   } else if (type === 'triton') {
     title = 'TRITON Escaped Defects';
-    body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} onSaveRecord={onSaveRecord}/>;
+    body = <TritonDetailBody r={r} ql={ql} jiraHistory={jiraHistory} jiraMetrics={jiraMetrics}/>;
   } else if (type === 'dce') {
     title = 'Detection Coverage Efficiency (DCE)';
     body = <DCEDetailBody r={r} />;
@@ -1589,11 +1470,9 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [filterQuarter, setFilterQuarter] = useState('');
   const [viewMode, setViewMode] = useState('timeline');
   const [weightBase, setWeightBase] = useState(40);
-  const [localRefresh, setLocalRefresh] = useState(0);
   const [detail, setDetail] = useState(null);
   const [activePod, setActivePod] = useState(PODS[0]);
   const [sortBy, setSortBy] = useState('qaei');
-  const fileRef = useRef(null);
 
   useEffect(()=>{
     if (!detail) return;
@@ -1611,26 +1490,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
       setLoading(false);
     });
     return ()=>{ cancelled = true; };
-  },[refreshKey, localRefresh]);
-
-  const handleImport = e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const imported = JSON.parse(ev.target.result);
-        if (!Array.isArray(imported)) throw new Error('not an array');
-        const byId = new Map();
-        loadLocalAssessments().forEach(r=>byId.set(r.id,r));
-        imported.forEach(r=>byId.set(r.id,r));
-        localStorage.setItem(STORAGE_KEY, JSON.stringify([...byId.values()]));
-        setLocalRefresh(n=>n+1);
-      } catch { alert('Invalid data.json file'); }
-    };
-    reader.readAsText(f);
-    e.target.value = '';
-  };
+  },[refreshKey]);
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
@@ -1782,9 +1642,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           <button className={`toggle-btn${viewMode==='gauge'?' active':''}`} onClick={()=>setViewMode('gauge')}>Gauge</button>
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
-        <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
-        <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import</button>
-        <button className="btn-primary" style={{fontSize:11,padding:'5px 12px'}} onClick={()=>exportAssessments(allRecords)} disabled={!allRecords.length}>Export data.json</button>
       </div>
 
       {loading && <div className="empty-state">Loading...</div>}
@@ -2197,10 +2054,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
         </div>
       )}
       <HistoryDetailModal detail={detail} onClose={()=>setDetail(null)}
-        onSaveRecord={updatedRecord => {
-          setDetail(prev => prev ? {...prev, record: updatedRecord} : null);
-          setLocalRefresh(n => n + 1);
-        }}
         jiraHistory={jiraHistory} jiraMetrics={jiraMetrics} testMetrics={testMetrics}/>
     </div>
   );
@@ -2208,6 +2061,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
 
 // ── ConfigView — what the calculation is using right now, with plain meanings ──
 function ConfigView({ jiraMetrics, jiraHistory }) {
+  const [showDetail, setShowDetail] = useState(false);
   const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
   const sev = jiraMetrics?.severityWeights || DEFAULT_SEV_WEIGHTS;
   const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
@@ -2283,7 +2137,15 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
         <div className="helper" style={{marginTop:6}}>Higher severity counts more (continuously) toward the weighted count that feeds the curve.</div>
       </Group>
 
-
+      {/* Secondary analysis — collapsed by default */}
+      <div style={{marginTop:4,marginBottom:4}}>
+        <button onClick={()=>setShowDetail(v=>!v)}
+          style={{fontSize:11,color:'var(--text3)',background:'none',border:'none',cursor:'pointer',padding:'4px 0',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+          {showDetail ? '▾' : '▸'} {showDetail ? 'Hide' : 'Show'} detailed analysis — sensitivity, history, density, calibration
+        </button>
+      </div>
+      {showDetail && (
+      <>
       {muVariants && Object.keys(projData).some(p=>PROJECT_DEFAULTS[p]) && (
         <Group title="Sensitivity — how μ moves each project" badge="Rec #5">
           <div className="helper" style={{marginBottom:8}}>Final Risk if μ were set lower (stricter) or higher (lenient). Helps the team pick the anchor with eyes open.</div>
@@ -2353,6 +2215,8 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
             : 'Disabled. Cross-team density isn’t viable yet — delivered-volume counts vary too much by team (verified: 31× spread). The workable path is per-project trend (each project vs its own history) once enough quarters accrue. See scripts/jira-projects.json → exposure.'}
         </div>
       </Group>
+      </>
+      )}
     </div>
   );
 }
@@ -2363,6 +2227,8 @@ function QAEffectivenessView({ jiraMetrics }) {
   const [activePod, setActivePod] = useState(PODS[0]);
   const [visibleProjects, setVisibleProjects] = useState(new Set(PODS[0].projects));
   const [sortBy, setSortBy] = useState('qaei');
+  const [showPhase2, setShowPhase2] = useState(false);
+  const [showQARef, setShowQARef] = useState(false);
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
@@ -2412,7 +2278,7 @@ function QAEffectivenessView({ jiraMetrics }) {
           Measures the value QA adds independently of product complexity or user base size.
           A product can score <strong>High Risk</strong> and <strong>Excellent QA</strong> simultaneously — they answer different questions.
         </div>
-        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:10}}>
+        <div style={{marginTop:10}}>
           <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
             <div style={{fontWeight:700, marginBottom:4}}>
               Formula — Q3 2026
@@ -2428,14 +2294,21 @@ function QAEffectivenessView({ jiraMetrics }) {
               {docs.riskBaselineConfluence && <><br/><a href={docs.riskBaselineConfluence} target="_blank" rel="noreferrer" style={{color:'var(--purple)'}}>QA Risk Baseline Confluence ↗</a></>}
             </div>
           </div>
-          <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)'}}>
-            <div style={{fontWeight:700, marginBottom:4}}>Phase 2 — Q4 2026</div>
-            <code style={{fontSize:10, display:'block', lineHeight:1.6, color:'var(--text3)'}}>
-              QAEI = DCE × 0.50 + Trend × 0.30 + Process × 0.20
-            </code>
-            <div style={{fontSize:10, color:'var(--text3)', marginTop:4}}>
-              Trend (quarter-over-quarter improvement) requires 2 consecutive real quarters of data. Unlocks after Q3 closes.
-            </div>
+          <div style={{marginTop:6}}>
+            <button onClick={()=>setShowPhase2(v=>!v)}
+              style={{fontSize:10,color:'var(--text3)',background:'none',border:'none',cursor:'pointer',padding:'3px 0',fontFamily:'inherit'}}>
+              {showPhase2 ? '▾' : '▸'} Phase 2 — Q4 2026 (next formula)
+            </button>
+            {showPhase2 && (
+              <div style={{fontSize:11, background:'var(--bg2)', borderRadius:6, padding:'8px 10px', border:'.5px solid var(--border)', marginTop:4}}>
+                <code style={{fontSize:10, display:'block', lineHeight:1.6, color:'var(--text3)'}}>
+                  QAEI = DCE × 0.50 + Trend × 0.30 + Process × 0.20
+                </code>
+                <div style={{fontSize:10, color:'var(--text3)', marginTop:4}}>
+                  Trend requires 2 consecutive real quarters of data. Unlocks after Q3 closes.
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2552,14 +2425,6 @@ function QAEffectivenessView({ jiraMetrics }) {
                   </div>
                 </div>
 
-                {/* Trend */}
-                <div>
-                  <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
-                    <span style={{color:'var(--text3)'}}>Trend (Q4+) <span style={{fontWeight:700}}>—</span></span>
-                    <span style={{color:'var(--text3)', fontStyle:'italic', fontSize:11}}>Available Q4 2026</span>
-                  </div>
-                  <ScoreBar value={0} max={10} color='var(--border2)' dim={true}/>
-                </div>
               </div>
             </div>
 
@@ -2579,40 +2444,47 @@ function QAEffectivenessView({ jiraMetrics }) {
         ))}
       </div>
 
-      {/* Industry benchmarks + methodology */}
-      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12}}>
-        <div className="card">
-          <div style={{fontSize:12, fontWeight:700, marginBottom:4}}>DCE Industry Benchmarks</div>
-          <div style={{fontSize:11, color:'var(--text3)', marginBottom:8}}>Defect Containment Effectiveness — Capers Jones / IEEE / Atlassian</div>
-          {[
-            { range:'≥ 80%', label:'World-class', ...QA_LEVELS[3] },
-            { range:'50–79%', label:'Effective', ...QA_LEVELS[2] },
-            { range:'< 50%', label:'Needs improvement', ...QA_LEVELS[0] },
-          ].map(b => (
-            <div key={b.range} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
-              <span className="pill" style={{background:b.bg, color:b.text, border:`1px solid ${b.border}`}}>{b.label}</span>
-              <span style={{fontSize:11, color:'var(--text2)', fontWeight:600}}>{b.range} of bugs caught internally</span>
+      {/* Reference: benchmarks + priorities — collapsed by default */}
+      <div style={{marginTop:4}}>
+        <button onClick={()=>setShowQARef(v=>!v)}
+          style={{fontSize:11,color:'var(--text3)',background:'none',border:'none',cursor:'pointer',padding:'4px 0',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+          {showQARef ? '▾' : '▸'} Reference — DCE benchmarks &amp; priorities
+        </button>
+        {showQARef && (
+          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:8}}>
+            <div className="card">
+              <div style={{fontSize:12, fontWeight:700, marginBottom:4}}>DCE Industry Benchmarks</div>
+              <div style={{fontSize:11, color:'var(--text3)', marginBottom:8}}>Defect Containment Effectiveness — Capers Jones / IEEE / Atlassian</div>
+              {[
+                { range:'≥ 80%', label:'World-class', ...QA_LEVELS[3] },
+                { range:'50–79%', label:'Effective', ...QA_LEVELS[2] },
+                { range:'< 50%', label:'Needs improvement', ...QA_LEVELS[0] },
+              ].map(b => (
+                <div key={b.range} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
+                  <span className="pill" style={{background:b.bg, color:b.text, border:`1px solid ${b.border}`}}>{b.label}</span>
+                  <span style={{fontSize:11, color:'var(--text2)', fontWeight:600}}>{b.range} of bugs caught internally</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div className="card">
-          <div style={{fontSize:12, fontWeight:700, marginBottom:8}}>What to improve first</div>
-          {projectData.filter(p => p.de).sort((a,b) => (a.result?.qaei||0) - (b.result?.qaei||0)).map(({ proj, de, result, ql }) => (
-            <div key={proj} style={{display:'flex', alignItems:'center', gap:8, padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
-              <span style={{fontSize:11, fontWeight:600, minWidth:110}}>{proj}</span>
-              <div style={{flex:1, height:5, background:'var(--bg3)', borderRadius:3}}>
-                <div style={{height:5, width:`${Math.min(100, (result?.qaei||0) * 10)}%`, background:ql?.border||'var(--border)', borderRadius:3}}/>
+            <div className="card">
+              <div style={{fontSize:12, fontWeight:700, marginBottom:8}}>What to improve first</div>
+              {projectData.filter(p => p.de).sort((a,b) => (a.result?.qaei||0) - (b.result?.qaei||0)).map(({ proj, de, result, ql }) => (
+                <div key={proj} style={{display:'flex', alignItems:'center', gap:8, padding:'5px 0', borderBottom:'.5px solid var(--border)'}}>
+                  <span style={{fontSize:11, fontWeight:600, minWidth:110}}>{proj}</span>
+                  <div style={{flex:1, height:5, background:'var(--bg3)', borderRadius:3}}>
+                    <div style={{height:5, width:`${Math.min(100, (result?.qaei||0) * 10)}%`, background:ql?.border||'var(--border)', borderRadius:3}}/>
+                  </div>
+                  <span style={{fontSize:11, fontWeight:700, color:ql?.text||'var(--text3)', minWidth:26, textAlign:'right'}}>
+                    {result?.qaei?.toFixed(1)||'—'}
+                  </span>
+                </div>
+              ))}
+              <div className="helper" style={{marginTop:8}}>
+                DCE improves by labeling bugs with <code>known</code> (staging catches, strongest signal) and <code>escaped</code> (production catches before customer reports) on dev boards. Process Maturity improves through automation and coverage growth.
               </div>
-              <span style={{fontSize:11, fontWeight:700, color:ql?.text||'var(--text3)', minWidth:26, textAlign:'right'}}>
-                {result?.qaei?.toFixed(1)||'—'}
-              </span>
             </div>
-          ))}
-          <div className="helper" style={{marginTop:8}}>
-            DCE improves by labeling bugs with <code>known</code> (staging catches, strongest signal) and <code>escaped</code> (production catches before customer reports) on dev boards. Process Maturity improves through automation and coverage growth.
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
