@@ -11,11 +11,9 @@
     "Q2-2026"
   ],
   "calibrationStats": {
-    "basis": "2026 real values",
-    "n": 8,
-    "mean": 6.4,
-    "median": 4.5,
-    "std": 5.8
+    "n": 26,
+    "mean": 8.5,
+    "median": 10
   },
   "densityInfo": {
     "denominator": "Done Story/User Story/Bug resolved in quarter",
@@ -1165,7 +1163,7 @@
       "Q1-2026": {
         "total": 49,
         "weighted": 57,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36139",
@@ -1564,7 +1562,7 @@
       "Q2-2026": {
         "total": 37,
         "weighted": 46,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37113",
@@ -1869,7 +1867,7 @@
       "Q1-2026": {
         "total": 116,
         "weighted": 154.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36130",
@@ -2804,7 +2802,7 @@
       "Q2-2026": {
         "total": 29,
         "weighted": 38,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37134",
@@ -3045,7 +3043,7 @@
       "Q1-2026": {
         "total": 67,
         "weighted": 80.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36114",
@@ -3588,7 +3586,7 @@
       "Q2-2026": {
         "total": 32,
         "weighted": 44,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37112",
@@ -3867,7 +3865,7 @@
       "Q1-2026": {
         "total": 55,
         "weighted": 85.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36132",
@@ -4314,7 +4312,7 @@
       "Q2-2026": {
         "total": 56,
         "weighted": 78,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37122",
@@ -4771,7 +4769,7 @@
       "Q1-2026": {
         "total": 31,
         "weighted": 40,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36097",
@@ -5026,7 +5024,7 @@
       "Q2-2026": {
         "total": 27,
         "weighted": 31.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37120",
@@ -5265,7 +5263,7 @@
       "Q1-2026": {
         "total": 52,
         "weighted": 61,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36131",
@@ -5688,7 +5686,7 @@
       "Q2-2026": {
         "total": 30,
         "weighted": 34.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37121",
@@ -5937,7 +5935,7 @@
       "Q1-2026": {
         "total": 87,
         "weighted": 105,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36138",
@@ -6640,7 +6638,7 @@
       "Q2-2026": {
         "total": 72,
         "weighted": 84,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37136",
@@ -7225,7 +7223,7 @@
       "Q1-2026": {
         "total": 26,
         "weighted": 34,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-36112",
@@ -7440,7 +7438,7 @@
       "Q2-2026": {
         "total": 16,
         "weighted": 22.5,
-        "tritonScore": null,
+        "tritonScore": 10,
         "tickets": [
           {
             "key": "TRITON-37082",

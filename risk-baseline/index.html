@@ -2209,7 +2209,7 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
               </React.Fragment>
             ))}
           </div>
-          {jiraHistory.calibrationStats && <div className="helper" style={{marginTop:8}}>Calibration check: across {jiraHistory.calibrationStats.n} real values, median {jiraHistory.calibrationStats.median} / mean {jiraHistory.calibrationStats.mean} → μ={curve.mu} sits near the center (anchor validated). Note the quarter-to-quarter volatility — read the trend, not a single point.</div>}
+          {jiraHistory.calibrationStats && <div className="helper" style={{marginTop:8}}>Calibration check: {jiraHistory.calibrationStats.n} values — median {jiraHistory.calibrationStats.median} / mean {jiraHistory.calibrationStats.mean}. High-volume pods (Explore, UDS, Newsletters…) saturate the curve at 10 — expected given μ={curve.mu} was anchored to Pod 1 scale. Trend direction matters more than the absolute ceiling value.</div>}
         </Group>
       )}
 
