@@ -1735,6 +1735,18 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
             );
           })}
         </div>
+        {viewMode==='timeline' && (
+          <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:10, paddingTop:10, borderTop:'.5px solid var(--border)'}}>
+            <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Sort:</span>
+            <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--teal)' : undefined}}>
+              <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
+              <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+              <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
+              <button className={`toggle-btn${sortBy==='trend'?' active':''}`} onClick={()=>setSortBy(s=>s==='trend'?'default':'trend')}>Trend ↓</button>
+            </div>
+            {sortBy!=='default' && <button onClick={()=>setSortBy('default')} style={{fontSize:10,padding:'2px 7px',borderRadius:4,border:'1px solid var(--teal)',background:'transparent',color:'var(--teal-dim)',cursor:'pointer',fontFamily:'inherit'}}>↩ reset</button>}
+          </div>
+        )}
       </div>
 
       {/* Toolbar: quarter filter + view toggle + export */}
@@ -1770,15 +1782,6 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           <button className={`toggle-btn${viewMode==='gauge'?' active':''}`} onClick={()=>setViewMode('gauge')}>Gauge</button>
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
-        {viewMode==='timeline' && (
-          <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--teal)' : undefined}}>
-            <span style={{fontSize:10,fontWeight:600,color:'var(--text3)',padding:'0 4px',flexShrink:0}}>Sort:</span>
-            <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
-            <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
-            <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
-            <button className={`toggle-btn${sortBy==='trend'?' active':''}`} onClick={()=>setSortBy(s=>s==='trend'?'default':'trend')}>Trend ↓</button>
-          </div>
-        )}
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
         <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import</button>
         <button className="btn-primary" style={{fontSize:11,padding:'5px 12px'}} onClick={()=>exportAssessments(allRecords)} disabled={!allRecords.length}>Export data.json</button>
@@ -2473,16 +2476,15 @@ function QAEffectivenessView({ jiraMetrics }) {
             );
           })}
         </div>
-      </div>
-
-      {/* Sort control */}
-      <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:12}}>
-        <span style={{fontSize:11, fontWeight:600, color:'var(--text2)'}}>Sort by:</span>
-        <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--purple)' : undefined}}>
-          <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
-          <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
-          <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
-          <button className={`toggle-btn${sortBy==='dce'?' active':''}`} onClick={()=>setSortBy(s=>s==='dce'?'default':'dce')}>DCE ↓</button>
+        <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:10, paddingTop:10, borderTop:'.5px solid var(--border)'}}>
+          <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Sort:</span>
+          <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--purple)' : undefined}}>
+            <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
+            <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+            <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
+            <button className={`toggle-btn${sortBy==='dce'?' active':''}`} onClick={()=>setSortBy(s=>s==='dce'?'default':'dce')}>DCE ↓</button>
+          </div>
+          {sortBy!=='default' && <button onClick={()=>setSortBy('default')} style={{fontSize:10,padding:'2px 7px',borderRadius:4,border:'1px solid var(--purple)',background:'transparent',color:'var(--purple)',cursor:'pointer',fontFamily:'inherit'}}>↩ reset</button>}
         </div>
       </div>
 
