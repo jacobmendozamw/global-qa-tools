@@ -1592,7 +1592,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [localRefresh, setLocalRefresh] = useState(0);
   const [detail, setDetail] = useState(null);
   const [activePod, setActivePod] = useState(PODS[0]);
-  const [sortBy, setSortBy] = useState('default');
+  const [sortBy, setSortBy] = useState('qaei');
   const fileRef = useRef(null);
 
   useEffect(()=>{
@@ -1739,8 +1739,8 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:10, paddingTop:10, borderTop:'.5px solid var(--border)'}}>
             <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Sort:</span>
             <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--teal)' : undefined}}>
-              <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
               <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+              <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
               <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
               <button className={`toggle-btn${sortBy==='trend'?' active':''}`} onClick={()=>setSortBy(s=>s==='trend'?'default':'trend')}>Trend ↓</button>
             </div>
@@ -2362,7 +2362,7 @@ function QAEffectivenessView({ jiraMetrics }) {
   const mp = jiraMetrics && jiraMetrics.modelParams ? jiraMetrics.modelParams : DEFAULT_MODEL_PARAMS;
   const [activePod, setActivePod] = useState(PODS[0]);
   const [visibleProjects, setVisibleProjects] = useState(new Set(PODS[0].projects));
-  const [sortBy, setSortBy] = useState('default');
+  const [sortBy, setSortBy] = useState('qaei');
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
@@ -2479,8 +2479,8 @@ function QAEffectivenessView({ jiraMetrics }) {
         <div style={{display:'flex', alignItems:'center', gap:6, flexWrap:'wrap', marginTop:10, paddingTop:10, borderTop:'.5px solid var(--border)'}}>
           <span style={{fontSize:11, fontWeight:600, color:'var(--text2)', flexShrink:0}}>Sort:</span>
           <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--purple)' : undefined}}>
-            <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
             <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+            <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
             <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
             <button className={`toggle-btn${sortBy==='dce'?' active':''}`} onClick={()=>setSortBy(s=>s==='dce'?'default':'dce')}>DCE ↓</button>
           </div>
