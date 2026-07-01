@@ -840,7 +840,7 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
       }
     }
     setScores(base);
-    setShowTickets(false);
+    setShowTritonDetail(false);
   }, [project, jiraMetrics]);
 
   useEffect(() => {
@@ -940,10 +940,10 @@ function RiskIndexView({ jiraMetrics, testMetrics, activePod, onPodChange, proje
               and manually exclude any service request the keyword filter missed. */}
           {escapedTickets.length > 0 && (
             <div className="card" style={{marginTop:8,padding:'10px 12px'}}>
-              <div style={{display:'flex',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTickets(v=>!v)}>
-                <span style={{fontSize:12,fontWeight:600}}>{showTickets?'▾':'▸'} Defects considered ({escTotalEff})</span>
+              <div style={{display:'flex',alignItems:'center',cursor:'pointer',gap:8}} onClick={()=>setShowTritonDetail(v=>!v)}>
+                <span style={{fontSize:12,fontWeight:600}}>{showTritonDetail?'▾':'▸'} Defects considered ({escTotalEff})</span>
               </div>
-              {showTickets && (
+              {showTritonDetail && (
                 <div style={{marginTop:8,display:'flex',flexDirection:'column',gap:3}}>
                   {escapedTickets.map(t => {
                     const pc = t.critical ? {bg:'#FAECE7',bd:'#D85A30',tx:'#712B13'} : {bg:'var(--bg2)',bd:'var(--border2)',tx:'var(--text2)'};
