@@ -2354,7 +2354,6 @@ function QAEffectivenessView({ jiraMetrics }) {
           <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--purple)' : undefined}}>
             <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
             <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>QAEI ↓</button>
-            <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
             <button className={`toggle-btn${sortBy==='dce'?' active':''}`} onClick={()=>setSortBy(s=>s==='dce'?'default':'dce')}>DCE ↓</button>
           </div>
           {sortBy!=='default' && <button onClick={()=>setSortBy('default')} style={{fontSize:10,padding:'2px 7px',borderRadius:4,border:'1px solid var(--purple)',background:'transparent',color:'var(--purple)',cursor:'pointer',fontFamily:'inherit'}}>↩ reset</button>}
