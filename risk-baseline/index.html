@@ -1592,6 +1592,7 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   const [localRefresh, setLocalRefresh] = useState(0);
   const [detail, setDetail] = useState(null);
   const [activePod, setActivePod] = useState(PODS[0]);
+  const [sortBy, setSortBy] = useState('default');
   const fileRef = useRef(null);
 
   useEffect(()=>{
@@ -1769,6 +1770,15 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
           <button className={`toggle-btn${viewMode==='gauge'?' active':''}`} onClick={()=>setViewMode('gauge')}>Gauge</button>
           <button className={`toggle-btn${viewMode==='table'?' active':''}`} onClick={()=>setViewMode('table')}>Table</button>
         </div>
+        {viewMode==='timeline' && (
+          <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--teal)' : undefined}}>
+            <span style={{fontSize:10,fontWeight:600,color:'var(--text3)',padding:'0 4px',flexShrink:0}}>Sort:</span>
+            <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
+            <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+            <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
+            <button className={`toggle-btn${sortBy==='trend'?' active':''}`} onClick={()=>setSortBy(s=>s==='trend'?'default':'trend')}>Trend ↓</button>
+          </div>
+        )}
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} style={{display:'none'}}/>
         <button className="toggle-btn" style={{border:'1px solid var(--border2)',borderRadius:6}} onClick={()=>fileRef.current && fileRef.current.click()}>Import</button>
         <button className="btn-primary" style={{fontSize:11,padding:'5px 12px'}} onClick={()=>exportAssessments(allRecords)} disabled={!allRecords.length}>Export data.json</button>
@@ -1788,7 +1798,38 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
               if (!byProjQ[r.project]) byProjQ[r.project] = {};
               byProjQ[r.project][q] = r;
             });
-            return PROJECTS.filter(p => visibleProjects.has(p)).map(proj => {
+            const mp_ = jiraMetrics && jiraMetrics.modelParams ? jiraMetrics.modelParams : DEFAULT_MODEL_PARAMS;
+            const refQ_ = filterQuarter || allQuarters[0];
+            const getSortVals = function(p) {
+              const r = byProjQ[p] && byProjQ[p][refQ_];
+              if (!r) return { risk: -1, qaei: -1, trend: -999, podIdx: 99 };
+              const risk = computedRisk(r) != null ? computedRisk(r) : -1;
+              const de_ = r.jira && r.jira.detectionEfficiency;
+              const pd_ = PROJECT_DEFAULTS[p] || {};
+              const pm_ = {
+                automationConfidence: r.scores && r.scores.automationConfidence != null ? r.scores.automationConfidence : pd_.automationConfidence,
+                testCoverage:         r.scores && r.scores.testCoverage != null         ? r.scores.testCoverage         : pd_.testCoverage,
+                testability:          r.scores && r.scores.testability != null          ? r.scores.testability          : pd_.testability,
+              };
+              const qr_ = computeQAEI(de_ ? de_.rate : 0, pm_, mp_);
+              const qaei = qr_ ? qr_.qaei : -1;
+              const prevQ_ = allQuarters[allQuarters.indexOf(refQ_) + 1];
+              const prevR_ = prevQ_ && byProjQ[p] ? byProjQ[p][prevQ_] : null;
+              const prevRisk_ = prevR_ ? computedRisk(prevR_) : null;
+              const trend = prevRisk_ != null && risk >= 0 ? risk - prevRisk_ : -999;
+              const podIdx = PODS.findIndex(function(pod) { return pod.projects.indexOf(p) >= 0; });
+              return { risk: risk, qaei: qaei, trend: trend, podIdx: podIdx >= 0 ? podIdx : 99 };
+            };
+            const rawProjs_ = PROJECTS.filter(function(p) { return visibleProjects.has(p); });
+            const sortedProjs_ = sortBy === 'default' ? rawProjs_ : rawProjs_.slice().sort(function(a, b) {
+              const ka = getSortVals(a), kb = getSortVals(b);
+              if (sortBy === 'risk')  return kb.risk  - ka.risk;
+              if (sortBy === 'qaei')  return kb.qaei  - ka.qaei;
+              if (sortBy === 'pod')   return ka.podIdx - kb.podIdx;
+              if (sortBy === 'trend') return kb.trend  - ka.trend;
+              return 0;
+            });
+            return sortedProjs_.map(proj => {
               const projQuarters = allQuarters
                 .filter(q => (!filterQuarter || q === filterQuarter) && byProjQ[proj]?.[q]);
               if (!projQuarters.length) return null;
@@ -2315,9 +2356,10 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
 
 // ── QAEffectivenessView ───────────────────────────────────────────────────────
 function QAEffectivenessView({ jiraMetrics }) {
-  const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
+  const mp = jiraMetrics && jiraMetrics.modelParams ? jiraMetrics.modelParams : DEFAULT_MODEL_PARAMS;
   const [activePod, setActivePod] = useState(PODS[0]);
   const [visibleProjects, setVisibleProjects] = useState(new Set(PODS[0].projects));
+  const [sortBy, setSortBy] = useState('default');
 
   const toggleProject = proj =>
     setVisibleProjects(s => { const n = new Set(s); n.has(proj) ? n.delete(proj) : n.add(proj); return n; });
@@ -2333,6 +2375,18 @@ function QAEffectivenessView({ jiraMetrics }) {
     const result   = de ? computeQAEI(de.rate, defaults, mp) : null;
     const ql       = result ? qaLevel(result.qaei) : null;
     return { proj, de, defaults, result, ql };
+  });
+
+  const podIdxQA = function(proj) {
+    const i = PODS.findIndex(function(pod) { return pod.projects.indexOf(proj) >= 0; });
+    return i >= 0 ? i : 99;
+  };
+  const sortedProjectData = sortBy === 'default' ? projectData : projectData.slice().sort(function(a, b) {
+    if (sortBy === 'risk')  return (a.result ? a.result.qaei : 10)  - (b.result ? b.result.qaei : 10);
+    if (sortBy === 'qaei')  return (b.result ? b.result.qaei : -1)  - (a.result ? a.result.qaei : -1);
+    if (sortBy === 'pod')   return podIdxQA(a.proj) - podIdxQA(b.proj);
+    if (sortBy === 'dce')   return (b.de ? b.de.rate : -1) - (a.de ? a.de.rate : -1);
+    return 0;
   });
 
   const ScoreBar = ({ value, max = 10, color, dim }) => (
@@ -2421,9 +2475,20 @@ function QAEffectivenessView({ jiraMetrics }) {
         </div>
       </div>
 
+      {/* Sort control */}
+      <div style={{display:'flex', alignItems:'center', gap:8, marginBottom:12}}>
+        <span style={{fontSize:11, fontWeight:600, color:'var(--text2)'}}>Sort by:</span>
+        <div className="toggle-wrap" style={{border: sortBy!=='default' ? '1.5px solid var(--purple)' : undefined}}>
+          <button className={`toggle-btn${sortBy==='risk'?' active':''}`} onClick={()=>setSortBy(s=>s==='risk'?'default':'risk')}>Risk ↓</button>
+          <button className={`toggle-btn${sortBy==='qaei'?' active':''}`} onClick={()=>setSortBy(s=>s==='qaei'?'default':'qaei')}>QAEI ↑</button>
+          <button className={`toggle-btn${sortBy==='pod'?' active':''}`} onClick={()=>setSortBy(s=>s==='pod'?'default':'pod')}>Pod</button>
+          <button className={`toggle-btn${sortBy==='dce'?' active':''}`} onClick={()=>setSortBy(s=>s==='dce'?'default':'dce')}>DCE ↓</button>
+        </div>
+      </div>
+
       {/* Project cards */}
       <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(480px, 1fr))', gap:16, marginBottom:16}}>
-        {projectData.filter(p => visibleProjects.has(p.proj)).map(({ proj, de, defaults, result, ql }) => (
+        {sortedProjectData.filter(p => visibleProjects.has(p.proj)).map(({ proj, de, defaults, result, ql }) => (
           <div key={proj} className="card" style={{
             border: ql ? `1.5px solid ${ql.border}` : '1px solid var(--border)',
             background: ql ? `${ql.bg}cc` : 'var(--bg2)',
