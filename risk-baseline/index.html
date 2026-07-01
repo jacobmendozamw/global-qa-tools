@@ -2391,7 +2391,7 @@ function QAEffectivenessView({ jiraMetrics }) {
                 {/* DCE */}
                 <div style={{marginBottom:12}}>
                   <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
-                    <span style={{color:'var(--text2)'}}>Defect Containment <span style={{fontWeight:700, color:'var(--text)'}}>65%</span></span>
+                    <span style={{color:'var(--text2)'}}>Defect Containment <span style={{fontSize:10, fontWeight:400, color:'var(--text3)'}}>· wt 65%</span></span>
                     <span style={{fontWeight:700, color: de ? ql?.text||'var(--text)' : 'var(--text3)'}}>
                       {de ? `${de.rate}%` : '—'}
                     </span>
@@ -2414,7 +2414,7 @@ function QAEffectivenessView({ jiraMetrics }) {
                 {/* Process Maturity */}
                 <div style={{marginBottom:12}}>
                   <div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:4}}>
-                    <span style={{color:'var(--text2)'}}>Process Maturity <span style={{fontWeight:700, color:'var(--text)'}}>35%</span></span>
+                    <span style={{color:'var(--text2)'}}>Process Maturity <span style={{fontSize:10, fontWeight:400, color:'var(--text3)'}}>· wt 35%</span></span>
                     <span style={{fontWeight:700, color:'var(--text)'}}>
                       {result?.pmScore != null ? `${result.pmScore.toFixed(1)}/10` : '—'}
                     </span>
