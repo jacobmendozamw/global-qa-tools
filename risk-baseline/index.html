@@ -2059,9 +2059,30 @@ function HistoryView({ refreshKey, jiraHistory, jiraMetrics, testMetrics }) {
   );
 }
 
+// ── InfoTip — hover tooltip helper ─────────────────────────────────────────────
+function InfoTip({ text }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{position:'relative',display:'inline-flex',marginLeft:'auto',flexShrink:0}}
+      onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
+      <span style={{fontSize:12,color:'var(--text3)',cursor:'default',userSelect:'none',padding:'0 2px'}}>ⓘ</span>
+      {show && (
+        <div style={{position:'absolute',right:0,top:20,zIndex:200,background:'var(--bg)',border:'1px solid var(--border2)',borderRadius:6,padding:'8px 10px',fontSize:11,color:'var(--text2)',lineHeight:1.5,width:260,boxShadow:'0 4px 14px rgba(0,0,0,.12)',whiteSpace:'normal'}}>
+          {text}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── ConfigView — what the calculation is using right now, with plain meanings ──
 function ConfigView({ jiraMetrics, jiraHistory }) {
   const [showDetail, setShowDetail] = useState(false);
+  const [showBaseRisk, setShowBaseRisk] = useState(false);
+  const [showSensitivity, setShowSensitivity] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showDensity, setShowDensity] = useState(false);
+  const [showCalibration, setShowCalibration] = useState(false);
   const curve = jiraMetrics?.tritonCurve || DEFAULT_CURVE;
   const sev = jiraMetrics?.severityWeights || DEFAULT_SEV_WEIGHTS;
   const mp = jiraMetrics?.modelParams || DEFAULT_MODEL_PARAMS;
@@ -2080,10 +2101,10 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
   const fmtDay = s => { try { return new Date(s + (s && s.length===10?'T00:00:00':'')).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); } catch { return s; } };
 
   const Row = ({k, v, meaning}) => (
-    <div style={{display:'grid',gridTemplateColumns:'150px 70px 1fr',gap:10,alignItems:'baseline',padding:'6px 0',borderBottom:'.5px solid var(--border)'}}>
-      <div style={{fontSize:12,fontWeight:600}}>{k}</div>
-      <div style={{fontSize:12,fontWeight:700,color:'var(--purple)'}}>{v}</div>
-      <div style={{fontSize:11,color:'var(--text2)',lineHeight:1.45}}>{meaning}</div>
+    <div style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'.5px solid var(--border)'}}>
+      <div style={{fontSize:12,fontWeight:600,minWidth:130,flexShrink:0}}>{k}</div>
+      <div style={{fontSize:12,fontWeight:700,color:'var(--purple)',flex:1}}>{v}</div>
+      {meaning && <InfoTip text={meaning}/>}
     </div>
   );
   const Group = ({title, badge, children}) => (
@@ -2098,30 +2119,40 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
 
   return (
     <div style={{maxWidth:760}}>
-      <div className="helper" style={{marginBottom:14}}>
-        These are the exact parameters the calculation is using right now. Scores are sourced from TRITON and computed with the model below; values marked as policy are team decisions, not auto-derived.
-      </div>
+      <div className="helper" style={{marginBottom:14}}>Live model parameters — hover ⓘ on any row for details.</div>
 
       <Group title="Overview">
-        <Row k="Model version" v={jiraMetrics?.modelVersion || '—'} meaning="Identifies the formula version, so historical assessments stay comparable when the model changes." />
-        <Row k="Quarter" v={jiraMetrics?.quarter || '—'} meaning="Evaluation period." />
-        <Row k="TRITON data" v={win?`${win.elapsedPct}%`:'—'} meaning={win?`Pulled ${fmtDay(win.from)} – ${fmtDay(win.to)}. The quarter is ${win.elapsedPct}% elapsed — early readings count fewer days, so treat them as partial.`:'Extraction window.'} />
-        <Row k="Final scale" v="0–10" meaning="Final Risk runs 0 (none) to 10 (max). Levels: Low 0–5.0 · Medium 5.1–7.3 · High 7.4–10." />
+        <Row k="Model version" v={jiraMetrics?.modelVersion || '—'} meaning="Formula version — ensures historical records stay comparable when the model changes." />
+        <Row k="TRITON data" v={win?`${win.elapsedPct}%`:'—'} meaning={win?`Pulled ${fmtDay(win.from)} – ${fmtDay(win.to)}. Quarter is ${win.elapsedPct}% elapsed — early readings count fewer days, treat as partial.`:'Extraction window.'} />
+        <Row k="Formula" v="Base × 0.40 + TRITON × 0.60" meaning="Inherent product risk (Base, 40%) + objective escaped defects (TRITON, 60%). QA process quality is in the QAEI tab and does not modify Risk. Manual Override forces Final = 10." />
+        <Row k="Exposure" v={jiraMetrics?.exposureEnabled ? 'ON' : 'OFF'} meaning="Defect density normalization by delivery volume. OFF — cross-team counts vary 31× so per-project trend is used instead. See scripts/jira-projects.json → exposure." />
       </Group>
 
-      <Group title="Formula" badge="how the final is built">
-        <div style={{fontFamily:'monospace',fontSize:12,background:'var(--bg2)',borderRadius:6,padding:'8px 10px',marginBottom:8}}>
-          Final = Base × 0.40 + TRITON × 0.60
+      <div className="card" style={{marginBottom:12}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',cursor:'pointer'}} onClick={()=>setShowBaseRisk(v=>!v)}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{fontSize:11,color:'var(--text3)'}}>{showBaseRisk?'▾':'▸'}</span>
+            <span style={{fontSize:13,fontWeight:700}}>Base Risk</span>
+            <span style={{fontSize:11,color:'var(--text3)',fontWeight:400}}>— inherent product risk</span>
+          </div>
+          <span className="dim-badge" style={{background:'var(--bg2)',color:'var(--text2)',borderColor:'var(--border2)'}}>40% of final</span>
         </div>
-        <div className="helper">Inherent product risk (Base, 40%) and objective production defects (TRITON, 60%). QA process quality is measured separately in the QA Effectiveness Index tab — it no longer modifies the Risk score. Manual Override forces Final = 10.</div>
-      </Group>
-
-      <Group title="Base Risk — inherent product risk" badge="40% of final">
-        <Row k="User impact" v={pct(BASE_WEIGHTS.userImpact)} meaning="Business criticality & size of user base." />
-        <Row k="Rate of change" v={pct(BASE_WEIGHTS.rateOfChange)} meaning="Release frequency / how fast the product moves." />
-        <Row k="Complexity" v={pct(BASE_WEIGHTS.complexity)} meaning="Integrations, dependencies, system logic." />
-        <div className="helper" style={{marginTop:6}}>Pre-loaded per project (1–3, mapped to 0–10); confirmed quarterly. Weights are within this group.</div>
-      </Group>
+        {!showBaseRisk && (
+          <div style={{display:'flex',gap:6,marginTop:8,flexWrap:'wrap'}}>
+            <span className="pill" style={{background:'var(--bg2)',color:'var(--text2)',border:'.5px solid var(--border2)'}}>User impact {pct(BASE_WEIGHTS.userImpact)}</span>
+            <span className="pill" style={{background:'var(--bg2)',color:'var(--text2)',border:'.5px solid var(--border2)'}}>Rate of change {pct(BASE_WEIGHTS.rateOfChange)}</span>
+            <span className="pill" style={{background:'var(--bg2)',color:'var(--text2)',border:'.5px solid var(--border2)'}}>Complexity {pct(BASE_WEIGHTS.complexity)}</span>
+          </div>
+        )}
+        {showBaseRisk && (
+          <div style={{marginTop:8}}>
+            <Row k="User impact" v={pct(BASE_WEIGHTS.userImpact)} meaning="Business criticality &amp; size of user base." />
+            <Row k="Rate of change" v={pct(BASE_WEIGHTS.rateOfChange)} meaning="Release frequency / how fast the product moves." />
+            <Row k="Complexity" v={pct(BASE_WEIGHTS.complexity)} meaning="Integrations, dependencies, system logic." />
+            <div className="helper" style={{marginTop:6}}>Pre-loaded per project (1–3, mapped to 0–10); confirmed quarterly. Weights are within this group.</div>
+          </div>
+        )}
+      </div>
 
       <Group title="TRITON Score — escaped defects curve" badge="60% of final">
         <Row k="μ (mu)" v={curve.mu} meaning="POLICY: the number of severity-weighted escaped defects/quarter treated as MEDIUM risk (5/10). The target you measure against — set by the team. Lower μ = stricter; higher μ = more lenient." />
@@ -2145,23 +2176,31 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
         </button>
       </div>
       {showDetail && (
-      <>
+      <div style={{display:'flex',flexDirection:'column',gap:4}}>
       {muVariants && Object.keys(projData).some(p=>PROJECT_DEFAULTS[p]) && (
-        <Group title="Sensitivity — how μ moves each project" badge="Rec #5">
-          <div className="helper" style={{marginBottom:8}}>Final Risk if μ were set lower (stricter) or higher (lenient). Helps the team pick the anchor with eyes open.</div>
-          <div style={{display:'grid',gridTemplateColumns:`1fr ${muVariants.map(()=>'70px').join(' ')}`,gap:6,fontSize:11.5}}>
-            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
-            {muVariants.map((m,i)=><div key={i} style={{fontWeight:600,textAlign:'center',color:m===curve.mu?'var(--purple)':'var(--text2)'}}>μ={m}{m===curve.mu?' ★':''}</div>)}
-            {Object.keys(projData).filter(p=>PROJECT_DEFAULTS[p]).map(p=>(
-              <React.Fragment key={p}>
-                <div style={{padding:'3px 0'}}>{p}</div>
-                {muVariants.map((m,i)=>{const f=simFinal(p,m);const rl=f!=null?riskLevel(f):null;return (
-                  <div key={i} style={{textAlign:'center',padding:'3px 0',borderRadius:4,background:rl?rl.bg:'transparent',color:rl?rl.text:'var(--text3)',fontWeight:m===curve.mu?700:500}}>{f!=null?f.toFixed(1):'—'}</div>
-                );})}
-              </React.Fragment>
-            ))}
-          </div>
-        </Group>
+        <React.Fragment>
+          <button onClick={()=>setShowSensitivity(v=>!v)}
+            style={{fontSize:11,color:'var(--text2)',fontWeight:600,background:'none',border:'none',cursor:'pointer',padding:'5px 0',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+            {showSensitivity?'▾':'▸'} Sensitivity — how μ moves each project
+          </button>
+          {showSensitivity && (
+          <Group title="Sensitivity — how μ moves each project" badge="Rec #5">
+            <div className="helper" style={{marginBottom:8}}>Final Risk if μ were set lower (stricter) or higher (lenient). Helps the team pick the anchor with eyes open.</div>
+            <div style={{display:'grid',gridTemplateColumns:`1fr ${muVariants.map(()=>'70px').join(' ')}`,gap:6,fontSize:11.5}}>
+              <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+              {muVariants.map((m,i)=><div key={i} style={{fontWeight:600,textAlign:'center',color:m===curve.mu?'var(--purple)':'var(--text2)'}}>μ={m}{m===curve.mu?' ★':''}</div>)}
+              {Object.keys(projData).filter(p=>PROJECT_DEFAULTS[p]).map(p=>(
+                <React.Fragment key={p}>
+                  <div style={{padding:'3px 0'}}>{p}</div>
+                  {muVariants.map((m,i)=>{const f=simFinal(p,m);const rl=f!=null?riskLevel(f):null;return (
+                    <div key={i} style={{textAlign:'center',padding:'3px 0',borderRadius:4,background:rl?rl.bg:'transparent',color:rl?rl.text:'var(--text3)',fontWeight:m===curve.mu?700:500}}>{f!=null?f.toFixed(1):'—'}</div>
+                  );})}
+                </React.Fragment>
+              ))}
+            </div>
+          </Group>
+          )}
+        </React.Fragment>
       )}
 
       {jiraHistory?.projects && (
@@ -2184,38 +2223,44 @@ function ConfigView({ jiraMetrics, jiraHistory }) {
       )}
 
       {jiraHistory?.projects && (
-        <Group title="Defect density (informational — NOT scored)" badge="Rec #1">
-          <div className="helper" style={{marginBottom:8}}>Weighted escaped defects per 100 delivered items (Done Story/Bug), per project vs its own history. Does <strong>not</strong> affect the score — cross-team density isn't comparable, so this is each project against itself, building toward the Q4 decision.</div>
-          <div style={{display:'grid',gridTemplateColumns:`1fr ${(jiraHistory.quarters||[]).map(()=>'66px').join(' ')}`,gap:6,fontSize:11.5}}>
-            <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
-            {(jiraHistory.quarters||[]).map(qq=><div key={qq} style={{fontWeight:600,textAlign:'center',color:'var(--text2)'}}>{qq.replace('-'," ")}</div>)}
-            {Object.entries(jiraHistory.projects).map(([p,qd])=>(
-              <React.Fragment key={p}>
-                <div style={{padding:'3px 0'}}>{p}</div>
-                {(jiraHistory.quarters||[]).map(qq=>{const c=qd[qq];const d=c?c.density:null;return (
-                  <div key={qq} style={{textAlign:'center',padding:'3px 0',color:'var(--text2)'}}>{d!=null?d:(c&&c.delivered===0?'n/a':'—')}</div>
-                );})}
-              </React.Fragment>
-            ))}
-          </div>
-          <div className="helper" style={{marginTop:8}}>⚠ <strong>Mira</strong> shows <code>n/a</code> — its delivery isn't logged under MIRA Story/Bug (denominator ≈ 0), so density is undefined for it. That denominator must be fixed before density is usable for Mira. GenAI Lens, Mira Studio and Mobile have a usable per-project trend.</div>
-        </Group>
+        <React.Fragment>
+          <button onClick={()=>setShowDensity(v=>!v)}
+            style={{fontSize:11,color:'var(--text2)',fontWeight:600,background:'none',border:'none',cursor:'pointer',padding:'5px 0',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+            {showDensity?'▾':'▸'} Defect density <span style={{fontWeight:400,color:'var(--text3)'}}>— informational, not scored</span>
+          </button>
+          {showDensity && (
+          <Group title="Defect density (informational — NOT scored)" badge="Rec #1">
+            <div className="helper" style={{marginBottom:8}}>Weighted escaped defects per 100 delivered items (Done Story/Bug), per project vs its own history. Does <strong>not</strong> affect the score — cross-team density isn't comparable, so this is each project against itself, building toward the Q4 decision.</div>
+            <div style={{display:'grid',gridTemplateColumns:`1fr ${(jiraHistory.quarters||[]).map(()=>'66px').join(' ')}`,gap:6,fontSize:11.5}}>
+              <div style={{fontWeight:600,color:'var(--text2)'}}>Project</div>
+              {(jiraHistory.quarters||[]).map(qq=><div key={qq} style={{fontWeight:600,textAlign:'center',color:'var(--text2)'}}>{qq.replace('-'," ")}</div>)}
+              {Object.entries(jiraHistory.projects).map(([p,qd])=>(
+                <React.Fragment key={p}>
+                  <div style={{padding:'3px 0'}}>{p}</div>
+                  {(jiraHistory.quarters||[]).map(qq=>{const c=qd[qq];const d=c?c.density:null;return (
+                    <div key={qq} style={{textAlign:'center',padding:'3px 0',color:'var(--text2)'}}>{d!=null?d:(c&&c.delivered===0?'n/a':'—')}</div>
+                  );})}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="helper" style={{marginTop:8}}>⚠ <strong>Mira</strong> shows <code>n/a</code> — its delivery isn't logged under MIRA Story/Bug (denominator ≈ 0), so density is undefined for it. That denominator must be fixed before density is usable for Mira. GenAI Lens, Mira Studio and Mobile have a usable per-project trend.</div>
+          </Group>
+          )}
+        </React.Fragment>
       )}
 
+      <button onClick={()=>setShowCalibration(v=>!v)}
+        style={{fontSize:11,color:'var(--text2)',fontWeight:600,background:'none',border:'none',cursor:'pointer',padding:'5px 0',fontFamily:'inherit',display:'flex',alignItems:'center',gap:4}}>
+        {showCalibration?'▾':'▸'} Calibration cadence
+      </button>
+      {showCalibration && (
       <Group title="Calibration cadence" badge="Rec #5">
         <Row k="Last reviewed" v={cal?.lastReviewed||'—'} meaning="When μ/σ were last set/validated." />
         <Row k="Next review" v={cal?.nextReview||'—'} meaning="μ/σ are anchored and reviewed on a cadence (not per quarter) so scores stay comparable over time." />
         <div className="helper" style={{marginTop:6}}>{cal?.basis ? `Basis: ${cal.basis}.` : ''} Recompute the basis from accumulated history once ≥4 quarters exist.</div>
       </Group>
-
-      <Group title="Exposure normalization (defect density)" badge={jiraMetrics?.exposureEnabled ? 'ON' : 'OFF'}>
-        <div className="helper">
-          {jiraMetrics?.exposureEnabled
-            ? 'Active: escaped defects are normalized by delivery volume (defects per unit shipped).'
-            : 'Disabled. Cross-team density isn’t viable yet — delivered-volume counts vary too much by team (verified: 31× spread). The workable path is per-project trend (each project vs its own history) once enough quarters accrue. See scripts/jira-projects.json → exposure.'}
-        </div>
-      </Group>
-      </>
+      )}
+      </div>
       )}
     </div>
   );
