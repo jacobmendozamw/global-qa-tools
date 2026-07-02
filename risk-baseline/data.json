@@ -22,7 +22,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -48,7 +48,7 @@
     "finalRisk": 10,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -74,7 +74,7 @@
     "finalRisk": 4.9,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -100,7 +100,7 @@
     "finalRisk": 5,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -126,7 +126,7 @@
     "finalRisk": 3,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q1-2026 end-of-quarter snapshot. Test suite did not exist this quarter.",
+    "notes": "Historical backfill — Q1-2026 end-of-quarter snapshot. Test suite did not exist this quarter.",
     "jira": null
   },
   {
@@ -139,17 +139,17 @@
       "userImpact": 2,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
     },
     "overrideActive": false,
     "overrideJustification": "",
-    "baseRisk": 5.0,
-    "tritonScore": 10.0,
+    "baseRisk": 5,
+    "tritonScore": 10,
     "mitScore": null,
-    "finalRisk": 8.0,
+    "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
     "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=57, tritonScore=10.0.",
@@ -165,7 +165,7 @@
       "userImpact": 3,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
@@ -173,7 +173,7 @@
     "overrideActive": false,
     "overrideJustification": "",
     "baseRisk": 6.7,
-    "tritonScore": 10.0,
+    "tritonScore": 10,
     "mitScore": null,
     "finalRisk": 8.7,
     "level": "High",
@@ -191,7 +191,7 @@
       "userImpact": 3,
       "rateOfChange": 2,
       "complexity": 3,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
@@ -199,7 +199,7 @@
     "overrideActive": false,
     "overrideJustification": "",
     "baseRisk": 8.3,
-    "tritonScore": 10.0,
+    "tritonScore": 10,
     "mitScore": null,
     "finalRisk": 9.3,
     "level": "High",
@@ -243,7 +243,7 @@
       "userImpact": 2,
       "rateOfChange": 2,
       "complexity": 3,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
@@ -251,7 +251,7 @@
     "overrideActive": false,
     "overrideJustification": "",
     "baseRisk": 6.7,
-    "tritonScore": 10.0,
+    "tritonScore": 10,
     "mitScore": null,
     "finalRisk": 8.7,
     "level": "High",
@@ -269,7 +269,7 @@
       "userImpact": 3,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
@@ -277,7 +277,7 @@
     "overrideActive": false,
     "overrideJustification": "",
     "baseRisk": 6.7,
-    "tritonScore": 10.0,
+    "tritonScore": 10,
     "mitScore": null,
     "finalRisk": 8.7,
     "level": "High",
@@ -302,7 +302,7 @@
     },
     "overrideActive": false,
     "overrideJustification": "",
-    "baseRisk": 5.0,
+    "baseRisk": 5,
     "tritonScore": 1.1,
     "mitScore": null,
     "finalRisk": 2.7,
@@ -321,17 +321,17 @@
       "userImpact": 2,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
     },
     "overrideActive": false,
     "overrideJustification": "",
-    "baseRisk": 5.0,
-    "tritonScore": 10.0,
+    "baseRisk": 5,
+    "tritonScore": 10,
     "mitScore": null,
-    "finalRisk": 8.0,
+    "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
     "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=61, tritonScore=10.0.",
@@ -347,17 +347,17 @@
       "userImpact": 2,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
     },
     "overrideActive": false,
     "overrideJustification": "",
-    "baseRisk": 5.0,
-    "tritonScore": 10.0,
+    "baseRisk": 5,
+    "tritonScore": 10,
     "mitScore": null,
-    "finalRisk": 8.0,
+    "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
     "notes": "Historical backfill - Q1-2026 end-of-quarter snapshot. Jira weighted=105, tritonScore=10.0.",
@@ -373,7 +373,7 @@
       "userImpact": 3,
       "rateOfChange": 2,
       "complexity": 2,
-      "escapedDefects": 10.0,
+      "escapedDefects": 10,
       "automationConfidence": 1,
       "testCoverage": 1,
       "testability": 2
@@ -381,7 +381,7 @@
     "overrideActive": false,
     "overrideJustification": "",
     "baseRisk": 6.7,
-    "tritonScore": 10.0,
+    "tritonScore": 10,
     "mitScore": null,
     "finalRisk": 8.7,
     "level": "High",
@@ -412,7 +412,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -438,7 +438,7 @@
     "finalRisk": 7.9,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -464,7 +464,7 @@
     "finalRisk": 9.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -490,7 +490,7 @@
     "finalRisk": 6.4,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -516,7 +516,7 @@
     "finalRisk": 5,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Historical backfill \u2014 Q2-2026 end-of-quarter snapshot.",
+    "notes": "Historical backfill — Q2-2026 end-of-quarter snapshot.",
     "jira": null
   },
   {
@@ -536,7 +536,7 @@
     "finalRisk": 9.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -890,7 +890,7 @@
     "finalRisk": 6.4,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1020,7 +1020,7 @@
     "finalRisk": 9.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1151,7 +1151,7 @@
           },
           {
             "key": "TRITON-36197",
-            "summary": "MIRA \u2013 Coverage Report Generation Failure",
+            "summary": "MIRA – Coverage Report Generation Failure",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -1167,7 +1167,7 @@
           },
           {
             "key": "TRITON-36159",
-            "summary": "#86529274 MIRA \u2013 Coverage Report Generation Fails",
+            "summary": "#86529274 MIRA – Coverage Report Generation Fails",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -1195,7 +1195,7 @@
         "tickets": [
           {
             "key": "MIRALEGACY-3224",
-            "summary": "MIRA PPT Export : Generate PPT\u201d CTA visible on bot response for confirmation scenario",
+            "summary": "MIRA PPT Export : Generate PPT” CTA visible on bot response for confirmation scenario",
             "priority": "Low",
             "url": "https://meltwater.atlassian.net/browse/MIRALEGACY-3224"
           },
@@ -1309,7 +1309,7 @@
     "finalRisk": 5.6,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1440,7 +1440,7 @@
     "finalRisk": 6.8,
     "level": "Medium",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1680,7 +1680,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -1835,7 +1835,7 @@
           },
           {
             "key": "TRITON-36498",
-            "summary": "Klear \u2013 Redirecting Users to Creator Login (Incorrect Routing)",
+            "summary": "Klear – Redirecting Users to Creator Login (Incorrect Routing)",
             "priority": "High",
             "weight": 1.5,
             "critical": false,
@@ -1907,7 +1907,7 @@
           },
           {
             "key": "TRITON-36271",
-            "summary": "Klear - Centralized Connect Inbox \u2013 Message notification redirect broken for influencers with single-brand interaction",
+            "summary": "Klear - Centralized Connect Inbox – Message notification redirect broken for influencers with single-brand interaction",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -1987,7 +1987,7 @@
           },
           {
             "key": "TRITON-36168",
-            "summary": "#86522131 Klear \u2013 Instagram Reel Reach Discrepancy vs Native",
+            "summary": "#86522131 Klear – Instagram Reel Reach Discrepancy vs Native",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -2040,7 +2040,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2336,7 +2336,7 @@
     "finalRisk": 9.3,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2656,7 +2656,7 @@
     "finalRisk": 3.2,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -2719,7 +2719,7 @@
     "finalRisk": 8.5,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3231,7 +3231,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3330,7 +3330,7 @@
           },
           {
             "key": "TRITON-36640",
-            "summary": "98514665 Incorrect selection display in Added Content \u2013 shows all articles selected when only one is selected",
+            "summary": "98514665 Incorrect selection display in Added Content – shows all articles selected when only one is selected",
             "priority": "Low",
             "weight": 1,
             "critical": false,
@@ -3346,7 +3346,7 @@
           },
           {
             "key": "TRITON-36607",
-            "summary": "Monitor View shows \u201cNo documents found\u201d ",
+            "summary": "Monitor View shows “No documents found” ",
             "priority": "Low",
             "weight": 1,
             "critical": false,
@@ -3506,7 +3506,7 @@
           },
           {
             "key": "UCS-3305",
-            "summary": "Trends Center: Missing \u201cOpen in new tab\u201d action on content cards in slideout",
+            "summary": "Trends Center: Missing “Open in new tab” action on content cards in slideout",
             "priority": "High",
             "url": "https://meltwater.atlassian.net/browse/UCS-3305"
           },
@@ -3566,7 +3566,7 @@
     "finalRisk": 2.7,
     "level": "Low",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3629,7 +3629,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -3736,7 +3736,7 @@
           },
           {
             "key": "TRITON-36921",
-            "summary": "Media Relation | OutReach- Discrepancy in\u00a0Outreach Analytics",
+            "summary": "Media Relation | OutReach- Discrepancy in Outreach Analytics",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -3896,7 +3896,7 @@
           },
           {
             "key": "TRITON-36202",
-            "summary": "#87949520 Media Relations \u2013 Error when clicking on Media List (Review Contact Updates)",
+            "summary": "#87949520 Media Relations – Error when clicking on Media List (Review Contact Updates)",
             "priority": "Minor",
             "weight": 1,
             "critical": false,
@@ -3957,7 +3957,7 @@
     "finalRisk": 8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -4605,7 +4605,7 @@
     "finalRisk": 8.8,
     "level": "High",
     "scaleMax": 10,
-    "notes": "Auto-generated snapshot \u2014 2026-Q2",
+    "notes": "Auto-generated snapshot — 2026-Q2",
     "jira": {
       "source": "TRITON",
       "quarter": "2026-Q2",
@@ -4784,6 +4784,1003 @@
         "preProductionCaught": 0,
         "internallyFound": 0,
         "customerFound": 17,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-genai-lens",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "GenAI Lens",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 3,
+      "complexity": 3,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 10,
+    "tritonScore": 1.1,
+    "finalRisk": 4.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 54,
+        "openCount": 9,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-mira-studio",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Mira Studio",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 3,
+      "complexity": 3,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 10,
+    "tritonScore": 1.1,
+    "finalRisk": 4.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 44,
+        "openCount": 4,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 1
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      },
+      "needsManualReview": {
+        "escaped": 0,
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-mira",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Mira",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 3,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 8.8,
+    "tritonScore": 1.1,
+    "finalRisk": 4.2,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 27,
+        "openCount": 10,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 1
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      },
+      "needsManualReview": {
+        "escaped": 0,
+        "open": 1
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-mobile",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Mobile",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 5,
+    "tritonScore": 1.1,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 115,
+        "openCount": 4,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-engage--legacy-",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Engage (Legacy)",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 1,
+      "complexity": 1,
+      "escapedDefects": 3.1
+    },
+    "baseRisk": 2,
+    "tritonScore": 3.1,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 3.1,
+        "total": 1,
+        "critical": 1,
+        "weighted": 3,
+        "tickets": [
+          {
+            "key": "TRITON-37172",
+            "summary": "RED Account - Automated rules - Engage Conversations - Check reason for LinkedIn comments being deleted",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37172"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 139,
+        "openCount": 19,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 1,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-klear",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Klear",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 5,
+    "tritonScore": 1.1,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 370,
+        "openCount": 29,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-explore",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Explore",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.6
+    },
+    "baseRisk": 7,
+    "tritonScore": 1.6,
+    "finalRisk": 3.8,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.6,
+        "total": 1,
+        "critical": 0,
+        "weighted": 1,
+        "tickets": [
+          {
+            "key": "TRITON-37170",
+            "summary": "Explore - Missing Forum Data",
+            "priority": "Minor",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37170"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 154,
+        "openCount": 32,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 1,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-explore-",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Explore+",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 8.3,
+    "tritonScore": 1.1,
+    "finalRisk": 4,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 141,
+        "openCount": 26,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-analytics",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Analytics",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 6.3,
+    "tritonScore": 1.1,
+    "finalRisk": 3.2,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 0,
+        "openCount": 0,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-uds",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "UDS",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 3,
+      "escapedDefects": 3.1
+    },
+    "baseRisk": 6.3,
+    "tritonScore": 3.1,
+    "finalRisk": 4.4,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 3.1,
+        "total": 1,
+        "critical": 1,
+        "weighted": 3,
+        "tickets": [
+          {
+            "key": "TRITON-37165",
+            "summary": "(Churn Risk) UDS - PPT export - Word Cloud hashtags are different in Export compared to dashboard on the app",
+            "priority": "Blocker",
+            "weight": 3,
+            "critical": true,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37165"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 81,
+        "openCount": 53,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 1,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-monitor",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Monitor",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 7,
+    "tritonScore": 1.1,
+    "finalRisk": 3.5,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 63,
+        "openCount": 29,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-app-framework",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "App Framework",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 5,
+    "tritonScore": 1.1,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 0,
+        "openCount": 0,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-media-relations",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Media Relations",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 5,
+    "tritonScore": 1.1,
+    "finalRisk": 2.7,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 128,
+        "openCount": 31,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-newsletters",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Newsletters",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 2,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 2.3
+    },
+    "baseRisk": 5,
+    "tritonScore": 2.3,
+    "finalRisk": 3.4,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 2.3,
+        "total": 2,
+        "critical": 0,
+        "weighted": 2,
+        "tickets": [
+          {
+            "key": "TRITON-37163",
+            "summary": "Newsletter - Issue with Move to dropdown",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37163"
+          },
+          {
+            "key": "TRITON-37162",
+            "summary": "Newsletter - Delete Recipient list",
+            "priority": "Low",
+            "weight": 1,
+            "critical": false,
+            "url": "https://meltwater.atlassian.net/browse/TRITON-37162"
+          }
+        ]
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 94,
+        "openCount": 55,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 2,
+        "rate": 0
+      }
+    }
+  },
+  {
+    "id": "auto-2026-Q3-smart-alerts",
+    "date": "2026-07-02T08:58:04.861Z",
+    "modelVersion": "2026-Q3-v3",
+    "project": "Smart Alerts",
+    "evaluator": "auto",
+    "scores": {
+      "userImpact": 3,
+      "rateOfChange": 2,
+      "complexity": 2,
+      "escapedDefects": 1.1
+    },
+    "baseRisk": 7,
+    "tritonScore": 1.1,
+    "finalRisk": 3.5,
+    "level": "Low",
+    "scaleMax": 10,
+    "notes": "Auto-generated snapshot — 2026-Q3",
+    "jira": {
+      "source": "TRITON",
+      "quarter": "2026-Q3",
+      "window": {
+        "from": "2026-07-01",
+        "to": "2026-07-02",
+        "quarterEnd": "2026-09-30",
+        "elapsedPct": 2
+      },
+      "generatedAt": "2026-07-02T08:58:04.861Z",
+      "escapedDefects": {
+        "score": 1.1,
+        "total": 0,
+        "critical": 0,
+        "weighted": 0,
+        "tickets": []
+      },
+      "avgAgeOpenIssues": {
+        "avgDays": 76,
+        "openCount": 8,
+        "informational": true
+      },
+      "dataQuality": {
+        "manualReview": {
+          "escaped": 0,
+          "open": 0
+        }
+      },
+      "internalEscaped": {
+        "total": 0,
+        "tickets": []
+      },
+      "preProductionCaught": {
+        "total": 0,
+        "tickets": []
+      },
+      "detectionEfficiency": {
+        "score": 1,
+        "preProductionCaught": 0,
+        "internallyFound": 0,
+        "customerFound": 0,
         "rate": 0
       }
     }
