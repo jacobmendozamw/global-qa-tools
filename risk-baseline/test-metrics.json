@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T21:11:48.328Z",
+  "generatedAt": "2026-07-02T09:53:47.096Z",
   "projects": {
     "GenAI Lens": {
       "repo": "global-qa-test-suite",
@@ -13,9 +13,9 @@
       "repo": "global-qa-test-suite",
       "branch": "develop",
       "directory": "src/tests/mira-studio",
-      "specFiles": 10,
-      "activeTests": 88,
-      "skipped": 11
+      "specFiles": 11,
+      "activeTests": 93,
+      "skipped": 12
     },
     "Mira": {
       "repo": "global-qa-test-suite",
